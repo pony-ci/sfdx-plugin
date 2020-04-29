@@ -1,6 +1,7 @@
 {
   "name": "@pony-ci/sfdx-plugin",
   "version": "1.0.0",
+  "description": "Pony sfdx plugin to automate your application lifecycle.",
   "author": "Ondřej Kratochvíl",
   "bugs": "https://github.com/pony-ci/sfdx-plugin/issues",
   "dependencies": {
