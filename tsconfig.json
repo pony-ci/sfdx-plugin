@@ -2,7 +2,9 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2017",
-    "lib": ["es2017"],
+    "lib": [
+      "es2017"
+    ],
     "sourceMap": true,
     "declaration": true,
     "moduleResolution": "node",
@@ -14,9 +16,6 @@
     "esModuleInterop": true,
     "allowJs": true,
     "resolveJsonModule": true
-  },
-  "include": [
-    "./src/**/*"
-  ]
+  }
 }
 

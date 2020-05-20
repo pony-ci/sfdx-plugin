@@ -6,7 +6,7 @@
   ],
   "linterOptions": {
     "exclude": [
-      "src/types/custom.d.ts"
+      "dist/**/*.d.ts"
     ]
   },
   "jsRules": {},
