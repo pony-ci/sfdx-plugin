@@ -64,6 +64,8 @@
     "no-unused-variable": false,
     "no-relative-imports": false,
     "one-variable-per-declaration": false,
+    "prefer-type-cast": false,
+    "prefer-object-spread": false,
     "rulesDirectory": [
       "node_modules/tslint-microsoft-contrib"
     ],
@@ -75,7 +77,6 @@
       "parameter",
       "property-declaration",
       "member-variable-declaration",
-      "object-destructuring",
       "array-destructuring"
     ],
     "trailing-comma": false

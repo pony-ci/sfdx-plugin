@@ -12,7 +12,9 @@
     "@pony-ci/sfdx-node": "^1.0.4",
     "@salesforce/command": "^2",
     "@salesforce/core": "^2",
+    "find": "^0.3.0",
     "fs-extra": "^8.1.0",
+    "xml2js": "^0.4.22",
     "slash": "^3.0.0",
     "tslib": "^1"
   },
@@ -22,13 +24,14 @@
     "@oclif/plugin-help": "^2",
     "@oclif/test": "^1",
     "@salesforce/dev-config": "1.4.1",
+    "@salesforce/ts-types": "^1.2.2",
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^8.1.0",
     "@types/mocha": "^7.0.2",
     "@types/node": "^10.17.18",
     "ajv": "^6.12.0",
     "chai": "^4.2.0",
-    "cpy-cli": "^3.1.0",
+    "cpy-cli": "^3.1.1",
     "globby": "^8",
     "json-schema-to-typescript": "^8.2.0",
     "lodash": "^4.17.15",
@@ -41,8 +44,8 @@
     "node": ">=10.0.0"
   },
   "files": [
-    "/lib",
-    "/types",
+    "/dist",
+    "/src/types",
     "/messages",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
@@ -57,9 +60,9 @@
     "pony-ci",
     "ponyci"
   ],
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "oclif": {
-    "commands": "./lib/commands",
+    "commands": "./dist/commands",
     "bin": "sfdx",
     "devPlugins": [
       "@oclif/plugin-help"
@@ -68,11 +71,11 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "tslint -p test -t stylish",
-    "prepack": "rm -rf lib && tsc -b  && oclif-dev manifest && oclif-dev readme && npm run schema2ts",
+    "prepack": "rm -rf dist && tsc -b && oclif-dev manifest && oclif-dev readme && npm run schema2ts",
     "docs": "rm -r docs/reference/config; mkdir -p docs/reference/config; jsonschema2md -o docs/reference/config -d src/schema -x -",
-    "schema2ts": "(cd src/schema && json2ts -i . -o ../../types --bannerComment \"/* tslint:disable */\")",
+    "schema2ts": "(cd src/schema && json2ts -i . -o ../../types)",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
-    "watch": "rm -rf lib && tsc --watch"
+    "watch": "rm -rf dist && tsc --watch"
   }
 }
