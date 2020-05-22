@@ -6,7 +6,6 @@ import path from 'path';
 import {Component, describeComponentFile, MetadataType, readComponent, registerUX, writeComponent} from '../../..';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
-import {Field} from 'jsforce/describe-result';
 
 const INNER_TEXT_SORT_KEY = '__inner_text__';
 
