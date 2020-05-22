@@ -1,38 +1,19 @@
 import {flags, FlagsConfig} from '@salesforce/command';
-import {Dictionary, isArray, isObject, isString} from '@salesforce/ts-types';
+import {definiteEntriesOf, isArray, isObject, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {EOL} from 'os';
 import path from 'path';
-import {Component, describeComponentFile, MetadataType, readComponent, registerUX, writeComponent} from '../../..';
+import {Component, describeComponentFile, readComponent, registerUX, writeComponent} from '../../..';
+import {
+    INNER_TEXT_SORT_KEY,
+    SortDefinition,
+    sortDefinitions,
+    supportedMetadataToSort
+} from '../../../lib/metadata/sortDefinitions';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 
-const INNER_TEXT_SORT_KEY = '__inner_text__';
-
-type SortDefinition = Dictionary<'__inner_text__' | string[]>[];
-
-const SORT_DEFINITIONS_BY_METADATA_TYPE: Dictionary<SortDefinition> = {
-    Profile: [
-        {applicationVisibilities: ['application']},
-        {classAccesses: ['apexClass']},
-        {externalDataSourceAccesses: ['externalDataSource']},
-        {fieldPermissions: ['field']},
-        {flowAccesses: ['flow']},
-        {layoutAssignments: ['recordType', 'layout']},
-        {objectPermissions: ['object']},
-        {pageAccesses: ['apexPage']},
-        {recordTypeVisibilities: ['recordType']},
-        {tabVisibilities: ['tab']},
-        {userPermissions: ['name']},
-        {userLicense: INNER_TEXT_SORT_KEY},
-        {custom: INNER_TEXT_SORT_KEY},
-        {customMetadataTypeAccesses: ['name']},
-    ]
-};
-
-const SUPPORTED_METADATA: MetadataType[] = [
-    'Profile'
-];
+type ToSort = ('all' | 'source' | 'none') | [string];
 
 export default class SourcePushCommand extends PonyCommand {
     public static readonly description: string = `sort xml source files
@@ -41,7 +22,7 @@ If no files are specified, sort files defined in .pony/config.json.
 Possible values are 'source', 'all', 'none' or array of files and/or directories.
 
 supported metadata:
-${SUPPORTED_METADATA.map(it => `* ${it}`).join(EOL)}
+${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
 `;
 
     public static examples: string[] = [
@@ -71,23 +52,22 @@ ${SUPPORTED_METADATA.map(it => `* ${it}`).join(EOL)}
         registerUX(this.ux);
         const project = await PonyProject.load();
         const {sourceSort} = await project.getPonyConfig();
-        if (this.flags.files) {
-            const filesOrDirs = this.flags.files.split(',').map(it => it.trim());
-            for (const file of filesOrDirs) {
+        const {files} = this.flags;
+        const toSort: ToSort = files
+            ? (['all', 'source', 'none'].includes(files) ? files : this.flags.files.split(',').map(it => it.trim()))
+            : sourceSort;
+        if (toSort === 'none') {
+            this.ux.log('Sorting explicitly disabled.');
+        } else if (isArray(toSort)) {
+            for (const file of toSort) {
                 await this.sortComponentOrDir(file);
             }
-        } else if (sourceSort === 'none') {
-            this.ux.log('Sorting explicitly disabled in your config.');
-        } else if (isArray(sourceSort)) {
-            for (const file of sourceSort) {
-                await this.sortComponentOrDir(file);
-            }
-        } else if (!sourceSort || isString(sourceSort)) {
-            for (const type of SUPPORTED_METADATA) {
-                const files = sourceSort === 'source'
+        } else if (!toSort || isString(toSort)) {
+            for (const type of supportedMetadataToSort) {
+                const filesToSort = toSort === 'source'
                     ? await project.findComponents(type)
                     : await project.findAllComponents(type);
-                for (const file of files) {
+                for (const file of filesToSort) {
                     await this.sortComponent(file);
                 }
             }
@@ -107,15 +87,15 @@ ${SUPPORTED_METADATA.map(it => `* ${it}`).join(EOL)}
 
     private async sortComponent(file: string): Promise<void> {
         const type = describeComponentFile(file);
-        if (!SUPPORTED_METADATA.includes(type || '')) {
+        if (!supportedMetadataToSort.includes(type || '')) {
             throw Error(`Unsupported metadata: ${file}`);
         }
         this.ux.log(`Sorting: ${file}`);
         const content = await readComponent(file);
-        if (!SORT_DEFINITIONS_BY_METADATA_TYPE.Profile) {
+        if (!sortDefinitions.Profile) {
             throw Error(`Sort definition not defined for ${file}`);
         }
-        sort(content, SORT_DEFINITIONS_BY_METADATA_TYPE.Profile);
+        sort(content, sortDefinitions.Profile);
         await writeComponent(file, content);
     }
 }
@@ -139,10 +119,10 @@ function stringCompare(a: string, b: string): number {
 }
 
 function sort(component: Component, sortDefinition: SortDefinition): void {
-    const root = component[Object.keys(component)[0]] || {};
-    for (const entry of sortDefinition) {
+    const root = Object.values(0);
+    for (const entry of definiteEntriesOf(sortDefinition)) {
         const key = Object.keys(entry)[0];
-        const value = entry[key] || [];
+        const value = entry[key];
         if (isArray(root[key]) && root[key].length) {
             if (value === INNER_TEXT_SORT_KEY) {
                 root[key].sort((a, b) => stringCompare(a[0], b[0]));
