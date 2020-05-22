@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/user-definition.schema.json",
+  "title": "User Definition",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Username": {
+      "type": "string"
+    },
+    "LastName": {
+      "type": "string"
+    },
+    "ProfileName": {
+      "type": "string"
+    },
+    "IsActive": {
+      "type": "string"
+    }
+  }
+}

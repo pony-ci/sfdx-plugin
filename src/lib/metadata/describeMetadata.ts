@@ -1,3 +1,4 @@
+import {Optional} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -12,20 +13,20 @@ export interface MetadataDescribe {
     childXmlNames?: string | string[];
 }
 
-export function describeMetadata(metadataType: MetadataType): MetadataDescribe | undefined {
+export function describeMetadata(metadataType: MetadataType): Optional<MetadataDescribe> {
     return getDescribe().find((it: MetadataDescribe) => it.xmlName === metadataType);
 }
 
-let described: MetadataDescribe[] | undefined;
+let described: Optional<MetadataDescribe[]>;
 
-function getDescribe(): MetadataDescribe[] {
+export function getDescribe(): MetadataDescribe[] {
     if (!described) {
         described = [
             ...fs.readJSONSync(path.join(
-                __dirname, '../../metadata/describe.json'
+                __dirname, '../../../metadata/describe.json'
             )).metadataObjects,
             ...fs.readJSONSync(path.join(
-                __dirname, '../../metadata/source-describe.json'
+                __dirname, '../../../metadata/source-describe.json'
             )).metadataObjects
         ];
     }
