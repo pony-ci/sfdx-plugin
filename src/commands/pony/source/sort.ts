@@ -1,4 +1,3 @@
-import {OutputArgs} from '@oclif/parser';
 import {flags, FlagsConfig} from '@salesforce/command';
 import {definiteEntriesOf, isArray, isObject, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
