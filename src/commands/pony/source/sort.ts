@@ -13,7 +13,7 @@ import {
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 
-export default class SourcePushCommand extends PonyCommand {
+export default class SourceSortCommand extends PonyCommand {
     public static readonly description: string = `sort xml source files
 
 If no files are specified, command will sort files defined in .pony/config.json.

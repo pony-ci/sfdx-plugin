@@ -135,7 +135,7 @@ async function readPackageGroup(name: string, projectDir: string): Promise<Packa
 }
 
 async function readConfig(projectDir: string): Promise<Config> {
-    const config = readJsonFileIfExists(path.join(projectDir, '.pony/config.json')) || {};
+    const config = readJsonFileIfExists(path.join(projectDir, '.pony/pony-config.json')) || {};
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
     }

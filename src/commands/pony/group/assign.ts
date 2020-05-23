@@ -29,7 +29,7 @@ interface Group {
     Name: string;
 }
 
-export default class OrgCreateCommand extends PonyCommand {
+export default class GroupAssignCommand extends PonyCommand {
 
     public static description: string = `assign public group
 This command is idempotent, which means you can run it multiple times with same result.

@@ -10,7 +10,7 @@ import PonyCommand from '../../../../../../lib/PonyCommand';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
-export default class OrgCreateCommand extends PonyCommand {
+export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
 
     public static description: string = `create soql file for exporting records`;
 

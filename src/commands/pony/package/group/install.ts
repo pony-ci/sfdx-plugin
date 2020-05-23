@@ -4,7 +4,7 @@ import {registerUX, sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 
-export default class OrgCreateCommand extends PonyCommand {
+export default class PackageGroupInstallCommand extends PonyCommand {
 
     public static description: string = `install package group
 

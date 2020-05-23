@@ -38,7 +38,7 @@ function mapInstalledPackageToPackage(pkg: InstalledPackage): Package {
     };
 }
 
-export default class SourcePushCommand extends PonyCommand {
+export default class PackageGroupExportCommand extends PonyCommand {
     public static readonly description: string = `export package group from configured org for scratch org creation
     
 Exported package group is a ordered list of packages that can be installed with 'sfdx pony:package:group:install' command.
