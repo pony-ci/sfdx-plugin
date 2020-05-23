@@ -13,8 +13,6 @@ import {
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 
-type ToSort = ('all' | 'source' | 'none') | [string];
-
 export default class SourcePushCommand extends PonyCommand {
     public static readonly description: string = `sort xml source files
 
