@@ -1,3 +1,4 @@
+import {OutputArgs} from '@oclif/parser';
 import {flags, FlagsConfig} from '@salesforce/command';
 import {definiteEntriesOf, isArray, isObject, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
@@ -18,8 +19,8 @@ type ToSort = ('all' | 'source' | 'none') | [string];
 export default class SourcePushCommand extends PonyCommand {
     public static readonly description: string = `sort xml source files
 
-If no files are specified, sort files defined in .pony/config.json.
-Possible values are 'source', 'all', 'none' or array of files and/or directories.
+If no files are specified, command will sort files defined in .pony/config.json.
+Possible values in the config are 'source', 'all', 'none' or array of files.
 
 Supported metadata:
 ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
@@ -27,9 +28,9 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
 
     public static examples: string[] = [
         `$ sfdx pony:source:sort`,
-        `$ sfdx pony:source:sort --files src/main/default/profiles/Admin.profile-meta.xml`,
-        `$ sfdx pony:source:sort --files "src/main/default/profiles/Admin.profile-meta.xml,src/main/default/profiles/Standard.profile-meta.xml"`,
-        `$ sfdx pony:source:sort --files "src/main/default/profiles/*"`,
+        `$ sfdx pony:source:sort -f src/main/default/profiles/Admin.profile-meta.xml`,
+        `$ sfdx pony:source:sort -f src/main/default/profiles/Admin.profile-meta.xml src/main/default/profiles/Standard.profile-meta.xml`,
+        `$ sfdx pony:source:sort -f src/main/default/profiles/*`,
     ];
 
     public static readonly supportsUsername: boolean = false;
@@ -39,29 +40,33 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
     public static readonly flagsConfig: FlagsConfig = {
         files: flags.string({
             char: 'f',
-            description: 'comma separated list of files'
+            description: 'comma separated list of files',
+            multiple: true
         })
     };
+
+    protected strict: boolean = false;
 
     public async run(): Promise<void> {
         registerUX(this.ux);
         const project = await PonyProject.load();
         const {sourceSort} = await project.getPonyConfig();
         const {files} = this.flags;
-        const toSort: ToSort = files
-            ? (['all', 'source', 'none'].includes(files) ? files : this.flags.files.split(',').map(it => it.trim()))
-            : sourceSort;
-        if (toSort === 'none') {
+        if (files) {
+            for (const file of files) {
+                await this.sortComponent(file);
+            }
+        } else if (sourceSort === 'none') {
             this.ux.log('Sorting explicitly disabled.');
-        } else if (isArray(toSort)) {
-            for (const file of toSort) {
+        } else if (isArray(sourceSort)) {
+            for (const file of sourceSort) {
                 await this.sortComponentOrDir(file);
             }
-        } else if (!toSort || isString(toSort)) {
+        } else if (!sourceSort || isString(sourceSort)) {
             for (const type of supportedMetadataToSort) {
-                const filesToSort = toSort === 'source'
-                    ? await project.findComponents(type)
-                    : await project.findAllComponents(type);
+                const filesToSort = sourceSort === 'all'
+                    ? await project.findAllComponents(type)
+                    : await project.findComponents(type);
                 for (const file of filesToSort) {
                     await this.sortComponent(file);
                 }
@@ -85,7 +90,7 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
         if (!supportedMetadataToSort.includes(type || '')) {
             throw Error(`Unsupported metadata: ${file}`);
         }
-        this.ux.log(`Sorting: ${file}`);
+        this.ux.log(`sorting: ${file}`);
         const content = await readComponent(file);
         if (!sortDefinitions.Profile) {
             throw Error(`Sort definition not defined for ${file}`);
