@@ -5,7 +5,7 @@ import {EOL} from 'os';
 import path from 'path';
 import {Component, describeComponentFile, readComponent, registerUX, writeComponent} from '../../..';
 import {
-    isInnerText,
+    isInnerTextSortKey,
     SortDefinition,
     sortDefinitions,
     supportedMetadataToSort
@@ -21,20 +21,15 @@ export default class SourcePushCommand extends PonyCommand {
 If no files are specified, sort files defined in .pony/config.json.
 Possible values are 'source', 'all', 'none' or array of files and/or directories.
 
-supported metadata:
+Supported metadata:
 ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
 `;
 
     public static examples: string[] = [
-        `$ sfdx pony:source:sort"
-        Sort files defined in .pony/config.json.
-        `,
-        `$ sfdx pony:source:sort --files src/main/default/profiles/Admin.profile-meta.xml
-        `,
-        `$ sfdx pony:source:sort --files "src/main/default/profiles/Admin.profile-meta.xml,src/main/default/profiles/Standard.profile-meta.xml"
-        `,
-        `$ sfdx pony:source:sort --files "src/main/default/profiles/*"
-        `,
+        `$ sfdx pony:source:sort`,
+        `$ sfdx pony:source:sort --files src/main/default/profiles/Admin.profile-meta.xml`,
+        `$ sfdx pony:source:sort --files "src/main/default/profiles/Admin.profile-meta.xml,src/main/default/profiles/Standard.profile-meta.xml"`,
+        `$ sfdx pony:source:sort --files "src/main/default/profiles/*"`,
     ];
 
     public static readonly supportsUsername: boolean = false;
@@ -124,7 +119,7 @@ function sort(component: Component, sortDefinition: SortDefinition): void {
         const key = Object.keys(entry)[0];
         const value = entry[key];
         if (isArray(root[key]) && root[key].length) {
-            if (isInnerText(value)) {
+            if (isInnerTextSortKey(value)) {
                 root[key].sort((a, b) => stringCompare(a[0], b[0]));
                 root[key] = filterUnique(key, root[key], (it) => isArray(it) && isString(it[0]) ? it[0] : '');
             } else {
