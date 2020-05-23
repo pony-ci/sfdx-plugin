@@ -86,11 +86,15 @@ export default class OrgCreateCommand extends PonyCommand {
         const describeMap: DescribeSObjectResultByType = {};
         const described = describeMap[sobjecttype] = await this.describeSObject(sobjecttype, targetusername);
         if (!excludeparentfields) {
+            const alreadyInProgress = new Set<string>();
             const describePromises: Promise<any>[] = [];
             for (const referenceField of this.filterCreateable(getReferenceFields(described))) {
                 if (referenceField.referenceTo) {
                     for (const referenceTo of referenceField.referenceTo) {
-                        describePromises.push(this.describeSObject(referenceTo, targetusername));
+                        if (!alreadyInProgress.has(referenceTo)) {
+                            describePromises.push(this.describeSObject(referenceTo, targetusername));
+                            alreadyInProgress.add(referenceTo);
+                        }
                     }
                 }
             }
@@ -122,7 +126,7 @@ const getReferenceFields = (result: DescribeSObjectResult) => result.fields.filt
 
 const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sobjectType: string, nonCreateable: boolean) => {
     return getReferenceFields(describeMap[sobjectType])
-        .filter(it => it.createable || nonCreateable)
+        .filter(it => it.relationshipName && (it.createable || nonCreateable))
         .reduce((arr: string[], it) => {
             if (it.referenceTo) {
                 for (const referenceTo of it.referenceTo) {
