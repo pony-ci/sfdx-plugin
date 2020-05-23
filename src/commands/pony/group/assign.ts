@@ -44,7 +44,7 @@ ${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
 
     public static examples: string[] = [
         `$ sfdx pony:group:assign -t Queue -g My_Queue`,
-        `$ sfdx pony:group:assign -t Queue -g Fist_Queue,Second_Queue`,
+        `$ sfdx pony:group:assign -t Queue -g Fist_Queue Second_Queue`,
         `$ sfdx pony:group:assign -t Queue -g My_Queue --userorgroup 0053N000002EP0zQAG`,
     ];
 
@@ -57,8 +57,9 @@ ${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
         }),
         group: flags.string({
             char: 'g',
-            description: 'developer name of the Group or comma separated list of developer names',
+            description: 'developer names of the Group',
             required: true,
+            multiple: true
         }),
         userorgroup: flags.string({
             description: 'ID of the User or Group that is a direct member of the group (default: target username)'
@@ -68,6 +69,8 @@ ${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
     protected static requiresUsername: boolean = true;
     protected static supportsDevhubUsername: boolean = false;
     protected static requiresProject: boolean = true;
+
+    protected strict: boolean = false;
 
     public async run(): Promise<void> {
         registerUX(this.ux);
@@ -95,22 +98,22 @@ ${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
     }
 
     private async getGroupRecords(): Promise<Group[]> {
-        const {targetusername, type} = this.flags;
-        const groupDeveloperNames = this.getGroupDeveloperNames();
-        if (!groupDeveloperNames.length) {
-            throw Error('Developer name of the Group cannot be empty.');
+        const {targetusername, type, group} = this.flags;
+        if (!group.length) {
+            throw Error('List of groups cannot be empty.');
         }
-        const groupNamesString = groupDeveloperNames.map(it => `'${it}'`).join(',');
+        const groupNamesString = group.map(it => `'${it}'`).join(',');
+        const query = `SELECT Id, Name, DeveloperName FROM Group WHERE Type = '${type}' AND DeveloperName IN (${groupNamesString})`;
         const {records} = await sfdx.force.data.soql.query({
             quiet: true,
             targetusername,
-            query: `SELECT Id, Name FROM Group WHERE Type = '${type}' AND DeveloperName IN (${groupNamesString})`
+            query
         });
+        if (records.length !== group.length) {
+            const groupsNotFound = group.filter(g => !records.find(({DeveloperName}) => DeveloperName !== g));
+            throw Error(`Some groups not found: ${groupsNotFound}`);
+        }
         return records;
-    }
-
-    private getGroupDeveloperNames(): string[] {
-        return this.flags.group.split(',').map(it => it.trim()).filter(() => true);
     }
 
     private async getUserOrGroupId(): Promise<string> {
