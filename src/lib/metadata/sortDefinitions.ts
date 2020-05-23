@@ -1,10 +1,12 @@
-import {Dictionary, isJsonMap} from '@salesforce/ts-types';
+import {Dictionary, isJsonMap, isString} from '@salesforce/ts-types';
 import {MetadataType} from './describeMetadata';
 
-export const INNER_TEXT_SORT_KEY = '__inner_text__';
+const INNER_TEXT_SORT_KEY = '__inner_text__';
 
 export const isSortedByInnerText = (it: any) =>
-    isJsonMap(it) && Object.keys(it).length === 1 && Object.values(it)[0] === INNER_TEXT_SORT_KEY;
+    isJsonMap(it) && Object.keys(it).length === 1 && isInnerText(Object.values(it)[0]);
+
+export const isInnerText = (it: any) => isString(it) && it === INNER_TEXT_SORT_KEY;
 
 export type SortDefinition = Dictionary<'__inner_text__' | string[]>[];
 

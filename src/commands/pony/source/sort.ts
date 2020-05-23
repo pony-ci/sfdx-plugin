@@ -5,7 +5,7 @@ import {EOL} from 'os';
 import path from 'path';
 import {Component, describeComponentFile, readComponent, registerUX, writeComponent} from '../../..';
 import {
-    INNER_TEXT_SORT_KEY,
+    isInnerText,
     SortDefinition,
     sortDefinitions,
     supportedMetadataToSort
@@ -124,7 +124,7 @@ function sort(component: Component, sortDefinition: SortDefinition): void {
         const key = Object.keys(entry)[0];
         const value = entry[key];
         if (isArray(root[key]) && root[key].length) {
-            if (value === INNER_TEXT_SORT_KEY) {
+            if (isInnerText(value)) {
                 root[key].sort((a, b) => stringCompare(a[0], b[0]));
                 root[key] = filterUnique(key, root[key], (it) => isArray(it) && isString(it[0]) ? it[0] : '');
             } else {
