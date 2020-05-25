@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import {readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
-import * as path from 'path';
+import path from 'path';
 import slash from 'slash';
 import {PonyOrg} from './PonyOrg';
 import {getUX} from './ux';
@@ -21,7 +21,7 @@ export async function updateSourcePathInfos(org: string | PonyOrg, files: string
                 .forEach(([infoPath, infoData]) => {
                     try {
                         const data = readFileSync(file).toString();
-                        console.log(`Updating source path info hash: ${file}`);
+                        ux.log(`Updating source path info hash: ${file}`);
                         infoData.contentHash = hash(data);
                     } catch (e) {
                         ux.warn(e);
