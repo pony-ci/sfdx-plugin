@@ -1,6 +1,6 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {registerUX, sfdx} from '../../../..';
+import {sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 
@@ -34,7 +34,6 @@ If not specified, the profile is assigned to target username.
     protected static requiresUsername: boolean = true;
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
         const {profile, onbehalfof} = this.flags;
         const project = await PonyProject.load();
         const assignerUsername = await this.getAssignerUsername(project);

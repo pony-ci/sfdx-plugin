@@ -1,7 +1,7 @@
 import {Flags, Opts, registerNamespace, sfdx as _sfdx} from '@pony-ci/sfdx-node';
 import * as path from 'path';
 import {PonyOrg} from './PonyOrg';
-import {getUX} from './ux';
+import {getUX} from './pubsub';
 
 export const sfdx: any = {};
 

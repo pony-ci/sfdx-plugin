@@ -58,7 +58,7 @@ Exported package group is a ordered list of packages that can be installed with 
     };
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
+        // registerUX(this.ux);
         const projectDir = process.cwd();
         const org = await useOrgOrDefault(this.flags.targetusername);
         const packagesDir = path.join(projectDir, 'data/packages');

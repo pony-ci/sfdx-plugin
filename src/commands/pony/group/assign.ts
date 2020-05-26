@@ -3,7 +3,7 @@ import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {AnyJson} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {EOL} from 'os';
-import {registerUX, sfdx} from '../../..';
+import {sfdx} from '../../..';
 import PonyCommand from '../../../lib/PonyCommand';
 import {tmp} from '../../../lib/tmp';
 
@@ -73,7 +73,6 @@ ${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
     protected strict: boolean = false;
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
         const {targetusername} = this.flags;
         const userOrGroupId = await this.getUserOrGroupId();
         const groups = await this.getGroupRecords();

@@ -60,11 +60,12 @@ postOrgCreate:
     }
 
     public async run(): Promise<Optional<PonyOrg>> {
-        registerUX(this.ux);
         const project = await PonyProject.load();
         let org: Optional<PonyOrg>;
         if (this.flags.targetusername) {
             org = await useOrg(this.flags.targetusername);
+            this.setEnv('username', org.getUsername());
+            this.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
             await project.runTaskIfDefined('preOrgCreate', {
                 targetusername: this.flags.targetusername,
@@ -73,9 +74,10 @@ postOrgCreate:
         try {
             if (!org) {
                 this.ux.log('Creating scratch org');
-                org = await sfdx.force.org
-                    .create(this.options)
-                    .then(({username}: any) => PonyOrg.createPonyOrg({aliasOrUsername: username}));
+                const {username} = await sfdx.force.org.create(this.options);
+                org = await PonyOrg.createPonyOrg({aliasOrUsername: username});
+                this.setEnv('username', org.getUsername());
+                this.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             }
         } catch (e) {
             throw e;

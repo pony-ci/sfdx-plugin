@@ -1,8 +1,8 @@
 import {Org} from '@salesforce/core/lib/org';
 import {Package} from '..';
 import PonyProject from './PonyProject';
+import {getUX} from './pubsub';
 import {Flags, Opts, RunApexTestsOptions, sfdx} from './sfdx';
-import {getUX} from './ux';
 
 /**
  * Create PonyOrg instance.

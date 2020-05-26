@@ -8,6 +8,7 @@
 export interface Config {
   extends?: string;
   data?: Data;
+  jobs?: Jobs;
   /**
    * Define which files and/or metadata types to sort on 'pony:source:sort' command.
    */
@@ -26,6 +27,28 @@ export interface Data {
     | {
         sobjectApiNames?: string[];
       };
+}
+export interface Jobs {
+  [k: string]: {
+    steps: (
+      | {
+          echo: string;
+        }
+      | {
+          env: string;
+        }
+      | {
+          job: string;
+        }
+      | {
+          run: string;
+        }
+      | {
+          sfdx: string;
+        }
+    )[];
+    [k: string]: any;
+  };
 }
 export interface SourceValidate {
   deleteOrg?: boolean | ("always" | "never" | "onSuccess");

@@ -8,7 +8,7 @@ import {Config, isConfig, isPackageGroup, PackageGroup, validateConfig, validate
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
 import {createTaskArg, TaskContext} from './taskExecution';
-import {getUX} from './ux';
+import {getUX} from './pubsub';
 
 type Task = (arg: TaskArg) => TaskResult;
 // tslint:disable-next-line:no-any

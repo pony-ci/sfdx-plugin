@@ -4,12 +4,14 @@ import {Config, PackageGroup} from '..';
 
 import configSchema from '../schema/config.schema.json';
 import dataSchema from '../schema/data.schema.json';
+import jobsSchema from '../schema/jobs.schema.json';
 import packageGroupSchema from '../schema/package-group.schema.json';
 import sourceSortSchema from '../schema/source-sort.schema.json';
 import sourceValidateSchema from '../schema/source-validate.schema.json';
 
 const CONFIG_REF = 'config';
 const DATA_REF = 'data';
+const JOBS_REF = 'jobs';
 const PACKAGE_GROUP_REF = 'packageGroup';
 const SOURCE_SORT_REF = 'sourceSort';
 const SOURCE_VALIDATE_REF = 'sourceValidate';
@@ -21,6 +23,7 @@ function validate(schemaKeyRef: string, value: Optional<AnyJson>): string | void
         ajv = new Ajv({allErrors: true, extendRefs: 'fail'});
         ajv.addSchema(configSchema, CONFIG_REF);
         ajv.addSchema(dataSchema, DATA_REF);
+        ajv.addSchema(jobsSchema, JOBS_REF);
         ajv.addSchema(packageGroupSchema, PACKAGE_GROUP_REF);
         ajv.addSchema(sourceSortSchema, SOURCE_SORT_REF);
         ajv.addSchema(sourceValidateSchema, SOURCE_VALIDATE_REF);

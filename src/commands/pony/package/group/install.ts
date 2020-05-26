@@ -25,7 +25,7 @@ Create package group with 'sfdx pony:package:group:export' command.
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
+        // registerUX(this.ux);
         const project = await PonyProject.load();
         const group = await project.getPackageGroup(this.flags.group);
         let count: number = 0;

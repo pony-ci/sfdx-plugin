@@ -1,9 +1,9 @@
 import {flags, FlagsConfig} from '@salesforce/command';
-import {definiteEntriesOf, isArray, isObject, isString} from '@salesforce/ts-types';
+import {definiteEntriesOf, definiteValuesOf, isArray, isObject, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {EOL} from 'os';
 import path from 'path';
-import {Component, describeComponentFile, readComponent, registerUX, writeComponent} from '../../..';
+import {Component, describeComponentFile, readComponent, writeComponent} from '../../..';
 import {
     isInnerTextSortKey,
     SortDefinition,
@@ -45,7 +45,6 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
     protected strict: boolean = false;
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
         const project = await PonyProject.load();
         const {sourceSort} = await project.getPonyConfig();
         const {files} = this.flags;
@@ -92,7 +91,8 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
         if (!sortDefinitions.Profile) {
             throw Error(`Sort definition not defined for ${file}`);
         }
-        sort(content, sortDefinitions.Profile);
+        const duplicates = sort(content, sortDefinitions.Profile);
+        duplicates.forEach(([key, it]) => this.ux.warn(`removing duplicate ${key}: ${JSON.stringify(it, null, 4)}`));
         await writeComponent(file, content);
     }
 }
@@ -115,15 +115,22 @@ function stringCompare(a: string, b: string): number {
     return 0;
 }
 
-function sort(component: Component, sortDefinition: SortDefinition): void {
-    const root = Object.values(0);
-    for (const entry of definiteEntriesOf(sortDefinition)) {
+function sort(component: Component, sortDefinition: SortDefinition): [string, string][] {
+    const allDuplicates: [string, any][] = [];
+    const root = Object.values(component)[0];
+    if (!root) {
+        throw Error('Invalid component.');
+    }
+    for (const entry of definiteValuesOf(sortDefinition)) {
         const key = Object.keys(entry)[0];
         const value = entry[key];
         if (isArray(root[key]) && root[key].length) {
             if (isInnerTextSortKey(value)) {
                 root[key].sort((a, b) => stringCompare(a[0], b[0]));
-                root[key] = filterUnique(key, root[key], (it) => isArray(it) && isString(it[0]) ? it[0] : '');
+                const {result, duplicates} = filterUnique(key, root[key],
+                    (it) => isArray(it) && isString(it[0]) ? it[0] : '');
+                root[key] = result;
+                duplicates.forEach(it => allDuplicates.push([key, it]));
             } else {
                 for (const val of value) {
                     root[key].sort((a, b) => {
@@ -133,22 +140,27 @@ function sort(component: Component, sortDefinition: SortDefinition): void {
                         return a[val] && a[val].length ? 1 : -1;
                     });
                 }
-                root[key] = filterUnique(key, root[key], (it) =>
+                const {result, duplicates} = filterUnique(key, root[key], (it) =>
                     value.map(val => isObject(it) && isArray(it[val]) && it[val].length ? it[val][0] : '').join('!!'));
+                root[key] = result;
+                duplicates.forEach(it => allDuplicates.push([key, it]));
             }
         }
     }
+    return allDuplicates;
 }
 
-function filterUnique<T>(key: string, array: T[], hashCode: (it: T) => string): T[] {
+function filterUnique<T>(key: string, array: T[], hashCode: (it: T) => string): {result: T[]; duplicates: T[]} {
     const alreadySorted = new Set<string>();
-    return array.filter((it) => {
+    const duplicates: T[] = [];
+    const result = array.filter((it) => {
         const hash = hashCode(it);
         if (alreadySorted.has(hash)) {
-            console.warn(`removing duplicate ${key}:`, it);
+            duplicates.push(it);
             return false;
         }
         alreadySorted.add(hash);
         return true;
     });
+    return {result, duplicates};
 }

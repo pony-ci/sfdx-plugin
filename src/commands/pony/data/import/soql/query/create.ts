@@ -40,7 +40,6 @@ export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<AnyJson> {
-        registerUX(this.ux);
         const query = await this.buildQuery();
         await this.writeQuery(query);
         return {query};

@@ -3,7 +3,7 @@ import {readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
 import path from 'path';
 import slash from 'slash';
 import {PonyOrg} from './PonyOrg';
-import {getUX} from './ux';
+import {getUX} from './pubsub';
 
 export async function updateSourcePathInfos(org: string | PonyOrg, files: string | string[]): Promise<void> {
     const ux = await getUX();

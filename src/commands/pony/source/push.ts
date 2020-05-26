@@ -49,7 +49,6 @@ postSourcePush:
     };
 
     public async run(): Promise<void> {
-        registerUX(this.ux);
         const project = await PonyProject.load();
         const org = await useOrgOrDefault(this.flags.targetusername);
         const ctx = TaskContext.create();

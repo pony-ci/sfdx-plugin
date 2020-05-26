@@ -1,7 +1,7 @@
 import {isArray, isPlainObject, isString} from '@salesforce/ts-types';
 import path from 'path';
 import {readComponent, writeComponent} from './metadata/components';
-import {getUX} from './ux';
+import {getUX} from './pubsub';
 
 export async function replaceInComponent(file: string, targets: string[], replacement: string): Promise<void> {
     const cmp = await readComponent(file);

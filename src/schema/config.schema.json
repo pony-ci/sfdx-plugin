@@ -11,6 +11,9 @@
     "data": {
       "$ref": "data.schema.json"
     },
+    "jobs": {
+      "$ref": "jobs.schema.json"
+    },
     "sourceSort": {
       "$ref": "source-sort.schema.json#/definitions/sourceSort"
     },
