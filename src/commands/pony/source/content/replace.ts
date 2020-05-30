@@ -52,7 +52,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
     private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement): Promise<string[]> {
         const {files, replacement} = rpl;
         for (const file of files) {
-            this.ux.log(`Removing senderAddress and changing senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
+            this.ux.log(`Going to remove senderAddress and change senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
             await replaceOrgWideEmailAddress(file, replacement);
         }
         return files;
