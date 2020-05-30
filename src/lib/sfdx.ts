@@ -1,5 +1,5 @@
 import {Flags, Opts, registerNamespace, sfdx as _sfdx} from '@pony-ci/sfdx-node';
-import * as path from 'path';
+import path from 'path';
 import {PonyOrg} from './PonyOrg';
 import {getUX} from './pubsub';
 
@@ -27,38 +27,10 @@ for (const p of ['force', 'pony']) {
 
 export {Flags, Opts} from '@pony-ci/sfdx-node';
 
-// export interface PushSourceOptions {
-//     forceoverwrite?: boolean;
-//     ignorewarnings?: boolean;
-//     wait?: number;
-// }
-
 export interface RunApexTestsOptions {
     targetusername?: string;
     synchronous?: boolean;
 }
-
-/**
- * Options for package installation.
- */
-// export interface PackageInstallationOptions {
-//     package: string;
-//     apexcompile?: string;
-//     publishwait?: string | number;
-//     installationkey?: string;
-//     securitytype?: string;
-//     upgradetype?: string;
-// }
-
-// export interface CreateScratchOrgOptions {
-//     setalias?: string;
-//     noancestors?: boolean;
-//     durationdays?: number;
-//     definitionfile?: string;
-//     nonamespace?: boolean;
-//     setdefaultusername?: boolean;
-//     targetdevhubusername?: string;
-// }
 
 export interface AuthJwtGrantOptions {
     jwtkeyfile?: string;

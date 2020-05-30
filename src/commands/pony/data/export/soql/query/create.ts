@@ -7,10 +7,11 @@ import {EOL} from 'os';
 import path from 'path';
 import {sfdx} from '../../../../../..';
 import PonyCommand from '../../../../../../lib/PonyCommand';
+import PonyProject from '../../../../../../lib/PonyProject';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
-export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
+export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
     public static description: string = `create soql file for exporting records`;
 
@@ -39,8 +40,11 @@ export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<AnyJson> {
+        const project = await PonyProject.load();
+        const data = await project.getDataConfig();
         const query = await this.buildQuery();
-        await this.writeQuery(query);
+        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || 'data/soql/export';
+        await this.writeQuery(query, soqlExportDir);
         return {query};
     }
 
@@ -63,11 +67,10 @@ export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
         return `SELECT${EOL}${fieldsClause}${EOL}FROM ${sobjecttype}${orderByClause}${EOL}`;
     }
 
-    private async writeQuery(query: string): Promise<void> {
+    private async writeQuery(query: string, soqlExportDir: string): Promise<void> {
         const {sobjecttype, noprompt} = this.flags;
-        const dir = 'data/soql/import/';
-        fs.ensureDirSync(dir);
-        const file = path.join(dir, `${sobjecttype}.soql`);
+        fs.ensureDirSync(soqlExportDir);
+        const file = path.join(soqlExportDir, `${sobjecttype}.soql`);
         let writeFile = true;
         if (!noprompt && fs.existsSync(file)) {
             writeFile = await this.ux.confirm(`File already exists, overwrite ${file}?`);

@@ -13,6 +13,7 @@ interface SObject {
         referenceId: string;
     };
 
+    // tslint:disable-next-line:no-any
     [key: string]: any;
 }
 

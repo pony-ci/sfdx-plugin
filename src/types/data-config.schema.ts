@@ -10,13 +10,15 @@ export type SObjectNames = string[];
 export interface DataConfig {
   sObjects?: {
     recordsDir?: string;
-    soqlDir?: string;
     import?: {
+      chunkSize?: number;
       deleteBeforeImport?: (false | "reversedOrder") | SObjectNames;
+      soqlDeleteDir?: string;
       order: SObjectNames;
       relationships?: Relationship[];
     };
     export?: {
+      soqlExportDir?: string;
       order?: SObjectNames | "reversedOrder";
     };
   };
@@ -26,6 +28,6 @@ export interface Relationship {
   fieldMappings: FieldMapping[];
 }
 export interface FieldMapping {
-  source: string;
-  target: string;
+  relationshipName: string;
+  fieldName: string;
 }

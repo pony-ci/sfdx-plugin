@@ -5,12 +5,13 @@ import {sfdx} from '../../..';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 
-const DEFAULT_RECORDS_DIR = 'data/sObjects/';
-const DEFAULT_SOQL_DIR = 'data/soql/sObjects/';
-const REVERSED_ORDER = 'reversedOrder';
+export const defaultRecordsDir = 'data/sObjects/';
+export const defaultSoqlExportDir = 'data/soql/export/';
+export const defaultSoqlDeleteDir = 'data/soql/delete/';
+export const reversedOrder = 'reversedOrder';
 
-const toQueryFile = (soqlDir: string, sObjectName: string) =>
-    path.join(soqlDir, `${sObjectName}.soql`);
+const toQueryFile = (soqlExportDir: string, sObjectName: string) =>
+    path.join(soqlExportDir, `${sObjectName}.soql`);
 
 export default class DataExportCommand extends PonyCommand {
 
@@ -24,14 +25,14 @@ export default class DataExportCommand extends PonyCommand {
     public async run(): Promise<void> {
         const project = await PonyProject.load();
         const data = await project.getDataConfig();
-        const recordsDir = data?.sObjects?.recordsDir || DEFAULT_RECORDS_DIR;
-        const soqlDir = data?.sObjects?.soqlDir || DEFAULT_SOQL_DIR;
-        const exportOrder = data?.sObjects?.export?.order || REVERSED_ORDER;
+        const recordsDir = data?.sObjects?.recordsDir || defaultRecordsDir;
+        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || defaultSoqlExportDir;
+        const exportOrder = data?.sObjects?.export?.order || reversedOrder;
         const importOrder = data?.sObjects?.import?.order || [];
-        const sObjectNames = exportOrder === REVERSED_ORDER
+        const sObjectNames = exportOrder === reversedOrder
             ? importOrder.reverse() : exportOrder;
         for (const sObjectName of sObjectNames) {
-            const queryFile = toQueryFile(soqlDir, sObjectName);
+            const queryFile = toQueryFile(soqlExportDir, sObjectName);
             if (!fs.existsSync(queryFile)) {
                 throw Error(`File with query not found: ${queryFile}`);
             }
@@ -41,7 +42,7 @@ export default class DataExportCommand extends PonyCommand {
             const {records} = await sfdx.force.data.tree.export({
                 targetusername: this.flags.targetusername,
                 outputdir: recordsDir,
-                query: toQueryFile(soqlDir, sObjectName)
+                query: toQueryFile(soqlExportDir, sObjectName)
             });
             if (!records.length) {
                 fs.writeJSONSync(path.join(recordsDir, `${sObjectName}.json`), {records});

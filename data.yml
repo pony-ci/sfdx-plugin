@@ -1,10 +1,12 @@
 
 sObjects:
     import:
+        chunkSize: 200
         order:
             - Account
+            - Contact
         relationships:
             -   sObject: Contact
                 fieldMappings:
-                    -   source: Account.Name
-                        target: AccountId
+                    -   relationshipName: Account
+                        fieldName: Name

@@ -192,14 +192,17 @@ async function readDataConfig(projectDir: string): Promise<DataConfig> {
     if (!isDataConfig(data)) {
         throw Error(`${validateDataConfig(data)}`);
     }
-    const sourceRegex = /^[a-zA-Z_]+\.[a-zA-Z_]+$/;
-    const targetRegex = /^[a-zA-Z_]+$/;
-    for (const relationship of data.import?.relationships || []) {
-        for (const {source, target} of relationship.fieldMappings) {
-            if (!sourceRegex.test(source)) {
-                throw Error(`Invalid source: ${target}`);
-            } else if (!targetRegex.test(target)) {
-                throw Error(`Invalid target: ${target}`);
+    const relationshipNameRegex = /^[a-zA-Z_]+$/;
+    const fieldNameRegex = /^[a-zA-Z_]+$/;
+    for (const relationship of data?.sObjects?.import?.relationships || []) {
+        for (const {relationshipName, fieldName} of relationship.fieldMappings) {
+            if (!relationshipNameRegex.test(relationshipName)) {
+                throw Error(`Invalid relationshipName: ${relationshipName}`);
+            } else if (!fieldNameRegex.test(fieldName)) {
+                throw Error(`Invalid fieldName: ${fieldName}`);
+            }
+            if (relationshipName.toLowerCase() === 'recordtype' && fieldName.toLowerCase() !== 'developername') {
+                throw Error('Relationship RecordType can be mapped only by DeveloperName.');
             }
         }
     }

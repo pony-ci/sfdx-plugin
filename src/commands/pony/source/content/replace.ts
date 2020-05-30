@@ -1,12 +1,9 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import fs from 'fs-extra';
-import path from 'path';
-import {getAppHomeDir, Replacement} from '../../../..';
+import {Replacement} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
-import klaw from 'klaw-sync';
 
 // sfdx pony:workflow:modify
 // email alerts:
