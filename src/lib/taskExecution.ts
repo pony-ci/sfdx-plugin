@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import klaw from 'klaw-sync';
 import path from 'path';
 import {getAppHomeDir} from './app';
-import {replaceInComponent} from './filesManip';
+import {replaceInnerText} from './filesManip';
 import {useDevhub, useDevhubOrDefault, useOrg, useOrgOrDefault} from './PonyOrg';
 import {getUX} from './pubsub';
 import {authJwtGrant, listOrgs, logoutAll, sfdx} from './sfdx';
@@ -104,7 +104,7 @@ export function createTaskArg(name: string, context: TaskContext): TaskArg {
         context,
         replaceInComponent: async (file: string, targets: string[], replacement: string) => {
             context.backupFile(file);
-            await replaceInComponent(file, targets, replacement);
+            await replaceInnerText(file, targets, replacement);
         }
     };
 }

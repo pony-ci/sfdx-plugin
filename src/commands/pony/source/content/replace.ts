@@ -4,9 +4,9 @@ import {
     InnerTextReplacement,
     isInnerTextReplacement,
     isOrgWideEmailAddressReplacement,
-    OrgWideEmailAddressReplacement,
-    Replacement
+    OrgWideEmailAddressReplacement
 } from '../../../..';
+import {replaceInnerText} from '../../../../lib/filesManip';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
@@ -67,7 +67,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
     private async replaceInnerText(rpl: InnerTextReplacement): Promise<string[]> {
         const {files, search, replacement} = rpl;
         for (const file of files) {
-            // await replaceInComponent(file, search, replacement);
+            await replaceInnerText(file, search, replacement);
         }
         return files;
     }
