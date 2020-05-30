@@ -58,7 +58,7 @@ export async function executeJobByName(jobs: Jobs, name: string, env: Environmen
         throw Error(`Job not found: ${name}`);
     }
     const ux = await getUX();
-    ux.log(chalk.blueBright.bold(`[job] ${name}`));
+    ux.log(chalk.blueBright.bold(`=== [job] ${name}`));
     return executeJob(jobs, jobs[name], env);
 }
 

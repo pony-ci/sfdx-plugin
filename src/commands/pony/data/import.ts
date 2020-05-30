@@ -19,7 +19,7 @@ const toRecordsFile = (recordsDir: string, sObjectName: string) =>
 const toDeleteSoql = (soqlDeleteDir: string, sObjectName: string) => {
     const file = path.join(soqlDeleteDir, `${sObjectName}.soql`);
     if (fs.existsSync(file)) {
-        return fs.readdirSync(file).toString();
+        return fs.readFileSync(file).toString();
     }
     return `SELECT Id FROM ${sObjectName}`;
 };
@@ -67,13 +67,19 @@ export default class DataImportCommand extends PonyCommand {
     private async importRecords(
         conn: Connection, data: DataConfig, recordsDir: string, importOrder: SObjectNames
     ): Promise<void> {
+        const {targetusername} = this.flags;
         const relationships = data?.sObjects?.import?.relationships || [];
         const chunkSize = data?.sObjects?.import?.chunkSize || defaultImportChunkSize;
         for (const sObjectName of importOrder) {
             const recordsContent = fs.readJSONSync(toRecordsFile(recordsDir, sObjectName));
             const records: Records = recordsContent.records;
             const allCount = records.length;
-            this.ux.log(chalk.blueBright.bold(`Importing ${allCount} ${sObjectName}`));
+            const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
+            if (!allCount) {
+                this.ux.warn(`No ${describe.labelPlural} to import.`);
+                continue;
+            }
+            this.ux.log(chalk.blueBright.bold(`Importing ${allCount} ${allCount === 1 ? describe.label : describe.labelPlural}`));
             await this.populateRelationships(
                 records,
                 relationships.filter(it => it.sObject.toLowerCase() === sObjectName.toLowerCase()),
@@ -81,11 +87,11 @@ export default class DataImportCommand extends PonyCommand {
             );
             let importedCount = 0;
             let i = 0;
-            this.ux.startSpinner(`0 imported`);
+            this.ux.startSpinner(`0/${allCount}`);
             do {
                 const importedRecords = await this.importRecordsChunk(conn, records, i++, chunkSize, sObjectName);
                 importedCount += importedRecords.length;
-                this.ux.startSpinner(`imported ${importedCount}`);
+                this.ux.startSpinner(`${importedCount}/${allCount}`);
             } while (importedCount !== allCount);
             this.ux.stopSpinner();
         }
@@ -160,7 +166,7 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async deleteRecords(conn: Connection, data: DataConfig, importOrder: SObjectNames): Promise<void> {
-        const {noprompt} = this.flags;
+        const {noprompt, targetusername} = this.flags;
         const deleteBeforeImport = data.sObjects?.import?.deleteBeforeImport;
         const soqlDeleteDir = data?.sObjects?.import?.soqlDeleteDir || defaultSoqlDeleteDir;
         const deleteOrder = deleteBeforeImport === false
@@ -177,7 +183,8 @@ export default class DataImportCommand extends PonyCommand {
             return;
         }
         for (const sObjectName of deleteOrder) {
-            this.ux.startSpinner(`Deleting ${sObjectName} records.`);
+            const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
+            this.ux.startSpinner(chalk.blueBright.bold(`Deleting ${describe.labelPlural}`));
             const deleteSoql = toDeleteSoql(soqlDeleteDir, sObjectName);
             await destroyRecords(conn, this.ux, sObjectName, deleteSoql);
             this.ux.stopSpinner();
