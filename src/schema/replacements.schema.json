@@ -10,26 +10,68 @@
     "replacement": {
       "type": "object",
       "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "innerText": {
+          "$ref": "#/definitions/innerText"
+        },
+        "orgWideEmailAddress": {
+          "$ref": "#/definitions/orgWideEmailAddress"
+        }
+      }
+    },
+    "innerText": {
+      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "files": {
-          "type": "array",
-          "additionalItems": false,
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/definitions/files"
         },
         "replacement": {
-          "type": "string"
+          "$ref": "#/definitions/replacementValue"
         },
         "search": {
-          "type": "array",
-          "additionalItems": false,
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/definitions/search"
         }
       },
-      "required": ["files", "search", "replacement"]
+      "required": [
+        "files",
+        "replacement",
+        "search"
+      ]
+    },
+    "orgWideEmailAddress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "$ref": "#/definitions/files"
+        },
+        "replacement": {
+          "$ref": "#/definitions/replacementValue"
+        }
+      },
+      "required": [
+        "files",
+        "replacement"
+      ]
+    },
+    "files": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "string"
+      }
+    },
+    "search": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "string"
+      }
+    },
+    "replacementValue": {
+      "type": "string"
     }
   }
 }

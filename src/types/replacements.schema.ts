@@ -5,11 +5,23 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type Files = string[];
+export type ReplacementValue = string;
+export type Search = string[];
+
 export interface Replacements {
   [k: string]: Replacement;
 }
 export interface Replacement {
-  files: string[];
-  replacement: string;
-  search: string[];
+  innerText?: InnerText;
+  orgWideEmailAddress?: OrgWideEmailAddress;
+}
+export interface InnerText {
+  files: Files;
+  replacement: ReplacementValue;
+  search: Search;
+}
+export interface OrgWideEmailAddress {
+  files: Files;
+  replacement: ReplacementValue;
 }

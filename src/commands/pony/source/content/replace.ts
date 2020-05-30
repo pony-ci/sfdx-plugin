@@ -1,9 +1,10 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {Replacement} from '../../../..';
+import {isInnerTextReplacement, isOrgWideEmailAddressReplacement, Replacement} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
+import {InnerText, OrgWideEmailAddress} from '../../../../types/replacements.schema';
 
 // sfdx pony:workflow:modify
 // email alerts:
@@ -34,21 +35,33 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         const {replacement} = this.flags;
         const project = await PonyProject.load();
         const {replacements = {}} = await project.getPonyConfig();
-        if (replacements[replacement]) {
-            const backup = FilesBackup.create(project.projectDir);
-            const files = await this.replace(replacements[replacement]);
-            backup.backupFiles(files);
-            // await backup.restoreBackupFiles();
-            this.sendMessage({modifiedFiles: files});
+        const rpl = replacements[replacement];
+        if (rpl) {
+            if (isInnerTextReplacement(rpl) && rpl.innerText) {
+                const backup = FilesBackup.create(project.projectDir);
+                const files = await this.replaceInnerText(rpl.innerText);
+                backup.backupFiles(files);
+                // await backup.restoreBackupFiles();
+                this.sendMessage({modifiedFiles: files});
+            } else if (isOrgWideEmailAddressReplacement(rpl) && rpl.orgWideEmailAddress) {
+                const backup = FilesBackup.create(project.projectDir);
+                const files = await this.replaceOrgWideEmailAddress(rpl.orgWideEmailAddress);
+                backup.backupFiles(files);
+                // await backup.restoreBackupFiles();
+                this.sendMessage({modifiedFiles: files});
+            }
         } else {
             throw Error(`Replacement not found: ${replacement}`);
         }
     }
 
-    private async replace(rpl: Replacement): Promise<string[]> {
+    private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddress): Promise<string[]> {
+        return [];
+    }
+
+    private async replaceInnerText(rpl: InnerText): Promise<string[]> {
         const {files, search, replacement} = rpl;
         for (const file of files) {
-
             // await replaceInComponent(file, search, replacement);
         }
         return files;

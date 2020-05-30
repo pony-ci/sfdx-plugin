@@ -1,4 +1,4 @@
-import {isAnyJson} from '@salesforce/ts-types';
+import {isAnyJson, isJsonMap} from '@salesforce/ts-types';
 import {AnyJson, Optional} from '@salesforce/ts-types/lib/types';
 import Ajv from 'ajv';
 import {Config, DataConfig, PackageGroup} from '..';
@@ -11,6 +11,7 @@ import packageGroupSchema from '../schema/package-group.schema.json';
 import replacementsSchema from '../schema/replacements.schema.json';
 import sourceSortSchema from '../schema/source-sort.schema.json';
 import sourceValidateSchema from '../schema/source-validate.schema.json';
+import {InnerText, OrgWideEmailAddress} from '../types/replacements.schema';
 
 const CONFIG_REF = 'config';
 const DATA_REF = 'data';
@@ -52,3 +53,7 @@ export const isPackageGroup = (value: unknown): value is PackageGroup =>
     isAnyJson(value) && validatePackageGroup(value) === undefined;
 export const isDataConfig = (value: unknown): value is DataConfig =>
     isAnyJson(value) && validateDataConfig(value) === undefined;
+export const isInnerTextReplacement = (value: unknown): value is InnerText =>
+    isAnyJson(value) && isJsonMap(value) && 'innerText' in value;
+export const isOrgWideEmailAddressReplacement = (value: unknown): value is OrgWideEmailAddress =>
+    isAnyJson(value) && isJsonMap(value) && 'orgWideEmailAddress' in value;

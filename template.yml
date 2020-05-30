@@ -1,0 +1,68 @@
+
+jobs:
+    lol:
+        steps:
+            - echo: $ONDASEK
+            - run: echo $ONDASEK
+            - env: ahoj=777
+            - job: pony:postSourcePush
+            - echo: $env.ahoj
+            - env: beta=$env.ahoj
+            - echo: $env.beta
+    second:
+        steps:
+            - echo: $env.username
+
+    pony:postOrgCreate:
+        steps:
+            - env: ahoj=5
+            - echo: $env
+            - job: pony:preSourcePush
+            - sfdx: force:org:open -u $env.devhub_username --urlonly
+            - sfdx: pony:package:group:install -u $env.username
+            - sfdx: pony:source:deploy -u $env.username -m QueueRoutingConfig,Queue
+            - sfdx: pony:source:push -u $env.username
+            - sfdx: force:apex:execute -u $env.username -f data/apex/insert-custom-settings.apex
+            - sfdx: pony:group:assign -u $env.username -t Queue -g Extra_Queue,Inbox_Lead_Queue,Priority_Queue
+#            - sfdx: force:apex:execute -u $env.username -f data/apex/assign-queues.apex
+    pony:preSourcePush:
+        steps:
+#            - sfdx: pony:source:content:replace -u $env.username -f ...files -t $pony.username
+            - run: node /home/ondrej/projects/pony-ci/sfdx-plugin/bin/run pony:source:content:replace -r preSourcePush
+    pony:postSourcePush:
+        steps:
+            - echo: lol
+            - echo: $env.ahoj
+            - env: ahoj=888
+
+
+replacements:
+    preSourcePush:
+        innerText:
+            files:
+                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
+                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
+                - src/main/default/queues/Extra_Queue.queue-meta.xml
+                - src/main/default/queues/Inbox_Lead_Queue.queue-meta.xml
+                - src/main/default/queues/Priority_Queue.queue-meta.xml
+                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
+                - src/main/default/skills/Account.skill-meta.xml
+                - src/main/default/skills/Case.skill-meta.xml
+                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
+                - src/main/default/reports/DashboardReportsAdoption.reportFolder-meta.xml
+                - src/main/default/reports/Best_Practice_Service_Reports.reportFolder-meta.xml
+                - src/main/default/reports/Sales_Marketing_Dashboard_Reports.reportFolder-meta.xml
+                - src/main/default/dashboards/Best_Practice_Service_Dashboards.dashboardFolder-meta.xml
+                - src/main/default/dashboards/Sales_Marketing_Dashboards.dashboardFolder-meta.xml
+                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
+                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
+            search:
+                - bogoljub.jakovcheski@aspectworks.com.orange
+            replacement: $env.username
+        orgWideEmailAddress:
+            files:
+                - ssss
+            replacement: CurrentUser
+
+# diff between `run: echo $var` and  `echo: $var`
+# diff between `$env.username` and  `$username`

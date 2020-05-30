@@ -42,9 +42,15 @@ export interface OrgCreateConfig {
 }
 export interface Replacements {
   [k: string]: {
-    files: string[];
-    replacement: string;
-    search: string[];
+    innerText?: {
+      files: string[];
+      replacement: string;
+      search: string[];
+    };
+    orgWideEmailAddress?: {
+      files: string[];
+      replacement: string;
+    };
   };
 }
 export interface SourceValidate {
