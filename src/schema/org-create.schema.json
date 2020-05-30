@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/org-create.schema.json",
+  "title": "Org Create Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generateUsername": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

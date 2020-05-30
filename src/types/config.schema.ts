@@ -7,30 +7,18 @@
 
 export interface Config {
   extends?: string;
-  data?: Data;
   jobs?: Jobs;
+  orgCreate?: OrgCreateConfig;
+  replacements?: Replacements;
   /**
    * Define which files and/or metadata types to sort on 'pony:source:sort' command.
    */
   sourceSort?: ("all" | "source" | "none") | [string];
   sourceValidate?: SourceValidate;
 }
-export interface Data {
-  import?:
-    | string[]
-    | {
-        deleteBeforeImport?: (true | false | "reversed") | string[];
-        sobjectApiNames?: string[];
-      };
-  export?:
-    | string[]
-    | {
-        sobjectApiNames?: string[];
-      };
-}
 export interface Jobs {
   [k: string]: {
-    steps: (
+    steps?: (
       | {
           echo: string;
         }
@@ -47,7 +35,16 @@ export interface Jobs {
           sfdx: string;
         }
     )[];
-    [k: string]: any;
+  };
+}
+export interface OrgCreateConfig {
+  generateUsername?: boolean;
+}
+export interface Replacements {
+  [k: string]: {
+    files: string[];
+    replacement: string;
+    search: string[];
   };
 }
 export interface SourceValidate {

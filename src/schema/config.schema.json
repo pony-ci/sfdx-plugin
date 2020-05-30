@@ -8,11 +8,14 @@
     "extends": {
       "type": "string"
     },
-    "data": {
-      "$ref": "data.schema.json"
-    },
     "jobs": {
       "$ref": "jobs.schema.json"
+    },
+    "orgCreate": {
+      "$ref": "org-create.schema.json"
+    },
+    "replacements": {
+      "$ref": "replacements.schema.json"
     },
     "sourceSort": {
       "$ref": "source-sort.schema.json#/definitions/sourceSort"

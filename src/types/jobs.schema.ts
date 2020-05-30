@@ -26,6 +26,5 @@ export interface Jobs {
   [k: string]: Job;
 }
 export interface Job {
-  steps: Step[];
-  [k: string]: any;
+  steps?: Step[];
 }

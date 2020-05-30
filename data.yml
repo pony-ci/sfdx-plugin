@@ -1,0 +1,7 @@
+import:
+    sObjects:
+        - Account
+        - Contact
+    relationships:
+        -   source: Account.Name
+            target: AccountId

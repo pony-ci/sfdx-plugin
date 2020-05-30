@@ -40,7 +40,7 @@
     ],
     "missing-jsdoc": false,
     "newline-before-return": false,
-    "no-any": false,
+    "no-any": true,
     "no-bitwise": false,
     "no-empty": false,
     "no-empty-interface": false,

@@ -1,14 +1,22 @@
-import {AnyJson, Dictionary, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {AnyJson, Dictionary, isAnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import chalk from 'chalk';
 import {spawn} from 'child_process';
 import {Jobs} from '..';
 import {Job, Step} from '../types/jobs.schema';
 import {getLogger, getUX} from './pubsub';
 
-export interface JobMessage {
+export interface IPCMessage {
     pony: {
-        env: AnyJson;
+        env?: AnyJson;
+        modifiedFiles?: string[];
     };
 }
+
+type ModifiedFiles = Set<String>;
+type Variables = Dictionary<EnvValue>;
+
+export const isIPCMessage = (value: unknown): value is IPCMessage =>
+    isAnyJson(value) && isJsonMap(value) && 'pony' in value && isJsonMap(value.pony);
 
 export type EnvValue = Optional<string | string[]>;
 
@@ -17,10 +25,16 @@ function isEnvValue(value: unknown): value is EnvValue {
 }
 
 export class Environment {
-    private variables: Dictionary<EnvValue> = {};
+    public readonly modifiedFiles: ModifiedFiles;
+    public readonly variables: Variables;
+
+    private constructor(modifiedFiles: ModifiedFiles, variables: Variables) {
+        this.modifiedFiles = modifiedFiles;
+        this.variables = variables;
+    }
 
     public static create(): Environment {
-        return new Environment();
+        return new Environment(new Set(), {});
     }
 
     public getEnv(name: string): Optional<EnvValue> {
@@ -32,9 +46,10 @@ export class Environment {
     }
 
     public clone(): Environment {
-        const cloned = new Environment();
-        cloned.variables = JSON.parse(JSON.stringify(this.variables));
-        return cloned;
+        return new Environment(
+            new Set(this.modifiedFiles),
+            JSON.parse(JSON.stringify(this.variables))
+        );
     }
 }
 
@@ -42,14 +57,16 @@ export async function executeJobByName(jobs: Jobs, name: string, env: Environmen
     if (!jobs[name]) {
         throw Error(`Job not found: ${name}`);
     }
+    const ux = await getUX();
+    ux.log(chalk.blueBright.bold(`[job] ${name}`));
     return executeJob(jobs, jobs[name], env);
 }
 
 export async function executeJob(jobs: Jobs, job: Job, env: Environment): Promise<Environment> {
     const logger = await getLogger();
-    logger.info('exec job', job, env);
+    logger.info('run job', job, env);
     let currEnv = env;
-    for (const step of job.steps) {
+    for (const step of job.steps || []) {
         currEnv = await executeStep(jobs, step, currEnv);
     }
     return currEnv;
@@ -59,52 +76,60 @@ function isValidEnvValue(value: Optional<string>): boolean {
     return !(isString(value) && !RegExp('^[a-zA-Z_]+=.*$').test(value));
 }
 
-export async function executeStep(jobs: Jobs, step: Step, env: Environment): Promise<Environment> {
+export async function executeStep(jobs: Jobs, step: Step, environment: Environment): Promise<Environment> {
     const ux = await getUX();
     const logger = await getLogger();
-    logger.info('exec step', step, env);
+    logger.info('run step', step, environment);
     const stepKey = Object.keys(step)[0];
-    const stepValue = prepareCommandArgs(Object.values(step)[0], env);
-    const newEnv = env.clone();
+    const stepValue = prepareCommandArgs(Object.values(step)[0], environment);
+    const newEnv = environment.clone();
     if (stepKey === 'env') {
         if (!isValidEnvValue(stepValue)) {
             throw Error(`Invalid env value: ${stepValue}`);
         }
         const keyPair = stepValue.split('=');
-        ux.log(`env: ${stepValue}`);
+        ux.log(`${chalk.blueBright('[env]')} ${stepValue}`);
         newEnv.setEnv(keyPair[0], keyPair[1]);
     } else if (stepKey === 'echo') {
-        ux.log(`echo: ${stepValue}`);
+        ux.log(`${chalk.blueBright(`[echo]`)} ${Object.values(step)[0]}`);
         ux.log(stepValue);
     } else if (stepKey === 'job') {
         return executeJobByName(jobs, stepValue, newEnv);
     } else {
-        const command = `${stepKey === 'run' ? '' : stepKey} ${stepValue}`;
-        ux.log(`$ ${command}`);
-        logger.info('spawn', command);
-        const cmd = spawn(command, [], {
-            shell: true,
-            stdio: ['inherit', 'inherit', 'inherit', 'ipc']
-        });
-        cmd.on('message', (message) => {
-            if (isJsonMap(message) && 'pony' in message) {
-                console.log('child message', JSON.stringify(message, null, 4));
-                logger.info('child message', JSON.stringify(message, null, 4));
-                const pony = message.pony;
-                if (isJsonMap(pony) && 'env' in pony && isJsonMap(pony.env) && pony.env) {
-                    for (const [key, value] of Object.entries(pony.env)) {
-                        if (isEnvValue(value)) {
-                            newEnv.setEnv(key, value);
-                        }
+        return executeCommand(stepKey, stepValue, newEnv);
+    }
+    return newEnv;
+}
+
+async function executeCommand(stepKey: string, stepValue: string, environment: Environment): Promise<Environment> {
+    const ux = await getUX();
+    const logger = await getLogger();
+    const command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
+    ux.log(`${chalk.blueBright(`[run]`)} ${command}`);
+    logger.info('spawn', command);
+    const cmd = spawn(command, [], {
+        shell: true,
+        stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+    });
+    cmd.on('message', (message) => {
+        if (isIPCMessage(message)) {
+            logger.info('ipc message', JSON.stringify(message, null, 4));
+            const {env = {}, modifiedFiles = []} = message.pony;
+            if (isJsonMap(env)) {
+                for (const [key, value] of Object.entries(env)) {
+                    if (isEnvValue(value)) {
+                        environment.setEnv(key, value);
                     }
                 }
             }
-        });
-        return new Promise((resolve) => {
-            cmd.on('exit', () => resolve(newEnv));
-        });
-    }
-    return newEnv;
+            if (isArray(modifiedFiles)) {
+                modifiedFiles.forEach(it => environment.modifiedFiles.add(it));
+            }
+        }
+    });
+    return new Promise((resolve) => {
+        cmd.on('exit', () => resolve(environment));
+    });
 }
 
 export function prepareCommandArgs(args: string, env: Environment): string {

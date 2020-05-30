@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import {DescribeSObjectResult, Field} from 'jsforce/describe-result';
 import {EOL} from 'os';
 import path from 'path';
-import {registerUX, sfdx} from '../../../../../..';
+import {sfdx} from '../../../../../..';
 import PonyCommand from '../../../../../../lib/PonyCommand';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
@@ -86,7 +86,7 @@ export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
         const described = describeMap[sobjecttype] = await this.describeSObject(sobjecttype, targetusername);
         if (!excludeparentfields) {
             const alreadyInProgress = new Set<string>();
-            const describePromises: Promise<any>[] = [];
+            const describePromises: Promise<DescribeSObjectResult>[] = [];
             for (const referenceField of this.filterCreateable(getReferenceFields(described))) {
                 if (referenceField.referenceTo) {
                     for (const referenceTo of referenceField.referenceTo) {

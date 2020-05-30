@@ -1,10 +1,12 @@
+import {IConfig} from '@oclif/config';
 import {SfdxCommand, UX} from '@salesforce/command';
-import {Logger} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
+import {isArray, isPlainObject} from '@salesforce/ts-types';
 import {EOL} from 'os';
-import {EnvValue, JobMessage} from './jobs';
+import {EnvValue, IPCMessage} from './jobs';
 import {registerLogger, registerUX} from './pubsub';
 
-const run = async (that: PonyCommand, ux: UX, logger: Logger, flags: any, thatRun) => {
+const run = async (that: PonyCommand, ux: UX, logger: Logger, thatRun) => {
     try {
         registerUX(ux);
         registerLogger(logger);
@@ -16,10 +18,10 @@ const run = async (that: PonyCommand, ux: UX, logger: Logger, flags: any, thatRu
 
 export default abstract class PonyCommand extends SfdxCommand {
 
-    constructor(arg1: any, arg2: any) {
+    constructor(arg1: string[], arg2: IConfig) {
         super(arg1, arg2);
         const thatRun = this.run;
-        this.run = () => run(this, this.ux, this.logger, this.flags, thatRun);
+        this.run = () => run(this, this.ux, this.logger, thatRun);
     }
 
     protected get commandName(): string {
@@ -34,7 +36,7 @@ export default abstract class PonyCommand extends SfdxCommand {
         });
     }
 
-    private sendMessage(message: JobMessage['pony']): void {
+    protected sendMessage(message: IPCMessage['pony']): void {
         if (process.send) {
             process.send({
                 pony: message
@@ -43,18 +45,18 @@ export default abstract class PonyCommand extends SfdxCommand {
     }
 }
 
-function preprocessError(errors: any): any {
+function preprocessError(errors: unknown): unknown {
     if (errors instanceof String || errors instanceof Error) {
         return errors;
     }
-    if (errors.message) {
+    if (errors instanceof SfdxError) {
         return (errors.commandName ? `[${errors.commandName}] ` : '') + errors.message;
     }
-    if (Array.isArray(errors)) {
+    if (isArray(errors)) {
         if (errors.length === 1) {
             return preprocessError(errors[0]);
         }
-        if (errors.every(it => it.commandName && it.message)) {
+        if (errors.every(it => isPlainObject(it) && 'commandName' in it && 'message' in it)) {
             return errors.map(preprocessError).join(EOL + EOL);
         }
         return JSON.stringify(errors, null, 3);

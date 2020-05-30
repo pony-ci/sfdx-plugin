@@ -7,7 +7,7 @@ should();
 use(chaiAsPromised);
 
 function createEnv(variables: Dictionary<string>): Environment {
-    const env = new Environment();
+    const env = Environment.create();
     for (const [key, value] of Object.entries(variables)) {
         env.setEnv(key, value);
     }

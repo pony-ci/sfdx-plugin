@@ -1,10 +1,9 @@
-import {OutputArgs} from '@oclif/parser';
+import {Command} from '@oclif/config';
 import {flags, FlagsConfig} from '@salesforce/command';
-import {readFileSync} from 'fs-extra';
-import yaml from 'yaml';
-import {getLogger, Jobs, validateConfig} from '../..';
-import {Environment, executeJob} from '../../lib/jobs';
+import {Environment, executeJobByName} from '../../lib/jobs';
 import PonyCommand from '../../lib/PonyCommand';
+import PonyProject from '../../lib/PonyProject';
+import Arg = Command.Arg;
 
 export default class RunCommand extends PonyCommand {
     public static readonly description: string = `run job`;
@@ -20,22 +19,42 @@ export default class RunCommand extends PonyCommand {
         })
     };
 
-    public static readonly args: any = [
+    public static readonly args: Arg[] = [
         {name: 'job', required: true}
     ];
 
     public async run(): Promise<void> {
+        // const dag = new Graph<string>();
+        // const a = new Node('A');
+        // const b = new Node('B');
+        // const c = new Node('C');
+        // const d = new Node('D');
+        // const e = new Node('E');
+        // const f = new Node('F');
+        //
+        // const af = dag.addEdge(a, f);
+        // const ba = dag.addEdge(b, a);
+        // const dc = dag.addEdge(d, c);
+        // const ef = dag.addEdge(e, f);
+        // const db = dag.addEdge(d, b);
+        // const ec = dag.addEdge(e, c);
+        //
+        // const cycle = dag.addEdge(f, d);
+        //
+        // console.log([...dag.nodes].map(it => it.value).join(' -> '));
+        // // const order = getTopologicalOrder(dag);
+        // const {order, edges} = getTopologicalOrderFromNonDAG(dag, new Set<Edge<string>>([
+        //     ba, ef, dc
+        // ]));
+        // console.log(edges.map(it => `${it.from.value} -> ${it.to.value}`).join(`,\n`));
+        // console.log(order.map(it => it.value).join(' -> '));
         const {onlyifdefined} = this.flags;
         const {job} = this.args;
-        const config = readFileSync('/home/ondrej/projects/pony-ci/sfdx-plugin/template.yml').toString();
-        const yml = yaml.parse(config);
-        const validation = validateConfig(yml);
-        if (validation) {
-            throw validation;
-        }
-        const jobs: Jobs = yml.jobs || {};
+        const project = await PonyProject.load();
+        const config = await project.getPonyConfig();
+        const jobs = config.jobs || {};
         if (jobs[job]) {
-            await executeJob(jobs, jobs[job], Environment.create());
+            await executeJobByName(jobs, job, Environment.create());
         } else if (!onlyifdefined) {
             throw Error(`Job not found: ${job}`);
         }

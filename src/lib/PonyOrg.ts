@@ -259,7 +259,7 @@ export class PonyOrg extends Org {
     public async createUsers(
         users: { [key: string]: string | boolean | number }[],
         definitionfile?: string
-    ): Promise<any> {
+    ): Promise<void> {
         const ux = await getUX();
         ux.log(`Creating users from definition file: ${definitionfile}`);
         for (const u of users) {

@@ -2,14 +2,64 @@ import {exec as shell} from '@pony-ci/cli-exec';
 import {Dictionary} from '@salesforce/ts-types/lib/types/collection';
 import crypto from 'crypto';
 import fs from 'fs-extra';
+import klaw from 'klaw-sync';
 import path from 'path';
 import {getAppHomeDir} from './app';
 import {replaceInComponent} from './filesManip';
 import {useDevhub, useDevhubOrDefault, useOrg, useOrgOrDefault} from './PonyOrg';
+import {getUX} from './pubsub';
 import {authJwtGrant, listOrgs, logoutAll, sfdx} from './sfdx';
-import {updateSourcePathInfos} from './sourcePathInfos';
 
-export type TaskArg = Dictionary<any>;
+export type TaskArg = Dictionary;
+
+export class FilesBackup {
+
+    public readonly projectDir: string;
+    public readonly backupDir: string;
+
+    private constructor(projectDir: string) {
+        this.projectDir = projectDir;
+        this.backupDir = this.getBackupDir();
+    }
+
+    public static create(projectDir: string): FilesBackup {
+        return new FilesBackup(projectDir);
+    }
+
+    public backupFiles(files: string[]): void {
+        files.forEach(it => this.backupFile(it));
+    }
+
+    public backupFile(file: string): void {
+        const dir = this.backupDir;
+        const targetFile = path.join(dir, path.relative(this.projectDir, file));
+        fs.ensureFileSync(targetFile);
+        fs.copyFileSync(file, targetFile);
+    }
+
+    public async restoreBackupFiles(username?: string): Promise<void> {
+        const ux = await getUX();
+        const dir = this.backupDir;
+        if (fs.existsSync(dir)) {
+            const files = klaw(dir, {nodir: true});
+            files.map(it => {
+                const targetFile = path.join(this.projectDir, path.relative(dir, it.path));
+                fs.ensureFileSync(targetFile);
+                fs.copyFileSync(it.path, targetFile);
+            });
+            fs.removeSync(dir);
+        } else {
+            ux.warn(`Backup files dir not found: ${dir}`);
+        }
+    }
+
+    private getBackupDir(): string {
+        const uniqueDirName = path.resolve(this.projectDir).replace(/[^a-zA-Z0-9-]/g, '');
+        const dir = path.join(getAppHomeDir(), 'sourceBackup', uniqueDirName);
+        fs.ensureDirSync(dir);
+        return dir;
+    }
+}
 
 export class TaskContext {
 
@@ -26,39 +76,11 @@ export class TaskContext {
     }
 
     public async restoreBackupFiles(username: string): Promise<void> {
-        const dir = path.join(this.getFilesBackupDir(), this.id);
-        if (fs.existsSync(dir)) {
-            const info = fs.readJSONSync(path.join(dir, 'info.json'));
-            info.files.forEach(file => {
-                fs.ensureFileSync(file);
-                fs.copyFileSync(path.join(dir, path.basename(file)), file);
-            });
-            fs.removeSync(dir);
-            if (this.updateHashes) {
-                await updateSourcePathInfos(username, [...this.backupFiles]);
-                this.backupFiles.clear();
-            }
-        } else {
-            console.warn(`Backup files dir not found: ${dir}`);
-        }
+
     }
 
     public backupFile(file: string): void {
-        const dir = path.join(this.getFilesBackupDir(), this.id);
-        const targetFile = path.join(dir, path.basename(file));
-        const infoFile = path.join(dir, 'info.json');
-        fs.ensureDirSync(this.id);
-        fs.ensureFileSync(targetFile);
-        if (!fs.existsSync(infoFile)) {
-            fs.writeJSONSync(infoFile, {
-                files: []
-            });
-        }
-        const info = fs.readJSONSync(infoFile);
-        info.files.push(file);
-        fs.writeJSONSync(infoFile, info);
-        fs.copyFileSync(file, targetFile);
-        this.backupFiles.add(file);
+
     }
 
     private getFilesBackupDir(): string {

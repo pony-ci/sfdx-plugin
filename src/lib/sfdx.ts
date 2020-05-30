@@ -3,6 +3,7 @@ import * as path from 'path';
 import {PonyOrg} from './PonyOrg';
 import {getUX} from './pubsub';
 
+// tslint:disable-next-line:no-any
 export const sfdx: any = {};
 
 for (const p of ['force', 'pony']) {
@@ -73,9 +74,8 @@ export interface ListOrgsOptions {
 export async function authJwtGrant(options: AuthJwtGrantOptions = {}): Promise<PonyOrg> {
     const ux = await getUX();
     ux.log(`Authorizing an org (${options.username}) using the JWT flow`);
-    return sfdx
-        .force.auth.jwtGrant({...options})
-        .then((it: any) => PonyOrg.createPonyOrg(it.username));
+    const {username} = sfdx.force.auth.jwtGrant({...options});
+    return PonyOrg.createPonyOrg(username);
 }
 
 export async function logoutAll(): Promise<void> {
@@ -87,7 +87,7 @@ export async function logoutAll(): Promise<void> {
     });
 }
 
-export async function listOrgs(options: ListOrgsOptions = {}): Promise<any> {
+export async function listOrgs(options: ListOrgsOptions = {}): Promise<unknown> {
     const ux = await getUX();
     ux.log('Listing orgs');
     return sfdx.force.org.list({

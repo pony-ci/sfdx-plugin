@@ -1,20 +1,31 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
 import {AnyJson, isArray, isFunction, isJsonMap, isString, Optional} from '@salesforce/ts-types';
-import fs from 'fs-extra';
+import {existsSync} from 'fs';
+import fs, {readFileSync} from 'fs-extra';
 import https from 'https';
 import path from 'path';
 import slash from 'slash';
-import {Config, isConfig, isPackageGroup, PackageGroup, validateConfig, validatePackageGroup} from '..';
+import yaml from 'yaml';
+import {
+    Config,
+    DataConfig,
+    isConfig,
+    isDataConfig,
+    isPackageGroup,
+    PackageGroup,
+    validateConfig,
+    validateDataConfig,
+    validatePackageGroup
+} from '..';
+import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
-import {createTaskArg, TaskContext} from './taskExecution';
 import {getUX} from './pubsub';
+import {createTaskArg, TaskContext} from './taskExecution';
 
 type Task = (arg: TaskArg) => TaskResult;
-// tslint:disable-next-line:no-any
-type TaskArg = any;
-// tslint:disable-next-line:no-any
-type TaskResult = any;
+type TaskArg = object;
+type TaskResult = unknown;
 
 type TaskDefinitions = { [key: string]: Task };
 
@@ -25,6 +36,7 @@ export default class PonyProject {
     private sfdxProjectJson: Optional<SfdxProjectJson>;
     private taskDefinitions: Optional<TaskDefinitions>;
     private ponyConfig: Optional<Config>;
+    private dataConfig: Optional<DataConfig>;
     private readonly packageGroups: { [name: string]: PackageGroup } = {};
 
     private constructor(projectDir: string) {
@@ -36,7 +48,7 @@ export default class PonyProject {
     }
 
     public getProjectName(): string {
-        return path.basename(this.projectDir).toLowerCase().replace(/[^a-z0-9]/, '');
+        return path.basename(this.projectDir).toLowerCase().replace(/[^a-z0-9-_]/g, '');
     }
 
     public async getTaskDefinitions(): Promise<TaskDefinitions> {
@@ -58,6 +70,13 @@ export default class PonyProject {
             this.ponyConfig = await readConfig(this.projectDir);
         }
         return this.ponyConfig;
+    }
+
+    public async getDataConfig(): Promise<DataConfig> {
+        if (!this.dataConfig) {
+            this.dataConfig = await readDataConfig(this.projectDir);
+        }
+        return this.dataConfig;
     }
 
     public async getSfdxProjectJson(): Promise<SfdxProjectJson> {
@@ -91,6 +110,16 @@ export default class PonyProject {
             isString(it.path) &&
             slashed.includes(`${slash(it.path)}/`)
         );
+    }
+
+    public async hasJob(name: string): Promise<boolean> {
+        const {jobs = {}} = await this.getPonyConfig();
+        return name in jobs;
+    }
+
+    public async executeJobByName(name: string, env: Environment): Promise<Environment> {
+        const {jobs = {}} = await this.getPonyConfig();
+        return executeJobByName(jobs, name, env);
     }
 
     public async runTaskIfDefined(
@@ -135,18 +164,46 @@ async function readPackageGroup(name: string, projectDir: string): Promise<Packa
 }
 
 async function readConfig(projectDir: string): Promise<Config> {
-    const config = readJsonFileIfExists(path.join(projectDir, '.pony/pony-config.json')) || {};
+    // const yml = readFileSync(path.join(projectDir, '.pony/pony-config.yml')).toString(); todo
+    const yml = readFileSync('/home/ondrej/projects/pony-ci/sfdx-plugin/template.yml').toString();
+    const config = yaml.parse(yml);
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
     }
     if (config.extends) {
-        const extension = await readJSONExtension(config.extends);
+        const extensionYml = readFileSync(config.extends).toString();
+        const extension = yaml.parse(extensionYml);
         if (!isConfig(extension)) {
             throw Error(`${validateConfig(extension)}`);
         }
         return Object.assign(extension, config);
     }
     return config;
+}
+
+async function readDataConfig(projectDir: string): Promise<DataConfig> {
+    const file = '/home/ondrej/projects/pony-ci/sfdx-plugin/data.yml';
+    // const file = path.join(projectDir, '/data.yml');
+    if (!existsSync(file)) {
+        return {};
+    }
+    const yml = readFileSync(file).toString();
+    const data = yaml.parse(yml);
+    if (!isDataConfig(data)) {
+        throw Error(`${validateDataConfig(data)}`);
+    }
+    const sourceRegex = /^[a-zA-Z_]+\.[a-zA-Z_]+$/;
+    const targetRegex = /^[a-zA-Z_]+$/;
+    for (const relationship of data.import?.relationships || []) {
+        for (const {source, target} of relationship.fieldMappings) {
+            if (!sourceRegex.test(source)) {
+                throw Error(`Invalid source: ${target}`);
+            } else if (!targetRegex.test(target)) {
+                throw Error(`Invalid target: ${target}`);
+            }
+        }
+    }
+    return data;
 }
 
 async function readTaskDefinitions(projectDir: string): Promise<TaskDefinitions> {

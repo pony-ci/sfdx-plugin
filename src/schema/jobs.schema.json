@@ -9,7 +9,7 @@
   "definitions": {
     "job": {
       "type": "object",
-      "additionalItems": false,
+      "additionalProperties": false,
       "properties": {
         "steps": {
           "type": "array",
@@ -18,8 +18,7 @@
             "$ref": "#/definitions/step"
           }
         }
-      },
-      "required": ["steps"]
+      }
     },
     "step": {
       "oneOf": [
