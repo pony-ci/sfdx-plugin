@@ -1,10 +1,15 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {isInnerTextReplacement, isOrgWideEmailAddressReplacement, Replacement} from '../../../..';
+import {
+    InnerTextReplacement,
+    isInnerTextReplacement,
+    isOrgWideEmailAddressReplacement,
+    OrgWideEmailAddressReplacement,
+    Replacement
+} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
-import {InnerText, OrgWideEmailAddress} from '../../../../types/replacements.schema';
 
 // sfdx pony:workflow:modify
 // email alerts:
@@ -55,11 +60,11 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         }
     }
 
-    private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddress): Promise<string[]> {
+    private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement): Promise<string[]> {
         return [];
     }
 
-    private async replaceInnerText(rpl: InnerText): Promise<string[]> {
+    private async replaceInnerText(rpl: InnerTextReplacement): Promise<string[]> {
         const {files, search, replacement} = rpl;
         for (const file of files) {
             // await replaceInComponent(file, search, replacement);

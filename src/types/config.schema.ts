@@ -42,16 +42,18 @@ export interface OrgCreateConfig {
 }
 export interface Replacements {
   [k: string]: {
-    innerText?: {
-      files: string[];
-      replacement: string;
-      search: string[];
-    };
-    orgWideEmailAddress?: {
-      files: string[];
-      replacement: string;
-    };
+    innerText?: InnerTextReplacement;
+    orgWideEmailAddress?: OrgWideEmailAddressReplacement;
   };
+}
+export interface InnerTextReplacement {
+  files: string[];
+  replacement: string;
+  search: string[];
+}
+export interface OrgWideEmailAddressReplacement {
+  files: string[];
+  replacement: string;
 }
 export interface SourceValidate {
   deleteOrg?: boolean | ("always" | "never" | "onSuccess");

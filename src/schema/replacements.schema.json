@@ -23,6 +23,7 @@
     "innerText": {
       "type": "object",
       "additionalProperties": false,
+      "title": "Inner Text Replacement",
       "properties": {
         "files": {
           "$ref": "#/definitions/files"
@@ -43,6 +44,7 @@
     "orgWideEmailAddress": {
       "type": "object",
       "additionalProperties": false,
+      "title": "Org Wide Email Address Replacement",
       "properties": {
         "files": {
           "$ref": "#/definitions/files"

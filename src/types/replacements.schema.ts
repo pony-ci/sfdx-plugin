@@ -13,15 +13,15 @@ export interface Replacements {
   [k: string]: Replacement;
 }
 export interface Replacement {
-  innerText?: InnerText;
-  orgWideEmailAddress?: OrgWideEmailAddress;
+  innerText?: InnerTextReplacement;
+  orgWideEmailAddress?: OrgWideEmailAddressReplacement;
 }
-export interface InnerText {
+export interface InnerTextReplacement {
   files: Files;
   replacement: ReplacementValue;
   search: Search;
 }
-export interface OrgWideEmailAddress {
+export interface OrgWideEmailAddressReplacement {
   files: Files;
   replacement: ReplacementValue;
 }
