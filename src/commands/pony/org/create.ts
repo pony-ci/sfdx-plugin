@@ -60,13 +60,14 @@ Flow:
 
     private get options(): Dictionary<string> {
         return {
-            setalias: this.flags.setalias,
-            noancestors: this.flags.noancestors,
-            durationdays: this.flags.durationdays,
-            definitionfile: this.flags.definitionfile || 'config/project-scratch-def.json',
-            nonamespace: this.flags.nonamespace,
-            setdefaultusername: this.flags.setdefaultusername,
             targetdevhubusername: this.flags.targetdevhubusername,
+            definitionfile: this.flags.definitionfile,
+            nonamespace: this.flags.nonamespace,
+            noancestors: this.flags.noancestors,
+            setdefaultusername: this.flags.setdefaultusername,
+            setalias: this.flags.setalias,
+            wait: this.flags.wait,
+            durationdays: this.flags.durationdays,
         };
     }
 

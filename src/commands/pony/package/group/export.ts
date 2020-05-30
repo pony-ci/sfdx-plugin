@@ -1,7 +1,7 @@
 import {flags, FlagsConfig} from '@salesforce/command';
 import fs from 'fs-extra';
 import path from 'path';
-import {Package, registerUX, sfdx, useOrgOrDefault} from '../../../..';
+import {Package, sfdx, useOrgOrDefault} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 
 const STANDARD_SUBSCRIBER_PACKAGE_NAMES = [
@@ -58,7 +58,6 @@ Exported package group is a ordered list of packages that can be installed with 
     };
 
     public async run(): Promise<void> {
-        // registerUX(this.ux);
         const projectDir = process.cwd();
         const org = await useOrgOrDefault(this.flags.targetusername);
         const packagesDir = path.join(projectDir, 'data/packages');

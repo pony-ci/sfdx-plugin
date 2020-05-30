@@ -1,6 +1,6 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {registerUX, sfdx} from '../../../..';
+import {sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 
@@ -25,7 +25,6 @@ Create package group with 'sfdx pony:package:group:export' command.
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<void> {
-        // registerUX(this.ux);
         const project = await PonyProject.load();
         const group = await project.getPackageGroup(this.flags.group);
         let count: number = 0;
