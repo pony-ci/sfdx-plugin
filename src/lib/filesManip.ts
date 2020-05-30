@@ -1,4 +1,14 @@
-import {isArray, isPlainObject, isString, JsonMap} from '@salesforce/ts-types';
+import {
+    AnyJson,
+    isAnyJson,
+    isArray,
+    isJsonArray,
+    isJsonMap,
+    isPlainObject,
+    isString,
+    JsonMap
+} from '@salesforce/ts-types';
+import {JsonCollection} from '@salesforce/ts-types/lib/types/json';
 import {readComponent, writeComponent} from './metadata/components';
 import {getUX} from './pubsub';
 
@@ -29,6 +39,39 @@ async function replaceInnerTextHelper(component: JsonMap, targets: string[], rep
                 component[key] = replacement;
             } else {
                 await replaceInnerTextHelper(value as JsonMap, targets, replacement);
+            }
+        }
+    }
+}
+
+export async function replaceOrgWideEmailAddress(file: string, replacement: AnyJson): Promise<void> {
+    const cmp = await readComponent(file);
+    await replaceOrgWideEmailAddressHelper(cmp, replacement);
+    await writeComponent(file, cmp);
+}
+
+async function replaceOrgWideEmailAddressHelper(component: JsonCollection, replacement: AnyJson): Promise<void> {
+    if (!component) {
+        return;
+    }
+    const ux = await getUX();
+    if (isArray(component)) {
+        component.forEach(it => {
+            if (isAnyJson(it) && (isJsonMap(it) || isJsonArray(it))) {
+                replaceOrgWideEmailAddressHelper(it, replacement);
+            }
+        });
+    } else if (isPlainObject(component)) {
+        if (isArray(component.senderType) && component.senderType.length && component.senderType[0] === 'OrgWideEmailAddress') {
+            if (component.senderAddress) {
+                delete component.senderAddress;
+            }
+            component.senderType = [replacement];
+        } else {
+            for (const value of Object.values(component)) {
+                if (isAnyJson(value) && (isJsonMap(value) || isJsonArray(value))) {
+                    await replaceOrgWideEmailAddressHelper(value, replacement);
+                }
             }
         }
     }

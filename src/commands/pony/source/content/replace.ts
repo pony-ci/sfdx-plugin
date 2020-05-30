@@ -6,21 +6,10 @@ import {
     isOrgWideEmailAddressReplacement,
     OrgWideEmailAddressReplacement
 } from '../../../..';
-import {replaceInnerText} from '../../../../lib/filesManip';
+import {replaceInnerText, replaceOrgWideEmailAddress} from '../../../../lib/filesManip';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
-
-// sfdx pony:workflow:modify
-// email alerts:
-// <alerts>
-//         <senderAddress>supportaw@aspectworks.com</senderAddress>
-//         <senderType>OrgWideEmailAddress</senderType>
-// </alerts>
-// to
-// <alerts>
-//         <senderType>CurrentUser</senderType>
-// </alerts>
 
 export default class SourceContentReplaceCommand extends PonyCommand {
 
@@ -61,12 +50,18 @@ export default class SourceContentReplaceCommand extends PonyCommand {
     }
 
     private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement): Promise<string[]> {
-        return [];
+        const {files, replacement} = rpl;
+        for (const file of files) {
+            this.ux.log(`Removing senderAddress and changing senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
+            await replaceOrgWideEmailAddress(file, replacement);
+        }
+        return files;
     }
 
     private async replaceInnerText(rpl: InnerTextReplacement): Promise<string[]> {
         const {files, search, replacement} = rpl;
         for (const file of files) {
+            this.ux.log(`Replacing content in ${file}`);
             await replaceInnerText(file, search, replacement);
         }
         return files;

@@ -38,30 +38,30 @@ jobs:
 
 replacements:
     preSourcePush:
-        innerText:
-            files:
-                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
-                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
-                - src/main/default/queues/Extra_Queue.queue-meta.xml
-                - src/main/default/queues/Inbox_Lead_Queue.queue-meta.xml
-                - src/main/default/queues/Priority_Queue.queue-meta.xml
-                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
-                - src/main/default/skills/Account.skill-meta.xml
-                - src/main/default/skills/Case.skill-meta.xml
-                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
-                - src/main/default/reports/DashboardReportsAdoption.reportFolder-meta.xml
-                - src/main/default/reports/Best_Practice_Service_Reports.reportFolder-meta.xml
-                - src/main/default/reports/Sales_Marketing_Dashboard_Reports.reportFolder-meta.xml
-                - src/main/default/dashboards/Best_Practice_Service_Dashboards.dashboardFolder-meta.xml
-                - src/main/default/dashboards/Sales_Marketing_Dashboards.dashboardFolder-meta.xml
-                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
-                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
-            search:
-                - bogoljub.jakovcheski@aspectworks.com.orange
-            replacement: $env.username
+#        innerText:
+#            files:
+#                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
+#                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
+#                - src/main/default/queues/Extra_Queue.queue-meta.xml
+#                - src/main/default/queues/Inbox_Lead_Queue.queue-meta.xml
+#                - src/main/default/queues/Priority_Queue.queue-meta.xml
+#                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
+#                - src/main/default/skills/Account.skill-meta.xml
+#                - src/main/default/skills/Case.skill-meta.xml
+#                - src/main/default/objects/User/fields/ManagerId.field-meta.xml
+#                - src/main/default/reports/DashboardReportsAdoption.reportFolder-meta.xml
+#                - src/main/default/reports/Best_Practice_Service_Reports.reportFolder-meta.xml
+#                - src/main/default/reports/Sales_Marketing_Dashboard_Reports.reportFolder-meta.xml
+#                - src/main/default/dashboards/Best_Practice_Service_Dashboards.dashboardFolder-meta.xml
+#                - src/main/default/dashboards/Sales_Marketing_Dashboards.dashboardFolder-meta.xml
+#                - src/main/default/approvalProcesses/Opportunity.Approve_discount.approvalProcess-meta.xml
+#                - src/main/default/presenceUserConfigs/Live_Agent.presenceUserConfig-meta.xml
+#            search:
+#                - bogoljub.jakovcheski@aspectworks.com.orange
+#            replacement: $env.username
         orgWideEmailAddress:
             files:
-                - ssss
+                - /home/ondrej/projects/aspectworks-dx/src/main/default/workflows/Case.workflow-meta.xml
             replacement: CurrentUser
 
 # diff between `run: echo $var` and  `echo: $var`
