@@ -63,7 +63,7 @@ Exported package group is a ordered list of packages that can be installed with 
         const packagesDir = path.join(projectDir, 'data/packages');
         fs.ensureDirSync(packagesDir);
         this.ux.startSpinner('Retrieving installed packages.');
-        const [installedPackages]: any = await Promise.all([
+        const [installedPackages]: InstalledPackage[][] = await Promise.all([
             sfdx.force.package.installed.list({
                 quiet: true,
                 targetusername: org.getUsername()

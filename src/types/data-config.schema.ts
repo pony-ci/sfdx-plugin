@@ -5,16 +5,20 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type SObjects = string[];
+export type SObjectNames = string[];
 
 export interface DataConfig {
-  import?: {
-    deleteBeforeImport?: (true | false | "reversed") | SObjects;
-    sObjects: SObjects;
-    relationships?: Relationship[];
-  };
-  export?: {
-    sObjects: SObjects;
+  sObjects?: {
+    recordsDir?: string;
+    soqlDir?: string;
+    import?: {
+      deleteBeforeImport?: (false | "reversedOrder") | SObjectNames;
+      order: SObjectNames;
+      relationships?: Relationship[];
+    };
+    export?: {
+      order?: SObjectNames | "reversedOrder";
+    };
   };
 }
 export interface Relationship {

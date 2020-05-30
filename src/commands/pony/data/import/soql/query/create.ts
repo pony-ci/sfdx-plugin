@@ -36,7 +36,6 @@ export default class DataImportSoqlQueryCreateCommand extends PonyCommand {
     };
 
     protected static requiresUsername: boolean = true;
-    protected static supportsDevhubUsername: boolean = false;
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<AnyJson> {

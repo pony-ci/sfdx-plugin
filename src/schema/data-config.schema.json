@@ -5,55 +5,76 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "import": {
+    "sObjects": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "deleteBeforeImport": {
-          "oneOf": [
-            {
-              "enum": [
-                true,
-                false,
-                "reversed"
-              ]
+        "recordsDir": {
+          "type": "string",
+          "default": "data/sObjects"
+        },
+        "soqlDir": {
+          "type": "string",
+          "default": "data/soql/sObjects"
+        },
+        "import": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "deleteBeforeImport": {
+              "oneOf": [
+                {
+                  "enum": [
+                    false,
+                    "reversedOrder"
+                  ]
+                },
+                {
+                  "$ref": "#/definitions/sObjectNames"
+                }
+              ],
+              "default": "reversed"
             },
-            {
-              "$ref": "#/definitions/sObjects"
+            "order": {
+              "$ref": "#/definitions/sObjectNames"
+            },
+            "relationships": {
+              "type": "array",
+              "additionalItems": false,
+              "items": {
+                "$ref": "#/definitions/relationship"
+              }
             }
-          ],
-          "default": "reversed"
+          },
+          "required": [
+            "order"
+          ]
         },
-        "sObjects": {
-          "$ref": "#/definitions/sObjects"
-        },
-        "relationships": {
-          "type": "array",
-          "additionalItems": false,
-          "items": {
-            "$ref": "#/definitions/relationship"
+        "export": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "order": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/sObjectNames"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "reversedOrder"
+                  ]
+                }
+              ],
+              "default": "reversedOrder"
+            }
           }
         }
-      },
-      "required": [
-        "sObjects"
-      ]
-    },
-    "export": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "sObjects": {
-          "$ref": "#/definitions/sObjects"
-        }
-      },
-      "required": [
-        "sObjects"
-      ]
+      }
     }
   },
   "definitions": {
-    "sObjects": {
+    "sObjectNames": {
       "type": "array",
       "additionalItems": false,
       "items": {

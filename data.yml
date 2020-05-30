@@ -1,7 +1,10 @@
-import:
-    sObjects:
-        - Account
-        - Contact
-    relationships:
-        -   source: Account.Name
-            target: AccountId
+
+sObjects:
+    import:
+        order:
+            - Account
+        relationships:
+            -   sObject: Contact
+                fieldMappings:
+                    -   source: Account.Name
+                        target: AccountId
