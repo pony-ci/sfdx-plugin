@@ -1,10 +1,8 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {Org} from '@salesforce/core';
-import {Duration} from '@salesforce/kit';
 import {AnyJson, Dictionary, isJsonMap, isString, Optional} from '@salesforce/ts-types';
 import fs from 'fs-extra';
-import constants from 'salesforce-alm/dist/lib/core/constants';
 import {OrgCreateConfig, sfdx} from '../../..';
 import {Environment} from '../../../lib/jobs';
 import PonyCommand from '../../../lib/PonyCommand';
@@ -45,6 +43,11 @@ Flow:
         }),
         durationdays: flags.integer({
             char: 'd', description: 'duration of the scratch org (in days)'
+        }),
+        ponyenv: flags.string({
+            description: 'environment',
+            default: Environment.stringify(Environment.create()),
+            hidden: true
         })
     };
 
@@ -65,11 +68,11 @@ Flow:
     }
 
     public async run(): Promise<AnyJson> {
+        let env = Environment.parse(this.flags.ponyenv);
         const project = await PonyProject.load();
         const {orgCreate = {}} = await project.getPonyConfig();
         let org: Optional<Org> = this.org;
         let orgCreateResult: AnyJson = {};
-        let env = Environment.create();
         if (org) {
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());

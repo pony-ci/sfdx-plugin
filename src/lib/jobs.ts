@@ -141,7 +141,11 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     const logger = await getLogger();
     let command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
     ux.log(`${chalk.blueBright(`[run] ${command}`)}`);
-    const supportsEnvArg = (c) => ['pony:source:content:replace', 'pony:source:push'].some(it => c.includes(it));
+    const supportsEnvArg = (c) => [
+        'pony:org:create',
+        'pony:source:content:replace',
+        'pony:source:push'
+    ].some(it => c.includes(it));
     command = supportsEnvArg(command)
         ? `${command} --ponyenv '${Environment.stringify(environment)}'` : command;
     console.log({usingEnv: environment});
