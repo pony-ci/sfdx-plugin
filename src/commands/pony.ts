@@ -1,5 +1,5 @@
 import {FlagsConfig} from '@salesforce/command';
-import {getUX, isGitInstalled} from '..';
+import {getUX} from '..';
 import PonyCommand from '../lib/PonyCommand';
 
 const DESCRIPTION = `Automate your application lifecycle.
@@ -19,7 +19,5 @@ export default class PonyBaseCommand extends PonyCommand {
     public async run(): Promise<void> {
         const ux = await getUX();
         ux.log(DESCRIPTION);
-        console.log(await isGitInstalled());
-
     }
 }
