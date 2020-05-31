@@ -6,7 +6,5 @@ sObjects:
             - Account
             - Contact
         relationships:
-            -   sObject: Contact
-                fieldMappings:
-                    -   relationshipName: Account
-                        fieldName: Name
+            Contact:
+                - Account.Name

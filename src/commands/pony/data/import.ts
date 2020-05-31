@@ -5,7 +5,7 @@ import {isArray, isBoolean, isNumber, isString, JsonMap} from '@salesforce/ts-ty
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import {DataConfig, Relationship, sfdx, SObjectNames} from '../../..';
+import {DataConfig, RelationshipField, sfdx, SObjectName} from '../../..';
 import {describeSObject} from '../../../lib/data/sObject';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
@@ -65,10 +65,10 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async importRecords(
-        conn: Connection, data: DataConfig, recordsDir: string, importOrder: SObjectNames
+        conn: Connection, data: DataConfig, recordsDir: string, importOrder: SObjectName[]
     ): Promise<void> {
         const {targetusername} = this.flags;
-        const relationships = data?.sObjects?.import?.relationships || [];
+        const relationships = data?.sObjects?.import?.relationships || {};
         const chunkSize = data?.sObjects?.import?.chunkSize || defaultImportChunkSize;
         for (const sObjectName of importOrder) {
             const recordsContent = fs.readJSONSync(toRecordsFile(recordsDir, sObjectName));
@@ -80,11 +80,7 @@ export default class DataImportCommand extends PonyCommand {
                 continue;
             }
             this.ux.log(chalk.blueBright.bold(`Importing ${allCount} ${allCount === 1 ? describe.label : describe.labelPlural}`));
-            await this.populateRelationships(
-                records,
-                relationships.filter(it => it.sObject.toLowerCase() === sObjectName.toLowerCase()),
-                sObjectName
-            );
+            await this.populateRelationships(records, relationships[sObjectName] || [], sObjectName);
             let importedCount = 0;
             let i = 0;
             this.ux.startSpinner(`0/${allCount}`);
@@ -98,36 +94,35 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async populateRelationships(
-        records: Records, relationships: Relationship[], sObjectName: string
+        records: Records, relationshipFields: RelationshipField[], sObjectName: string
     ): Promise<void> {
         const {targetusername} = this.flags;
         const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
-        for (const {fieldMappings} of relationships) {
-            for (const {relationshipName, fieldName} of fieldMappings) {
-                const describeRelationship = describe.fields.find(it =>
-                    it.type === 'reference' &&
-                    it.relationshipName?.toLowerCase() === relationshipName.toLowerCase() &&
-                    isString(it.referenceTo?.[0])
-                );
-                if (!describeRelationship) {
-                    throw Error(`Couldn't find relationship ${relationshipName} on ${sObjectName}`);
-                }
-                const sourceSObject = describeRelationship.referenceTo?.[0];
-                const sourceValues = this.getSourceFieldValues(records, relationshipName, fieldName);
-                const sourceValuesStr = sourceValues.map(it => `'${it}'`).join(',');
-                const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})`;
-                const {records: relatedRecords} = await sfdx.force.data.soql.query({
-                    quiet: true,
-                    query,
-                    targetusername
-                });
-                for (const record of records) {
-                    const sourceValue = record[relationshipName]?.[fieldName];
-                    if (sourceValue) {
-                        const relatedRecord = relatedRecords.find(it => it[fieldName] === sourceValue);
-                        if (relatedRecord) {
-                            record[describeRelationship.name] = relatedRecord.Id;
-                        }
+        for (const relationshipField of relationshipFields) {
+            const [relationshipName, fieldName]: string[] = relationshipField.split('.');
+            const describeRelationship = describe.fields.find(it =>
+                it.type === 'reference' &&
+                it.relationshipName?.toLowerCase() === relationshipName.toLowerCase() &&
+                isString(it.referenceTo?.[0])
+            );
+            if (!describeRelationship) {
+                throw Error(`Couldn't find relationship ${relationshipName} on ${sObjectName}`);
+            }
+            const sourceSObject = describeRelationship.referenceTo?.[0];
+            const sourceValues = this.getSourceFieldValues(records, relationshipName, fieldName);
+            const sourceValuesStr = sourceValues.map(it => `'${it}'`).join(',');
+            const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})`;
+            const {records: relatedRecords} = await sfdx.force.data.soql.query({
+                quiet: true,
+                query,
+                targetusername
+            });
+            for (const record of records) {
+                const sourceValue = record[relationshipName]?.[fieldName];
+                if (sourceValue) {
+                    const relatedRecord = relatedRecords.find(it => it[fieldName] === sourceValue);
+                    if (relatedRecord) {
+                        record[describeRelationship.name] = relatedRecord.Id;
                     }
                 }
             }
@@ -165,7 +160,7 @@ export default class DataImportCommand extends PonyCommand {
         return records;
     }
 
-    private async deleteRecords(conn: Connection, data: DataConfig, importOrder: SObjectNames): Promise<void> {
+    private async deleteRecords(conn: Connection, data: DataConfig, importOrder: SObjectName[]): Promise<void> {
         const {noprompt, targetusername} = this.flags;
         const deleteBeforeImport = data.sObjects?.import?.deleteBeforeImport;
         const soqlDeleteDir = data?.sObjects?.import?.soqlDeleteDir || defaultSoqlDeleteDir;

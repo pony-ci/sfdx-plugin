@@ -32,7 +32,12 @@
                   ]
                 },
                 {
-                  "$ref": "#/definitions/sObjectNames"
+                  "type": "array",
+                  "additionalItems": false,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/sObjectName"
+                  }
                 }
               ],
               "default": "reversed"
@@ -41,14 +46,23 @@
               "type": "string",
               "default": "data/soql/delete"
             },
-            "order": {
-              "$ref": "#/definitions/sObjectNames"
-            },
-            "relationships": {
+            "order":             {
               "type": "array",
               "additionalItems": false,
+              "uniqueItems": true,
               "items": {
-                "$ref": "#/definitions/relationship"
+                "$ref": "#/definitions/sObjectName"
+              }
+            },
+            "relationships": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "additionalItems": false,
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/definitions/relationshipField"
+                }
               }
             }
           },
@@ -67,7 +81,12 @@
             "order": {
               "oneOf": [
                 {
-                  "$ref": "#/definitions/sObjectNames"
+                  "type": "array",
+                  "additionalItems": false,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/sObjectName"
+                  }
                 },
                 {
                   "type": "string",
@@ -84,49 +103,11 @@
     }
   },
   "definitions": {
-    "sObjectNames": {
-      "type": "array",
-      "additionalItems": false,
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
+    "sObjectName": {
+      "type": "string"
     },
-    "relationship": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "sObject": {
-          "type": "string"
-        },
-        "fieldMappings": {
-          "type": "array",
-          "additionalItems": false,
-          "items": {
-            "$ref": "#/definitions/fieldMapping"
-          }
-        }
-      },
-      "required": [
-        "sObject",
-        "fieldMappings"
-      ]
-    },
-    "fieldMapping": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "relationshipName": {
-          "type": "string"
-        },
-        "fieldName": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "relationshipName",
-        "fieldName"
-      ]
+    "relationshipField": {
+      "type": "string"
     }
   }
 }
