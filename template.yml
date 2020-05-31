@@ -61,7 +61,7 @@ replacements:
 #            replacement: $env.username
         orgWideEmailAddress:
             files:
-                - /home/ondrej/projects/aspectworks-dx/src/main/default/workflows/Case.workflow-meta.xml
+                - src/main/default/workflows/Case.workflow-meta.xml
             replacement: CurrentUser
 
 # diff between `run: echo $var` and  `echo: $var`

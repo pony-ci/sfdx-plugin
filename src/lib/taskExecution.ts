@@ -1,3 +1,4 @@
+import {isArray} from '@salesforce/ts-types';
 import {Dictionary} from '@salesforce/ts-types/lib/types/collection';
 import fs from 'fs-extra';
 import klaw from 'klaw-sync';
@@ -47,6 +48,7 @@ export class FilesBackup {
             const files = klaw(dir, {nodir: true});
             files.map(it => {
                 const targetFile = path.join(this.projectDir, path.relative(dir, it.path));
+                console.log(`restore ${it.path}`);
                 targetFiles.push(targetFile);
                 fs.ensureFileSync(targetFile);
                 fs.copyFileSync(it.path, targetFile);

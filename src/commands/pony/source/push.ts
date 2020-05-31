@@ -36,6 +36,11 @@ export default class SourcePushCommand extends PonyCommand {
             required: false,
             default: constants.DEFAULT_SRC_WAIT_MINUTES,
             min: constants.MIN_SRC_WAIT_MINUTES
+        }),
+        ponyenv: flags.string({
+            description: 'environment',
+            default: Environment.stringify(Environment.create()),
+            hidden: true
         })
     };
 
@@ -44,9 +49,10 @@ export default class SourcePushCommand extends PonyCommand {
         const username = this.org?.getUsername();
         const backup = FilesBackup.create(project.projectDir);
         backup.clean();
-        const env = await project.hasJob(PONY_PRE_SOURCE_PUSH)
-            ? await project.executeJobByName(PONY_PRE_SOURCE_PUSH, Environment.create())
-            : Environment.create();
+        let env = Environment.parse(this.flags.ponyenv);
+        if (await project.hasJob(PONY_PRE_SOURCE_PUSH)) {
+            env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
+        }
         this.ux.log('Pushing source');
         let pushSuccess = false;
         try {
@@ -58,7 +64,7 @@ export default class SourcePushCommand extends PonyCommand {
             });
             pushSuccess = true;
         } catch (e) {
-            throw e;
+            throw Error('Push failed.');
         } finally {
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }

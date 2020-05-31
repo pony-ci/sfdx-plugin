@@ -11,6 +11,7 @@ import {
     readComponent,
     writeComponent
 } from '../../../..';
+import {Environment} from '../../../../lib/jobs';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
@@ -24,12 +25,18 @@ export default class SourceContentReplaceCommand extends PonyCommand {
             char: 'r',
             description: 'name of the replacement',
             required: true
+        }),
+        ponyenv: flags.string({
+            description: 'environment',
+            default: Environment.stringify(Environment.create()),
+            hidden: true
         })
     };
 
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<void> {
+        const env = Environment.parse(this.flags.ponyenv);
         const {replacement} = this.flags;
         const project = await PonyProject.load();
         const {replacements = {}} = await project.getPonyConfig();
@@ -37,38 +44,35 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         if (rpl) {
             if (isInnerTextReplacement(rpl) && rpl.innerText) {
                 const backup = FilesBackup.create(project.projectDir);
-                const files = await this.replaceInnerText(rpl.innerText);
-                backup.backupFiles(files);
-                // this.sendMessage({modifiedFiles: files});
+                backup.backupFiles(rpl.innerText.files);
+                await this.replaceInnerText(rpl.innerText, env);
             } else if (isOrgWideEmailAddressReplacement(rpl) && rpl.orgWideEmailAddress) {
                 const backup = FilesBackup.create(project.projectDir);
-                const files = await this.replaceOrgWideEmailAddress(rpl.orgWideEmailAddress);
-                backup.backupFiles(files);
-                // this.sendMessage({modifiedFiles: files});
+                backup.backupFiles(rpl.orgWideEmailAddress.files);
+                await this.replaceOrgWideEmailAddress(rpl.orgWideEmailAddress, env);
             }
         } else {
             throw Error(`Replacement not found: ${replacement}`);
         }
     }
 
-    private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement): Promise<string[]> {
-        // todo replacement can be $env.
+    private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement, env: Environment): Promise<string[]> {
         const {files, replacement} = rpl;
         for (const file of files) {
             this.ux.log(`Going to remove senderAddress and change senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
             const cmp = await readComponent(file);
-            await replaceOrgWideEmailAddressHelper(cmp, replacement);
+            await replaceOrgWideEmailAddressHelper(cmp, env.fillString(replacement));
             await writeComponent(file, cmp);
         }
         return files;
     }
 
-    private async replaceInnerText(rpl: InnerTextReplacement): Promise<string[]> {
+    private async replaceInnerText(rpl: InnerTextReplacement, env: Environment): Promise<string[]> {
         const {files, search, replacement} = rpl;
         for (const file of files) {
             this.ux.log(`Replacing content in ${file}`);
             const cmp = await readComponent(file);
-            await replaceInnerTextHelper(cmp, search, replacement);
+            await replaceInnerTextHelper(cmp, search, env.fillString(replacement));
             await writeComponent(file, cmp);
         }
         return files;
