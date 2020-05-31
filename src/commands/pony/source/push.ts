@@ -1,10 +1,10 @@
 import {flags, FlagsConfig} from '@salesforce/command';
 import constants from 'salesforce-alm/dist/lib/core/constants';
 import {sfdx} from '../../..';
+import {FilesBackup} from '../../../lib/FilesBackup';
 import {Environment} from '../../../lib/jobs';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
-import {FilesBackup} from '../../../lib/taskExecution';
 
 const PONY_PRE_SOURCE_PUSH = 'pony:preSourcePush';
 const PONY_POST_SOURCE_PUSH = 'pony:postSourcePush';
