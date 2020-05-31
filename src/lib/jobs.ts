@@ -39,23 +39,17 @@ export class Environment {
 
     public setEnv(name: string, value: Optional<EnvValue>): void {
         this.variables[name] = value;
-        if (this.isJobStep()) {
-            this.sendMessage({
-                env: {
-                    [name]: value
-                }
-            });
-        }
+        this.sendMessage({
+            env: {
+                [name]: value
+            }
+        });
     }
 
     public clone(): Environment {
         return new Environment(
             JSON.parse(JSON.stringify(this.variables))
         );
-    }
-
-    private isJobStep(): boolean {
-        return Boolean(process.send);
     }
 
     private sendMessage(message: IPCMessage['pony']): void {

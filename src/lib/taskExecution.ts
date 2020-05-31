@@ -25,7 +25,7 @@ export class FilesBackup {
     }
 
     public clean(): void {
-        fs.emptyDirSync(this.projectDir);
+        fs.emptyDirSync(this.getBackupDir());
     }
 
     public backupFiles(files: string[]): void {

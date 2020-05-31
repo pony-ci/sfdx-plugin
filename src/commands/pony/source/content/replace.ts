@@ -52,6 +52,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
     }
 
     private async replaceOrgWideEmailAddress(rpl: OrgWideEmailAddressReplacement): Promise<string[]> {
+        // todo replacement can be $env.
         const {files, replacement} = rpl;
         for (const file of files) {
             this.ux.log(`Going to remove senderAddress and change senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
