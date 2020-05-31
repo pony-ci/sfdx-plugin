@@ -4,6 +4,11 @@ import {sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 
+// onbehalfof: flags.string({
+//     char: 'o',
+//     description: 'comma-separated list of usernames or aliases to assign the profile to (default: target username)'
+// }),
+
 export default class ProfileAssignCommand extends PonyCommand {
 
     public static description: string = `assign a profile to a user
@@ -21,10 +26,6 @@ If not specified, the profile is assigned to target username.
             description: 'name of the profile',
             required: true
         }),
-        onbehalfof: flags.string({
-            char: 'o',
-            description: 'comma-separated list of usernames or aliases to assign the profile to (default: target username)'
-        }),
         assigner: flags.string({
             char: 'a',
             description: 'user who will assign the profile, this user must be authorized'
@@ -34,10 +35,10 @@ If not specified, the profile is assigned to target username.
     protected static requiresUsername: boolean = true;
 
     public async run(): Promise<void> {
-        const {profile, onbehalfof, assigner} = this.flags;
+        const {profile, assigner} = this.flags;
         const project = await PonyProject.load();
         const assignerUsername = await this.getAssignerUsername(project);
-        this.ux.log(`${assignerUsername} is going to assign '${profile}' profile to ${onbehalfof}.`);
+        this.ux.log(`${assignerUsername} is going to assign '${profile}' profile to ${this.getTargetUsername()}.`);
         const profileId = await this.getProfileId();
         await this.assignProfile(assignerUsername, profileId);
         if (!assigner) {
