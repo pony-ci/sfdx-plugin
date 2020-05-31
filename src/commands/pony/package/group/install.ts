@@ -1,5 +1,6 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
+import chalk from 'chalk';
 import {sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
@@ -31,7 +32,8 @@ Create package group with 'sfdx pony:package:group:export' command.
         let count: number = 0;
         for (const it of group.packages) {
             const versionNumber = it.subscriberPackageVersionNumber ? `@${it.subscriberPackageVersionNumber}` : '';
-            this.ux.log(`Installing package ${it.subscriberPackageName}${versionNumber} [${it.subscriberPackageVersionId}] (${++count}/${group.packages.length})`);
+            const label = chalk.magenta(`${it.subscriberPackageName}${versionNumber}`);
+            this.ux.log(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${group.packages.length})`);
             await sfdx.force.package.install({
                 apexcompile: it.apexCompile,
                 publishwait: it.publishWait,
