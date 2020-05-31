@@ -72,7 +72,10 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         for (const file of files) {
             this.ux.log(`Replacing content in ${file}`);
             const cmp = await readComponent(file);
-            await replaceInnerTextHelper(cmp, search, env.fillString(replacement));
+            const replaced = await replaceInnerTextHelper(cmp, search, env.fillString(replacement));
+            replaced.forEach((it, idx, array) => {
+                this.ux.log(`  ${idx === array.length - 1 ? '└' : '├'} ${it.join(' -> ')}`);
+            });
             await writeComponent(file, cmp);
         }
         return files;
@@ -103,20 +106,21 @@ async function replaceOrgWideEmailAddressHelper(component: JsonCollection, repla
     }
 }
 
-async function replaceInnerTextHelper(component: AnyJson, targets: string[], replacement: string): Promise<void> {
+async function replaceInnerTextHelper(
+    component: AnyJson, targets: string[], replacement: string
+): Promise<[string, string][]> {
     if (!component) {
-        return;
+        return [];
     }
-    const ux = await getUX();
-    const logReplacement = (it, to) => ux.log(`  ${it} -> ${to}`);
+    const replaced: [string, string][] = [];
     if (isArray(component)) {
         if (component.length === 1 && isString(component[0]) && targets.includes(component[0])) {
-            logReplacement(component[0], replacement);
+            replaced.push([component[0], replacement]);
             component.splice(0, 1, replacement);
         } else {
             for (const child of component) {
                 if (isAnyJson(child) && (isJsonMap(child) || isJsonArray(child))) {
-                    await replaceInnerTextHelper(child, targets, replacement);
+                    replaced.push(...await replaceInnerTextHelper(child, targets, replacement));
                 }
             }
         }
@@ -124,11 +128,12 @@ async function replaceInnerTextHelper(component: AnyJson, targets: string[], rep
         for (const key of Object.keys(component)) {
             const value = component[key];
             if (isString(value) && targets.includes(value)) {
-                logReplacement(value, replacement);
+                replaced.push([value, replacement]);
                 component[key] = replacement;
             } else if (isAnyJson(value) && (isJsonMap(value) || isJsonArray(value))) {
-                await replaceInnerTextHelper(value, targets, replacement);
+                replaced.push(...await replaceInnerTextHelper(value, targets, replacement));
             }
         }
     }
+    return replaced;
 }

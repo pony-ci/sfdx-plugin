@@ -1,4 +1,3 @@
-import {isArray} from '@salesforce/ts-types';
 import {Dictionary} from '@salesforce/ts-types/lib/types/collection';
 import fs from 'fs-extra';
 import klaw from 'klaw-sync';
@@ -6,8 +5,6 @@ import path from 'path';
 import {getAppHomeDir} from './app';
 import {getUX} from './pubsub';
 import {updateSourcePathInfos} from './sourcePathInfos';
-
-// todo rename file
 
 export type TaskArg = Dictionary;
 
@@ -53,7 +50,7 @@ export class FilesBackup {
                 fs.copyFileSync(it.path, targetFile);
             });
             if (username) {
-                await updateSourcePathInfos(username, targetFiles);
+                await updateSourcePathInfos(this.projectDir, username, targetFiles);
             }
             fs.removeSync(dir);
         } else {

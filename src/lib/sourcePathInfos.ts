@@ -1,35 +1,45 @@
-import {isArray} from '@salesforce/ts-types';
 import crypto from 'crypto';
 import {existsSync, readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
 import path from 'path';
 import slash from 'slash';
 import {getUX} from './pubsub';
 
-export async function updateSourcePathInfos(username: string, files: string | string[]): Promise<void> {
+export async function updateSourcePathInfos(
+    projectDir: string,
+    username: string,
+    files: string[]
+): Promise<void> {
     const ux = await getUX();
-    const infosFile = path.join(`.sfdx/orgs/${username}/sourcePathInfos.json`);
+    const infosFile = path.join(projectDir, `.sfdx/orgs/${username}/sourcePathInfos.json`);
     if (!existsSync(infosFile)) {
         throw Error(`File not found: ${infosFile}`);
     }
     const infos = readJSONSync(infosFile);
     const updated = new Set();
-    (isArray(files) ? files : [files])
+    const updates: string[] = [];
+    files
         .map(slash)
-        .forEach(file => {
+        .forEach((file) => {
             infos
                 .filter(([infoPath]) => !updated.has(infoPath))
                 .filter(([infoPath]) => slash(infoPath) === file || slash(infoPath).startsWith(file))
                 .forEach(([infoPath, infoData]) => {
                     try {
                         const data = readFileSync(file).toString();
-                        ux.log(`Updating source path info hash: ${file}`);
                         infoData.contentHash = hash(data);
+                        updates.push(file);
                     } catch (e) {
                         ux.warn(e);
                     }
                     updated.add(infoPath);
                 });
         });
+    if (updates.length) {
+        ux.log(`Updating source path info hashes to sync the source with scratch org`);
+    }
+    updates.forEach((it, idx, array) => {
+        ux.log(`  ${idx === array.length - 1 ? '└' : '├'} ${path.relative(projectDir, it)}`);
+    });
     writeJSONSync(infosFile, infos);
 }
 
