@@ -73,7 +73,7 @@ Flow:
         const {orgCreate = {}} = await project.getPonyConfig();
         let org: Optional<Org> = this.org;
         let orgCreateResult: AnyJson = {};
-        if (org) {
+        if (org) { // todo -u <non existing org> -> org is undefined
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {

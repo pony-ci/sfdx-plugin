@@ -33,7 +33,7 @@ Create package group with 'sfdx pony:package:group:export' command.
         for (const it of group.packages) {
             const versionNumber = it.subscriberPackageVersionNumber ? `@${it.subscriberPackageVersionNumber}` : '';
             const label = chalk.blueBright(`${it.subscriberPackageName}${versionNumber}`);
-            this.ux.log(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${group.packages.length})`);
+            this.ux.startSpinner(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${group.packages.length})`);
             const result = await sfdx.force.package.install({
                 apexcompile: it.apexCompile,
                 publishwait: it.publishWait,
@@ -46,10 +46,12 @@ Create package group with 'sfdx pony:package:group:export' command.
                 quiet: true,
                 noprompt: true,
             });
-            if (result.status === 'SUCCESS') {
-                this.ux.log(`Successfully installed package ${label}`);
+            if (result.Status === 'SUCCESS') {
+                this.ux.stopSpinner();
             } else {
-                throw Error(result);
+                this.ux.stopSpinner(result.Status);
+                this.ux.error('Package installation either failed or has not finished.');
+                throw Error(JSON.stringify(result));
             }
         }
     }
