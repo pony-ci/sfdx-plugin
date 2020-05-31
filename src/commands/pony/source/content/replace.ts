@@ -3,7 +3,6 @@ import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {AnyJson, isAnyJson, isArray, isJsonArray, isJsonMap, isPlainObject, isString} from '@salesforce/ts-types';
 import {JsonCollection} from '@salesforce/ts-types/lib/types/json';
 import {
-    getUX,
     InnerTextReplacement,
     isInnerTextReplacement,
     isOrgWideEmailAddressReplacement,
@@ -11,10 +10,10 @@ import {
     readComponent,
     writeComponent
 } from '../../../..';
+import {FilesBackup} from '../../../../lib/FilesBackup';
 import {Environment} from '../../../../lib/jobs';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
-import {FilesBackup} from '../../../../lib/taskExecution';
 
 export default class SourceContentReplaceCommand extends PonyCommand {
 
