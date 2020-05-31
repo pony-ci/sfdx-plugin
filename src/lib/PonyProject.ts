@@ -32,7 +32,6 @@ export default class PonyProject {
     public readonly projectDir: string;
     private sfdxProject: Optional<SfdxProject>;
     private sfdxProjectJson: Optional<SfdxProjectJson>;
-    private taskDefinitions: Optional<TaskDefinitions>;
     private ponyConfig: Optional<Config>;
     private dataConfig: Optional<DataConfig>;
     private readonly packageGroups: { [name: string]: PackageGroup } = {};
@@ -133,8 +132,7 @@ async function readPackageGroup(name: string, projectDir: string): Promise<Packa
 }
 
 async function readConfig(projectDir: string): Promise<Config> {
-    // const yml = readFileSync(path.join(projectDir, '.pony/pony-config.yml')).toString(); todo
-    const yml = readFileSync('/home/ondrej/projects/pony-ci/sfdx-plugin/template.yml').toString();
+    const yml = readFileSync(path.join(projectDir, '.pony/pony-config.yml')).toString();
     const config = yaml.parse(yml);
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
@@ -151,8 +149,7 @@ async function readConfig(projectDir: string): Promise<Config> {
 }
 
 async function readDataConfig(projectDir: string): Promise<DataConfig> {
-    const file = '/home/ondrej/projects/pony-ci/sfdx-plugin/data.yml';
-    // const file = path.join(projectDir, '/data.yml');
+    const file = path.join(projectDir, '/data.yml');
     if (!existsSync(file)) {
         return {};
     }

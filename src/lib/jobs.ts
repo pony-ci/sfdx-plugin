@@ -119,8 +119,9 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
             }
         }
     });
-    return new Promise((resolve) => {
-        cmd.on('exit', () => resolve(environment));
+    return new Promise((resolve, reject) => {
+        const error = (code) => `Command exited with code ${code} [${command}]`;
+        cmd.on('close', (code) => code ? reject(error(code)) : resolve(environment));
     });
 }
 

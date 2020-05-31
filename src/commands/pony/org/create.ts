@@ -43,12 +43,6 @@ Flow:
         setalias: flags.string({
             char: 'a', description: 'alias for the created org'
         }),
-        wait: flags.minutes({
-            char: 'w',
-            description: 'the streaming client socket timeout',
-            min: Duration.minutes(constants.MIN_STREAM_TIMEOUT_MINUTES),
-            default: Duration.minutes(constants.DEFAULT_STREAM_TIMEOUT_MINUTES)
-        }),
         durationdays: flags.integer({
             char: 'd', description: 'duration of the scratch org (in days)'
         })
@@ -66,7 +60,6 @@ Flow:
             noancestors: this.flags.noancestors,
             setdefaultusername: this.flags.setdefaultusername,
             setalias: this.flags.setalias,
-            wait: this.flags.wait,
             durationdays: this.flags.durationdays,
         };
     }
