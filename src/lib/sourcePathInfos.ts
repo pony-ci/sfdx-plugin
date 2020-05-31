@@ -1,23 +1,24 @@
+import {isArray} from '@salesforce/ts-types';
 import crypto from 'crypto';
-import {readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
+import {existsSync, readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
 import path from 'path';
 import slash from 'slash';
-import {PonyOrg} from './PonyOrg';
 import {getUX} from './pubsub';
 
-export async function updateSourcePathInfos(org: string | PonyOrg, files: string | string[]): Promise<void> {
+export async function updateSourcePathInfos(username: string, files: string | string[]): Promise<void> {
     const ux = await getUX();
-    const username = org instanceof PonyOrg ? org.getUsername() : org;
     const infosFile = path.join(`.sfdx/orgs/${username}/sourcePathInfos.json`);
+    if (!existsSync(infosFile)) {
+        throw Error(`File not found: ${infosFile}`);
+    }
     const infos = readJSONSync(infosFile);
     const updated = new Set();
-
-    (files instanceof Array ? files : [files])
-        .map(it => slash(path.join(process.cwd(), it)))
+    (isArray(files) ? files : [files])
+        .map(slash)
         .forEach(file => {
             infos
                 .filter(([infoPath]) => !updated.has(infoPath))
-                .filter(([infoPath]) => infoPath === file || infoPath.startsWith(file))
+                .filter(([infoPath]) => slash(infoPath) === file || slash(infoPath).startsWith(file))
                 .forEach(([infoPath, infoData]) => {
                     try {
                         const data = readFileSync(file).toString();

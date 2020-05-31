@@ -1,10 +1,10 @@
 import {flags, FlagsConfig} from '@salesforce/command';
 import constants from 'salesforce-alm/dist/lib/core/constants';
-import {sfdx, useOrgOrDefault} from '../../..';
+import {sfdx} from '../../..';
 import {Environment} from '../../../lib/jobs';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
-import {TaskContext} from '../../../lib/taskExecution';
+import {FilesBackup} from '../../../lib/taskExecution';
 
 const PONY_PRE_SOURCE_PUSH = 'pony:preSourcePush';
 const PONY_POST_SOURCE_PUSH = 'pony:postSourcePush';
@@ -41,22 +41,27 @@ export default class SourcePushCommand extends PonyCommand {
 
     public async run(): Promise<void> {
         const project = await PonyProject.load();
-        const org = await useOrgOrDefault(this.flags.targetusername);
-        const ctx = TaskContext.create();
+        const username = this.org?.getUsername();
+        const backup = FilesBackup.create(project.projectDir);
+        backup.clean();
         const env = await project.hasJob(PONY_PRE_SOURCE_PUSH)
             ? await project.executeJobByName(PONY_PRE_SOURCE_PUSH, Environment.create())
             : Environment.create();
-        // await project.executeJobByName('pony:preSourcePush', {org}, ctx);
-        // todo remove backup files
         this.ux.log('Pushing source');
-        await sfdx.force.source.push({
-            forceoverwrite: this.flags.forceoverwrite,
-            ignorewarnings: this.flags.ignorewarnings,
-            targetusername: org.getUsername(),
-            wait: this.flags.wait
-        });
-        await ctx.restoreBackupFiles(org.getUsername());
-
+        let pushSuccess = false;
+        try {
+            await sfdx.force.source.push({
+                forceoverwrite: this.flags.forceoverwrite,
+                ignorewarnings: this.flags.ignorewarnings,
+                targetusername: username,
+                wait: this.flags.wait
+            });
+            pushSuccess = true;
+        } catch (e) {
+            throw e;
+        } finally {
+            await backup.restoreBackupFiles(pushSuccess ? username : undefined);
+        }
         if (await project.hasJob(PONY_POST_SOURCE_PUSH)) {
             await project.executeJobByName(PONY_POST_SOURCE_PUSH, env);
         }

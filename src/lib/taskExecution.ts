@@ -1,10 +1,12 @@
 import {Dictionary} from '@salesforce/ts-types/lib/types/collection';
-import crypto from 'crypto';
 import fs from 'fs-extra';
 import klaw from 'klaw-sync';
 import path from 'path';
 import {getAppHomeDir} from './app';
 import {getUX} from './pubsub';
+import {updateSourcePathInfos} from './sourcePathInfos';
+
+// todo rename file
 
 export type TaskArg = Dictionary;
 
@@ -22,6 +24,10 @@ export class FilesBackup {
         return new FilesBackup(projectDir);
     }
 
+    public clean(): void {
+        fs.emptyDirSync(this.projectDir);
+    }
+
     public backupFiles(files: string[]): void {
         files.forEach(it => this.backupFile(it));
     }
@@ -37,12 +43,17 @@ export class FilesBackup {
         const ux = await getUX();
         const dir = this.backupDir;
         if (fs.existsSync(dir)) {
+            const targetFiles: string[] = [];
             const files = klaw(dir, {nodir: true});
             files.map(it => {
                 const targetFile = path.join(this.projectDir, path.relative(dir, it.path));
+                targetFiles.push(targetFile);
                 fs.ensureFileSync(targetFile);
                 fs.copyFileSync(it.path, targetFile);
             });
+            if (username) {
+                await updateSourcePathInfos(username, targetFiles);
+            }
             fs.removeSync(dir);
         } else {
             ux.warn(`Backup files dir not found: ${dir}`);
@@ -55,39 +66,4 @@ export class FilesBackup {
         fs.ensureDirSync(dir);
         return dir;
     }
-}
-
-export class TaskContext {
-
-    public readonly id: string;
-    public readonly backupFiles: Set<string> = new Set<string>();
-    public updateHashes: boolean = true;
-
-    private constructor(id?: string) {
-        this.id = id || `${new Date().toISOString()}@${crypto.randomBytes(12).toString('hex')}`;
-    }
-
-    public static create(id?: string): TaskContext {
-        return new TaskContext(id);
-    }
-
-    public async restoreBackupFiles(username: string): Promise<void> {
-
-    }
-
-    public backupFile(file: string): void {
-
-    }
-
-    private getFilesBackupDir(): string {
-        const dir = path.join(getAppHomeDir(), 'files-backups');
-        fs.ensureDirSync(dir);
-        return dir;
-    }
-}
-
-export function createTaskArg(name: string, context: TaskContext): TaskArg {
-    return {
-
-    };
 }

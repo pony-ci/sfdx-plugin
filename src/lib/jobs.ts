@@ -8,11 +8,9 @@ import {getLogger, getUX} from './pubsub';
 export interface IPCMessage {
     pony: {
         env?: AnyJson;
-        modifiedFiles?: string[];
     };
 }
 
-type ModifiedFiles = Set<String>;
 type Variables = Dictionary<EnvValue>;
 
 export const isIPCMessage = (value: unknown): value is IPCMessage =>
@@ -25,16 +23,14 @@ function isEnvValue(value: unknown): value is EnvValue {
 }
 
 export class Environment {
-    public readonly modifiedFiles: ModifiedFiles;
     public readonly variables: Variables;
 
-    private constructor(modifiedFiles: ModifiedFiles, variables: Variables) {
-        this.modifiedFiles = modifiedFiles;
+    private constructor(variables: Variables) {
         this.variables = variables;
     }
 
     public static create(): Environment {
-        return new Environment(new Set(), {});
+        return new Environment({});
     }
 
     public getEnv(name: string): Optional<EnvValue> {
@@ -47,7 +43,6 @@ export class Environment {
 
     public clone(): Environment {
         return new Environment(
-            new Set(this.modifiedFiles),
             JSON.parse(JSON.stringify(this.variables))
         );
     }
@@ -114,16 +109,13 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     cmd.on('message', (message) => {
         if (isIPCMessage(message)) {
             logger.info('ipc message', JSON.stringify(message, null, 4));
-            const {env = {}, modifiedFiles = []} = message.pony;
+            const {env = {}} = message.pony;
             if (isJsonMap(env)) {
                 for (const [key, value] of Object.entries(env)) {
                     if (isEnvValue(value)) {
                         environment.setEnv(key, value);
                     }
                 }
-            }
-            if (isArray(modifiedFiles)) {
-                modifiedFiles.forEach(it => environment.modifiedFiles.add(it));
             }
         }
     });

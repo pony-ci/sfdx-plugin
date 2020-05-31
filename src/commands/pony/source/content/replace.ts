@@ -39,14 +39,12 @@ export default class SourceContentReplaceCommand extends PonyCommand {
                 const backup = FilesBackup.create(project.projectDir);
                 const files = await this.replaceInnerText(rpl.innerText);
                 backup.backupFiles(files);
-                // await backup.restoreBackupFiles();
-                this.sendMessage({modifiedFiles: files});
+                // this.sendMessage({modifiedFiles: files});
             } else if (isOrgWideEmailAddressReplacement(rpl) && rpl.orgWideEmailAddress) {
                 const backup = FilesBackup.create(project.projectDir);
                 const files = await this.replaceOrgWideEmailAddress(rpl.orgWideEmailAddress);
                 backup.backupFiles(files);
-                // await backup.restoreBackupFiles();
-                this.sendMessage({modifiedFiles: files});
+                // this.sendMessage({modifiedFiles: files});
             }
         } else {
             throw Error(`Replacement not found: ${replacement}`);

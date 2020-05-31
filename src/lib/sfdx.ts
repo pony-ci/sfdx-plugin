@@ -1,6 +1,5 @@
 import {Flags, Opts, registerNamespace, sfdx as _sfdx} from '@pony-ci/sfdx-node';
 import path from 'path';
-import {PonyOrg} from './PonyOrg';
 import {getUX} from './pubsub';
 
 // tslint:disable-next-line:no-any
@@ -46,13 +45,6 @@ export interface ListOrgsOptions {
     all?: boolean;
     clean?: boolean;
     verbose?: boolean;
-}
-
-export async function authJwtGrant(options: AuthJwtGrantOptions = {}): Promise<PonyOrg> {
-    const ux = await getUX();
-    ux.log(`Authorizing an org (${options.username}) using the JWT flow`);
-    const {username} = sfdx.force.auth.jwtGrant({...options});
-    return PonyOrg.createPonyOrg(username);
 }
 
 export async function logoutAll(): Promise<void> {

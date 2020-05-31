@@ -1,5 +1,5 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
-import {AnyJson, isArray, isFunction, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {AnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
 import {existsSync} from 'fs';
 import fs, {readFileSync} from 'fs-extra';
 import https from 'https';
@@ -20,8 +20,6 @@ import {
 import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
-import {getUX} from './pubsub';
-import {createTaskArg, TaskContext} from './taskExecution';
 
 type Task = (arg: TaskArg) => TaskResult;
 type TaskArg = object;
@@ -49,13 +47,6 @@ export default class PonyProject {
 
     public getProjectName(): string {
         return path.basename(this.projectDir).toLowerCase().replace(/[^a-z0-9-_]/g, '');
-    }
-
-    public async getTaskDefinitions(): Promise<TaskDefinitions> {
-        if (!this.taskDefinitions) {
-            this.taskDefinitions = await readTaskDefinitions(this.projectDir);
-        }
-        return this.taskDefinitions;
     }
 
     public async getPackageGroup(name: string = 'default'): Promise<PackageGroup> {
@@ -121,28 +112,6 @@ export default class PonyProject {
         const {jobs = {}} = await this.getPonyConfig();
         return executeJobByName(jobs, name, env);
     }
-
-    public async runTaskIfDefined(
-        name: string,
-        arg: TaskArg,
-        ctx: TaskContext = TaskContext.create()
-    ): Promise<TaskResult> {
-        const ux = await getUX();
-        if (!await this.hasTask(name)) {
-            return Promise.resolve();
-        }
-        if (!this.taskDefinitions) {
-            this.taskDefinitions = await readTaskDefinitions(this.projectDir);
-        }
-        const task = this.taskDefinitions[name];
-        ux.log(`Running task: ${name}`);
-        return task({...arg, ...createTaskArg(name, ctx)});
-    }
-
-    public async hasTask(name: string): Promise<boolean> {
-        const tasks = await this.getTaskDefinitions();
-        return tasks && isFunction(tasks[name]);
-    }
 }
 
 async function readPackageGroup(name: string, projectDir: string): Promise<PackageGroup> {
@@ -205,21 +174,6 @@ async function readDataConfig(projectDir: string): Promise<DataConfig> {
         }
     }
     return data;
-}
-
-async function readTaskDefinitions(projectDir: string): Promise<TaskDefinitions> {
-    try {
-        const file = path.join(projectDir, '.pony/tasks.js');
-        // tslint:disable-next-line:non-literal-require
-        return require(file);
-    } catch (e) {
-        if (e.toString().includes('Cannot find module')) {
-            return {};
-        }
-        const ux = await getUX();
-        ux.error(e);
-        throw e;
-    }
 }
 
 async function readJSONExtension(extension: string): Promise<AnyJson> {
