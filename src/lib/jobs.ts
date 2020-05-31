@@ -16,7 +16,7 @@ type Variables = Dictionary<EnvValue>;
 export const isIPCMessage = (value: unknown): value is IPCMessage =>
     isAnyJson(value) && isJsonMap(value) && 'pony' in value && isJsonMap(value.pony);
 
-export type EnvValue = Optional<string | string[]>;
+export type EnvValue = Optional<string>;
 
 function isEnvValue(value: unknown): value is EnvValue {
     return !value || isString(value) || (isArray(value) && value.every(isString));
@@ -39,12 +39,31 @@ export class Environment {
 
     public setEnv(name: string, value: Optional<EnvValue>): void {
         this.variables[name] = value;
+        if (this.isJobStep()) {
+            this.sendMessage({
+                env: {
+                    [name]: value
+                }
+            });
+        }
     }
 
     public clone(): Environment {
         return new Environment(
             JSON.parse(JSON.stringify(this.variables))
         );
+    }
+
+    private isJobStep(): boolean {
+        return Boolean(process.send);
+    }
+
+    private sendMessage(message: IPCMessage['pony']): void {
+        if (process.send) {
+            process.send({
+                pony: message
+            });
+        }
     }
 }
 
@@ -135,7 +154,7 @@ export function prepareCommandArgs(args: string, env: Environment): string {
             const envNamePart = matched.substr(matched.lastIndexOf('.') + 1);
             const envName = envNamePart.substr(0, endsWithBracket ? envNamePart.length - 1 : envNamePart.length);
             const envValue = env.getEnv(envName) || '';
-            result = result.replace(matched, isArray(envValue) ? envValue.map(it => `"${it}"`).join(' ') : envValue);
+            result = result.replace(matched, envValue);
         } else {
             throw Error(`Malformed: ${args}`);
         }

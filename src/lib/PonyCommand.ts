@@ -27,22 +27,6 @@ export default abstract class PonyCommand extends SfdxCommand {
     protected get commandName(): string {
         return this.constructor.name.substr(0, this.constructor.name.length - 'Command'.length);
     }
-
-    protected setEnv(key: string, value: EnvValue): void {
-        this.sendMessage({
-            env: {
-                [key]: value
-            }
-        });
-    }
-
-    protected sendMessage(message: IPCMessage['pony']): void {
-        if (process.send) {
-            process.send({
-                pony: message
-            });
-        }
-    }
 }
 
 function preprocessError(errors: unknown): unknown {

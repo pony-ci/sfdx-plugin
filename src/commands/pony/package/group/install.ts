@@ -27,6 +27,7 @@ Create package group with 'sfdx pony:package:group:export' command.
     public async run(): Promise<void> {
         const project = await PonyProject.load();
         const group = await project.getPackageGroup(this.flags.group);
+        const username = this.org?.getUsername();
         let count: number = 0;
         for (const it of group.packages) {
             const versionNumber = it.subscriberPackageVersionNumber ? `@${it.subscriberPackageVersionNumber}` : '';
@@ -39,7 +40,7 @@ Create package group with 'sfdx pony:package:group:export' command.
                 upgradetype: it.upgradeType,
                 package: it.subscriberPackageVersionId,
                 wait: it.wait || 200,
-                targetusername: this.flags.tagetusername,
+                targetusername: username,
                 noprompt: true,
             });
         }

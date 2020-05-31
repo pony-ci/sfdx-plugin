@@ -77,7 +77,7 @@ Exported package group is a ordered list of packages that can be installed with 
         const filtered: Package[] = [];
         for (const pkg of packages) {
             if (STANDARD_SUBSCRIBER_PACKAGE_NAMES.includes(pkg.subscriberPackageName)) {
-                this.ux.warn(`Removing standard package from group: ${this.packageToString(pkg)}`);
+                this.ux.log(`Removing standard package from group: ${this.packageToString(pkg)}`);
             } else {
                 this.ux.log(`Add: ${this.packageToString(pkg)}`);
                 filtered.push(pkg);
@@ -85,6 +85,8 @@ Exported package group is a ordered list of packages that can be installed with 
         }
         const file = path.join(packagesDir, `${this.flags.group}.json`);
         fs.writeJSONSync(file, {packages: filtered}, {spaces: 2});
+        this.ux.log(`Package group written to ${file}`);
+        this.ux.warn('Some standard groups were removed automatically, please check the group and remove any other standard packages manually.');
     }
 
     private packageToString({subscriberPackageName, subscriberPackageVersionNumber}: Package): string {

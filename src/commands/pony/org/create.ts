@@ -71,8 +71,8 @@ Flow:
         let orgCreateResult: AnyJson = {};
         let env = Environment.create();
         if (org) {
-            this.setEnv('username', org.getUsername());
-            this.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
+            env.setEnv('username', org.getUsername());
+            env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
             env = await project.hasJob(PONY_PRE_ORG_CREATE)
                 ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
@@ -82,8 +82,8 @@ Flow:
             orgCreateResult = await sfdx.force.org.create(this.options, args);
             if (isJsonMap(orgCreateResult) && 'username' in orgCreateResult && isString(orgCreateResult.username)) {
                 org = await Org.create({aliasOrUsername: orgCreateResult.username});
-                this.setEnv('username', org.getUsername());
-                this.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
+                env.setEnv('username', org.getUsername());
+                env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             } else {
                 throw Error(`Unexpected 'force:org:create' result: ${JSON.stringify(orgCreateResult)}`);
             }
@@ -108,7 +108,7 @@ Flow:
 
     private getUsername(projectName: string): string {
         let branch = '';
-        const gitHeadFile = '/home/ondrej/projects/tmp/.git/HEAD';
+        const gitHeadFile = '.git/HEAD';
         if (fs.existsSync(gitHeadFile)) {
             const content = fs.readFileSync(gitHeadFile).toString();
             branch = content
