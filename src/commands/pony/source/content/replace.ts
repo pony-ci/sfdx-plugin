@@ -1,12 +1,16 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
+import {AnyJson, isAnyJson, isArray, isJsonArray, isJsonMap, isPlainObject, isString} from '@salesforce/ts-types';
+import {JsonCollection} from '@salesforce/ts-types/lib/types/json';
 import {
+    getUX,
     InnerTextReplacement,
     isInnerTextReplacement,
     isOrgWideEmailAddressReplacement,
-    OrgWideEmailAddressReplacement
+    OrgWideEmailAddressReplacement,
+    readComponent,
+    writeComponent
 } from '../../../..';
-import {replaceInnerText, replaceOrgWideEmailAddress} from '../../../../lib/filesManip';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 import {FilesBackup} from '../../../../lib/taskExecution';
@@ -53,7 +57,9 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         const {files, replacement} = rpl;
         for (const file of files) {
             this.ux.log(`Going to remove senderAddress and change senderType with value 'OrgWideEmailAddress' to '${replacement}' in ${file}`);
-            await replaceOrgWideEmailAddress(file, replacement);
+            const cmp = await readComponent(file);
+            await replaceOrgWideEmailAddressHelper(cmp, replacement);
+            await writeComponent(file, cmp);
         }
         return files;
     }
@@ -62,8 +68,64 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         const {files, search, replacement} = rpl;
         for (const file of files) {
             this.ux.log(`Replacing content in ${file}`);
-            await replaceInnerText(file, search, replacement);
+            const cmp = await readComponent(file);
+            await replaceInnerTextHelper(cmp, search, replacement);
+            await writeComponent(file, cmp);
         }
         return files;
+    }
+}
+
+async function replaceOrgWideEmailAddressHelper(component: JsonCollection, replacement: AnyJson): Promise<void> {
+    if (!component) {
+        return;
+    }
+    if (isArray(component)) {
+        for (const child of component) {
+            if (isAnyJson(child) && (isJsonMap(child) || isJsonArray(child))) {
+                await replaceOrgWideEmailAddressHelper(child, replacement);
+            }
+        }
+    } else if (isPlainObject(component)) {
+        if (isArray(component.senderType) && component.senderType.length && component.senderType[0] === 'OrgWideEmailAddress') {
+            delete component.senderAddress;
+            component.senderType = [replacement];
+        } else {
+            for (const value of Object.values(component)) {
+                if (isAnyJson(value) && (isJsonMap(value) || isJsonArray(value))) {
+                    await replaceOrgWideEmailAddressHelper(value, replacement);
+                }
+            }
+        }
+    }
+}
+
+async function replaceInnerTextHelper(component: AnyJson, targets: string[], replacement: string): Promise<void> {
+    if (!component) {
+        return;
+    }
+    const ux = await getUX();
+    const logReplacement = (it, to) => ux.log(JSON.stringify(it), '->', JSON.stringify(to));
+    if (isArray(component)) {
+        if (component.length === 1 && isString(component[0]) && targets.includes(component[0])) {
+            logReplacement(component[0], replacement);
+            component.splice(0, 1, replacement);
+        } else {
+            for (const child of component) {
+                if (isAnyJson(child) && (isJsonMap(child) || isJsonArray(child))) {
+                    await replaceInnerTextHelper(child, targets, replacement);
+                }
+            }
+        }
+    } else if (isPlainObject(component)) {
+        for (const key of Object.keys(component)) {
+            const value = component[key];
+            if (isString(value) && targets.includes(value)) {
+                logReplacement(value, replacement);
+                component[key] = replacement;
+            } else if (isAnyJson(value) && (isJsonMap(value) || isJsonArray(value))) {
+                await replaceInnerTextHelper(value, targets, replacement);
+            }
+        }
     }
 }

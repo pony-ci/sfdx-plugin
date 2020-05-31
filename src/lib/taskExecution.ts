@@ -1,14 +1,10 @@
-import {exec as shell} from '@pony-ci/cli-exec';
 import {Dictionary} from '@salesforce/ts-types/lib/types/collection';
 import crypto from 'crypto';
 import fs from 'fs-extra';
 import klaw from 'klaw-sync';
 import path from 'path';
 import {getAppHomeDir} from './app';
-import {replaceInnerText} from './filesManip';
-import {useDevhub, useDevhubOrDefault, useOrg, useOrgOrDefault} from './PonyOrg';
 import {getUX} from './pubsub';
-import {authJwtGrant, listOrgs, logoutAll, sfdx} from './sfdx';
 
 export type TaskArg = Dictionary;
 
@@ -92,19 +88,6 @@ export class TaskContext {
 
 export function createTaskArg(name: string, context: TaskContext): TaskArg {
     return {
-        sfdx,
-        authJwtGrant,
-        logoutAll,
-        listOrgs,
-        useOrg,
-        useDevhub,
-        useOrgOrDefault,
-        useDevhubOrDefault,
-        shell,
-        context,
-        replaceInComponent: async (file: string, targets: string[], replacement: string) => {
-            context.backupFile(file);
-            await replaceInnerText(file, targets, replacement);
-        }
+
     };
 }
