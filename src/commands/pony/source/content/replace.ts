@@ -73,7 +73,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
             const cmp = await readComponent(file);
             const replaced = await replaceInnerTextHelper(cmp, search, env.fillString(replacement));
             replaced.forEach((it, idx, array) => {
-                this.ux.log(`  ${idx === array.length - 1 ? '└' : '├'} ${it.join(' -> ')}`);
+                this.ux.log(`  ${idx === array.length - 1 ? '└' : '├'} ${it.join(' → ')}`);
             });
             await writeComponent(file, cmp);
         }
