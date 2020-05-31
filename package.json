@@ -15,7 +15,7 @@
     "find": "^0.3.0",
     "fs-extra": "^8.1.0",
     "klaw-sync": "^6.0.0",
-    "salesforce-alm": "^48.17.0",
+    "salesforce-alm": "^49.0.12",
     "slash": "^3.0.0",
     "tmp-promise": "^3.0.2",
     "tslib": "^1",

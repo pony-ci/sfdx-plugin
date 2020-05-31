@@ -83,7 +83,7 @@ Exported package group is a ordered list of packages that can be installed with 
                 filtered.push(pkg);
             }
         }
-        const file = path.join(packagesDir, 'default.json');
+        const file = path.join(packagesDir, `${this.flags.group}.json`);
         fs.writeJSONSync(file, {packages: filtered}, {spaces: 2});
     }
 
