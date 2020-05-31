@@ -7,6 +7,7 @@
 
 export interface Config {
   extends?: string;
+  data?: DataConfig;
   jobs?: Jobs;
   orgCreate?: OrgCreateConfig;
   replacements?: Replacements;
@@ -15,6 +16,24 @@ export interface Config {
    */
   sourceSort?: ("all" | "source" | "none") | [string];
   sourceValidate?: SourceValidate;
+}
+export interface DataConfig {
+  sObjects?: {
+    recordsDir?: string;
+    import?: {
+      chunkSize?: number;
+      deleteBeforeImport?: (false | "reversedOrder") | string[];
+      soqlDeleteDir?: string;
+      order: string[];
+      relationships?: {
+        [k: string]: string[];
+      };
+    };
+    export?: {
+      soqlExportDir?: string;
+      order?: string[] | "reversedOrder";
+    };
+  };
 }
 export interface Jobs {
   [k: string]: {

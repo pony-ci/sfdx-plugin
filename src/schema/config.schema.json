@@ -8,6 +8,9 @@
     "extends": {
       "type": "string"
     },
+    "data": {
+      "$ref": "data-config.schema.json"
+    },
     "jobs": {
       "$ref": "jobs.schema.json"
     },

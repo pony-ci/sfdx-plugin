@@ -5,10 +5,11 @@ import {isArray, isBoolean, isNumber, isString, JsonMap} from '@salesforce/ts-ty
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import {DataConfig, RelationshipField, sfdx, SObjectName} from '../../..';
+import {DataConfig} from '../../..';
 import {describeSObject} from '../../../lib/data/sObject';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
+import {RelationshipField, SObjectName} from '../../../types/data-config.schema';
 import {defaultRecordsDir, defaultSoqlDeleteDir} from './export';
 
 const defaultImportChunkSize = 200;

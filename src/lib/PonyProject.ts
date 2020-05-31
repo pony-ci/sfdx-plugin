@@ -63,10 +63,8 @@ export default class PonyProject {
     }
 
     public async getDataConfig(): Promise<DataConfig> {
-        if (!this.dataConfig) {
-            this.dataConfig = await readDataConfig(this.projectDir);
-        }
-        return this.dataConfig;
+        const config = await this.getPonyConfig();
+        return config.data || {};
     }
 
     public async getSfdxProjectJson(): Promise<SfdxProjectJson> {
@@ -145,32 +143,22 @@ async function readConfig(projectDir: string): Promise<Config> {
         }
         return Object.assign(extension, config);
     }
-    return config;
-}
-
-async function readDataConfig(projectDir: string): Promise<DataConfig> {
-    const file = path.join(projectDir, '.pony/data.yml');
-    if (!existsSync(file)) {
-        return {};
-    }
-    const yml = readFileSync(file).toString();
-    const data = yaml.parse(yml);
-    if (!isDataConfig(data)) {
-        throw Error(`${validateDataConfig(data)}`);
-    }
-    const relationshipNameRegex = /^[a-zA-Z0-9_]+.[a-zA-Z0-9_]+$/;
-    const relationships = data?.sObjects?.import?.relationships || {};
-    for (const [sObject, fields] of Object.entries(relationships)) {
-        for (const field of fields) {
-            if (!relationshipNameRegex.test(field)) {
-                throw Error(`Invalid relationship: ${field}`);
-            }
-            if (field.toLowerCase().startsWith('recordtype.') && field.toLowerCase() !== 'recordtype.developername') {
-                throw Error(`Relationship RecordType can be mapped only by DeveloperName: ${sObject}`);
+    if (config.data) {
+        const relationshipNameRegex = /^[a-zA-Z0-9_]+.[a-zA-Z0-9_]+$/;
+        const relationships = config.data.sObjects?.import?.relationships || {};
+        for (const [sObject, fields] of Object.entries(relationships)) {
+            for (const field of fields) {
+                if (!relationshipNameRegex.test(field)) {
+                    throw Error(`Invalid relationship: ${field}`);
+                }
+                if (field.toLowerCase().startsWith('recordtype.') &&
+                    field.toLowerCase() !== 'recordtype.developername') {
+                    throw Error(`Relationship RecordType can be mapped only by DeveloperName: ${sObject}`);
+                }
             }
         }
     }
-    return data;
+    return config;
 }
 
 async function readJSONExtension(extension: string): Promise<AnyJson> {

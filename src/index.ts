@@ -8,6 +8,5 @@ export * from './lib/metadata/describeMetadata';
 export * from './type-guards/schema';
 
 export * from './types/config.schema';
-export * from './types/data-config.schema';
 export * from './types/package-group.schema';
 export {Replacement, OrgWideEmailAddressReplacement, InnerTextReplacement} from './types/replacements.schema';
