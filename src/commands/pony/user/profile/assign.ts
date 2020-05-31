@@ -34,13 +34,15 @@ If not specified, the profile is assigned to target username.
     protected static requiresUsername: boolean = true;
 
     public async run(): Promise<void> {
-        const {profile, onbehalfof} = this.flags;
+        const {profile, onbehalfof, assigner} = this.flags;
         const project = await PonyProject.load();
         const assignerUsername = await this.getAssignerUsername(project);
         this.ux.log(`${assignerUsername} is going to assign '${profile}' profile to ${onbehalfof}.`);
         const profileId = await this.getProfileId();
         await this.assignProfile(assignerUsername, profileId);
-        await this.deactivateAssigner(assignerUsername);
+        if (!assigner) {
+            await this.deactivateAssigner(assignerUsername);
+        }
     }
 
     private async getProfileId(): Promise<string> {
