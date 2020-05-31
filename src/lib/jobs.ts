@@ -148,8 +148,6 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     ].some(it => c.includes(it));
     command = supportsEnvArg(command)
         ? `${command} --ponyenv '${Environment.stringify(environment)}'` : command;
-    console.log({usingEnv: environment});
-    console.log(command);
     logger.info('spawn', command);
     const cmd = spawn(command, [], {
         shell: true,
