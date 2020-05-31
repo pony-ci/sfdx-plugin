@@ -80,7 +80,7 @@ export default class DataImportCommand extends PonyCommand {
                 continue;
             }
             this.ux.log(chalk.blueBright.bold(`Importing ${allCount} ${allCount === 1 ? describe.label : describe.labelPlural}`));
-            await this.populateRelationships(records, relationships[sObjectName] || [], sObjectName);
+            await this.populateRelationships(conn, records, relationships[sObjectName] || [], sObjectName);
             let importedCount = 0;
             let i = 0;
             this.ux.startSpinner(`0/${allCount}`);
@@ -94,7 +94,7 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async populateRelationships(
-        records: Records, relationshipFields: RelationshipField[], sObjectName: string
+        conn: Connection, records: Records, relationshipFields: RelationshipField[], sObjectName: string
     ): Promise<void> {
         const {targetusername} = this.flags;
         const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
@@ -112,11 +112,7 @@ export default class DataImportCommand extends PonyCommand {
             const sourceValues = this.getSourceFieldValues(records, relationshipName, fieldName);
             const sourceValuesStr = sourceValues.map(it => `'${it}'`).join(',');
             const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})`;
-            const {records: relatedRecords} = await sfdx.force.data.soql.query({
-                quiet: true,
-                query,
-                targetusername
-            });
+            const relatedRecords = sourceValues.length ? await queryRecords(conn, this.ux, query) : [];
             for (const record of records) {
                 const sourceValue = record[relationshipName]?.[fieldName];
                 if (sourceValue) {
