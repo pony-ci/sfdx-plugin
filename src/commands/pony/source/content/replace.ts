@@ -108,7 +108,7 @@ async function replaceInnerTextHelper(component: AnyJson, targets: string[], rep
         return;
     }
     const ux = await getUX();
-    const logReplacement = (it, to) => ux.log(JSON.stringify(it), '->', JSON.stringify(to));
+    const logReplacement = (it, to) => ux.log(`  ${it} -> ${to}`);
     if (isArray(component)) {
         if (component.length === 1 && isString(component[0]) && targets.includes(component[0])) {
             logReplacement(component[0], replacement);
