@@ -149,7 +149,7 @@ async function readConfig(projectDir: string): Promise<Config> {
 }
 
 async function readDataConfig(projectDir: string): Promise<DataConfig> {
-    const file = path.join(projectDir, '/data.yml');
+    const file = path.join(projectDir, '.pony/data.yml');
     if (!existsSync(file)) {
         return {};
     }

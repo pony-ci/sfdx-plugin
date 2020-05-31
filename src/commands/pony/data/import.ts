@@ -192,7 +192,9 @@ export async function destroyRecords(
 ): Promise<void> {
     const records = await queryRecords(conn, ux, query);
     const ids = records.map(it => it.Id) as string[];
-    await deleteRecords(conn, ux, sObjectName, ids);
+    if (ids.length) {
+        await deleteRecords(conn, ux, sObjectName, ids);
+    }
 }
 
 export async function queryRecords(
@@ -213,21 +215,23 @@ export async function deleteRecords(
     conn: Connection, ux: UX, sObjectName: string, ids: string[]
 ): Promise<void> {
     return new Promise((resolve, reject) => {
-        conn.sobject(sObjectName).del(ids, (err, result) => {
-            if (err) {
-                reject(err);
-            }
-            let success = true;
-            result.forEach(it => {
-                if ('errors' in it && it.errors.length) {
-                    ux.log(it.errors.join(', '));
-                    success = false;
+        chunk(ids, 200).forEach(chunkedIds => {
+            conn.sobject(sObjectName).del(chunkedIds, (err, result = []) => {
+                if (err) {
+                    reject(err);
                 }
+                let success = true;
+                result.forEach(it => {
+                    if ('errors' in it && it.errors.length) {
+                        ux.log(it.errors.join(', '));
+                        success = false;
+                    }
+                });
+                if (!success) {
+                    reject(`Delete failed.`);
+                }
+                resolve();
             });
-            if (!success) {
-                reject(`Delete failed.`);
-            }
-            resolve();
         });
     });
 }
@@ -238,21 +242,44 @@ export async function insertRecords(
     conn.bulk.pollTimeout = 60000 * 10;
     return new Promise((resolve, reject) => {
         // @ts-ignore
-        conn.sobject(sObjectName).insert(records, {allOrNone: true}, (err, result) => {
+        // tslint:disable-next-line:no-any
+        conn.sobject(sObjectName).insert(records, {allOrNone: true}, (err, result: any[] = []) => {
             if (err) {
                 reject(err);
             }
             let success = true;
+            const errorRows: { statusCode: string; message: string; fields: string }[] = [];
             result.forEach(it => {
-                if ('errors' in it && it.errors.length) {
-                    ux.log(it.errors.join(', '));
+                if ('errors' in it && !it.success) {
                     success = false;
+                    if (isArray(it.errors) && it.errors.length) {
+                        it.errors.forEach(item => {
+                            errorRows.push({
+                                statusCode: item.statusCode,
+                                message: item.message,
+                                fields: (item.fields || []).join(',')
+                            });
+                        });
+                    }
                 }
             });
+            if (errorRows.length) {
+                ux.table(errorRows, Object.keys(errorRows[0]));
+            }
             if (!success) {
                 reject(`Insert failed.`);
             }
             resolve();
         });
     });
+}
+
+function chunk<T>(array: T[], size: number): T[][] {
+    const chunked: T[][] = [];
+    let index = 0;
+    while (index < array.length) {
+        chunked.push(array.slice(index, size + index));
+        index += size;
+    }
+    return chunked;
 }
