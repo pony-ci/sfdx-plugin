@@ -1,12 +1,12 @@
-import {UX} from '@salesforce/command';
 import {flags, FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {Connection} from '@salesforce/core';
-import {isArray, isBoolean, isNumber, isString, JsonMap} from '@salesforce/ts-types';
+import {isArray, isBoolean, isNumber, isString} from '@salesforce/ts-types';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import {DataConfig} from '../../..';
 import {describeSObject} from '../../../lib/data/sObject';
+import {deleteRecords, insertRecords, queryRecords, Record} from '../../../lib/force';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 import {RelationshipField, SObjectName} from '../../../types/data-config.schema';
@@ -24,9 +24,6 @@ const toDeleteSoql = (soqlDeleteDir: string, sObjectName: string) => {
     }
     return `SELECT Id FROM ${sObjectName}`;
 };
-
-export type Records = Record[];
-export type Record = JsonMap;
 
 export default class DataImportCommand extends PonyCommand {
 
@@ -73,7 +70,7 @@ export default class DataImportCommand extends PonyCommand {
         const chunkSize = data?.sObjects?.import?.chunkSize || defaultImportChunkSize;
         for (const sObjectName of importOrder) {
             const recordsContent = fs.readJSONSync(toRecordsFile(recordsDir, sObjectName));
-            const records: Records = recordsContent.records;
+            const records = recordsContent.records;
             const allCount = records.length;
             const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
             if (!allCount) {
@@ -95,7 +92,7 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async populateRelationships(
-        conn: Connection, records: Records, relationshipFields: RelationshipField[], sObjectName: string
+        conn: Connection, records: Record[], relationshipFields: RelationshipField[], sObjectName: string
     ): Promise<void> {
         const {targetusername} = this.flags;
         const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
@@ -126,20 +123,20 @@ export default class DataImportCommand extends PonyCommand {
         }
     }
 
-    private getSourceFieldValues(records: Records, relationshipName: string, fieldName: string): string[] {
-        const values: string[] = [];
+    private getSourceFieldValues(records: Record[], relationshipName: string, fieldName: string): string[] {
+        const values: Set<string> = new Set();
         for (const record of records) {
             const value = record[relationshipName]?.[fieldName];
             if (isString(value)) {
-                values.push(value);
+                values.add(value);
             }
         }
-        return values;
+        return [...values];
     }
 
     private async importRecordsChunk(
-        conn: Connection, allRecords: Records, chunkIndex: number, chunkSize: number, sObjectName: string
-    ): Promise<Records> {
+        conn: Connection, allRecords: Record[], chunkIndex: number, chunkSize: number, sObjectName: string
+    ): Promise<Record[]> {
         const records = allRecords.slice(chunkIndex * chunkSize, (chunkIndex * chunkSize) + chunkSize);
         if (!records.length) {
             return [];
@@ -175,108 +172,14 @@ export default class DataImportCommand extends PonyCommand {
             return;
         }
         for (const sObjectName of deleteOrder) {
+            await describeSObject(sObjectName, targetusername, {ux: this.ux});
+        }
+        for (const sObjectName of deleteOrder) {
             const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
             this.ux.startSpinner(chalk.blueBright.bold(`Deleting ${describe.labelPlural}`));
             const deleteSoql = toDeleteSoql(soqlDeleteDir, sObjectName);
-            await destroyRecords(conn, this.ux, sObjectName, deleteSoql);
+            await deleteRecords(conn, this.ux, sObjectName, deleteSoql);
             this.ux.stopSpinner();
         }
     }
-}
-
-export async function destroyRecords(
-    conn: Connection, ux: UX, sObjectName: string, query: string
-): Promise<void> {
-    const records = await queryRecords(conn, ux, query);
-    const ids = records.map(it => it.Id) as string[];
-    if (ids.length) {
-        await deleteRecords(conn, ux, sObjectName, ids);
-    }
-}
-
-export async function queryRecords(
-    conn: Connection, ux: UX, query: string
-): Promise<Record[]> {
-    return new Promise((resolve, reject) => {
-        // @ts-ignore
-        conn.query(query, (err, result) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(result.records || []);
-        });
-    });
-}
-
-export async function deleteRecords(
-    conn: Connection, ux: UX, sObjectName: string, ids: string[]
-): Promise<void> {
-    return new Promise((resolve, reject) => {
-        chunk(ids, 200).forEach(chunkedIds => {
-            conn.sobject(sObjectName).del(chunkedIds, (err, result = []) => {
-                if (err) {
-                    reject(err);
-                }
-                let success = true;
-                result.forEach(it => {
-                    if ('errors' in it && it.errors.length) {
-                        ux.log(it.errors.join(', '));
-                        success = false;
-                    }
-                });
-                if (!success) {
-                    reject(`Delete failed.`);
-                }
-                resolve();
-            });
-        });
-    });
-}
-
-export async function insertRecords(
-    conn: Connection, ux: UX, sObjectName: string, records: Record[]
-): Promise<void> {
-    conn.bulk.pollTimeout = 60000 * 10;
-    return new Promise((resolve, reject) => {
-        // @ts-ignore
-        // tslint:disable-next-line:no-any
-        conn.sobject(sObjectName).insert(records, {allOrNone: true}, (err, result: any[] = []) => {
-            if (err) {
-                reject(err);
-            }
-            let success = true;
-            const errorRows: { statusCode: string; message: string; fields: string }[] = [];
-            result.forEach(it => {
-                if ('errors' in it && !it.success) {
-                    success = false;
-                    if (isArray(it.errors) && it.errors.length) {
-                        it.errors.forEach(item => {
-                            errorRows.push({
-                                statusCode: item.statusCode,
-                                message: item.message,
-                                fields: (item.fields || []).join(',')
-                            });
-                        });
-                    }
-                }
-            });
-            if (errorRows.length) {
-                ux.table(errorRows, Object.keys(errorRows[0]));
-            }
-            if (!success) {
-                reject(`Insert failed.`);
-            }
-            resolve();
-        });
-    });
-}
-
-function chunk<T>(array: T[], size: number): T[][] {
-    const chunked: T[][] = [];
-    let index = 0;
-    while (index < array.length) {
-        chunked.push(array.slice(index, size + index));
-        index += size;
-    }
-    return chunked;
 }
