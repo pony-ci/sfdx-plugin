@@ -68,12 +68,16 @@ Flow:
     }
 
     public async run(): Promise<AnyJson> {
+        const {targetusername} = this.flags;
         let env = Environment.parse(this.flags.ponyenv);
         const project = await PonyProject.load();
         const {orgCreate = {}} = await project.getPonyConfig();
         let org: Optional<Org> = this.org;
         let orgCreateResult: AnyJson = {};
-        if (org) { // todo -u <non existing org> -> org is undefined
+        if (targetusername) {
+            if (!org) {
+                throw Error(`Non existing user ${targetusername}`);
+            }
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
