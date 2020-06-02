@@ -53,10 +53,8 @@ export default class PonyProject {
     }
 
     public async getPackageGroup(name: string = 'default'): Promise<PackageGroup> {
-        if (!this.packageGroups.name) {
-            this.packageGroups.name = await readPackageGroup(name, this.projectDir);
-        }
-        return this.packageGroups.name;
+        const {packages = {}} = await this.getPonyConfig();
+        return packages[name];
     }
 
     public async getPonyConfig(): Promise<Config> {
@@ -113,24 +111,6 @@ export default class PonyProject {
         const {jobs = {}} = await this.getPonyConfig();
         return executeJobByName(jobs, name, env);
     }
-}
-
-async function readPackageGroup(name: string, projectDir: string): Promise<PackageGroup> {
-    const packageGroup = readJsonFileIfExists(path.join(projectDir, `data/packages/${name}.json`));
-    if (!packageGroup) {
-        throw Error(`No package group named '${name}' found.`);
-    }
-    if (!isPackageGroup(packageGroup)) {
-        throw Error(`${validatePackageGroup(packageGroup)}`);
-    }
-    if (isString(packageGroup.extends)) {
-        const extension = await readJSONExtension(packageGroup.extends);
-        if (!isPackageGroup(extension)) {
-            throw Error(`${validatePackageGroup(extension)}`);
-        }
-        return Object.assign(extension, packageGroup);
-    }
-    return packageGroup as PackageGroup;
 }
 
 async function readConfig(projectDir: string): Promise<Config> {

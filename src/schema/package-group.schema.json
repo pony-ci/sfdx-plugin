@@ -2,26 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/package-group.schema.json",
   "title": "Package Group",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "packages"
-  ],
-  "properties": {
-    "extends": {
-      "type": "string"
-    },
-    "packages": {
-      "type": "array",
-      "additionalItems": false,
-      "items": {
-        "$ref": "#/definitions/package"
-      }
-    }
+  "type": "array",
+  "additionalItems": false,
+  "items": {
+    "$ref": "#/definitions/package"
   },
   "definitions": {
     "package": {
       "type": "object",
+      "title": "Package",
       "additionalProperties": false,
       "required": [
         "subscriberPackageName",
@@ -42,11 +31,24 @@
           "description": "ID (starts with 04t) or alias of the package version to install"
         },
         "subscriberPackageVersionName": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
         },
         "subscriberPackageVersionNumber": {
-          "type": "string"
-        },
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]        },
         "apexCompile": {
           "type": "string",
           "enum": [

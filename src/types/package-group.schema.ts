@@ -5,10 +5,8 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface PackageGroup {
-  extends?: string;
-  packages: Package[];
-}
+export type PackageGroup = Package[];
+
 export interface Package {
   subscriberPackageId?: string;
   subscriberPackageName: string;
@@ -17,8 +15,8 @@ export interface Package {
    * ID (starts with 04t) or alias of the package version to install
    */
   subscriberPackageVersionId: string;
-  subscriberPackageVersionName?: string;
-  subscriberPackageVersionNumber?: string;
+  subscriberPackageVersionName?: string | number;
+  subscriberPackageVersionNumber?: string | number;
   /**
    * compile all Apex in the org and package, or only Apex in the package
    */

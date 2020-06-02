@@ -45,6 +45,5 @@ function preprocessError(errors: unknown): unknown {
         }
         return JSON.stringify(errors, null, 4);
     }
-    console.log('1');
     return JSON.stringify(errors, null, 4);
 }

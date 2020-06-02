@@ -1,12 +1,11 @@
 import {flags, FlagsConfig} from '@salesforce/command';
-import fs from 'fs-extra';
-import path from 'path';
 import {Package, sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 
-const STANDARD_SUBSCRIBER_PACKAGE_NAMES = [
+const standardSubscriberPackageNames = [
     'Contacts Today',
     'Data.com Assessment',
+    'Knowledge Base Dashboards & Reports',
     'Process Automation Specialist Email Templates',
     'SFDC Channel Order',
     'Salesforce Adoption Dashboards',
@@ -58,9 +57,6 @@ Exported package group is a ordered list of packages that can be installed with 
     };
 
     public async run(): Promise<void> {
-        const projectDir = process.cwd();
-        const packagesDir = path.join(projectDir, 'data/packages');
-        fs.ensureDirSync(packagesDir);
         this.ux.startSpinner('Retrieving installed packages.');
         const [installedPackages]: InstalledPackage[][] = await Promise.all([
             sfdx.force.package.installed.list({
@@ -69,27 +65,45 @@ Exported package group is a ordered list of packages that can be installed with 
             })
         ]);
         this.ux.stopSpinner();
-        await this.configurePackages(packagesDir, installedPackages);
+        const packages = await this.filterAndMapPackages(installedPackages);
+        this.logPackages(packages);
     }
 
-    private async configurePackages(packagesDir: string, installedPackages: InstalledPackage[]): Promise<void> {
+    private filterAndMapPackages(installedPackages: InstalledPackage[]): Package[] {
         const packages: Package[] = installedPackages.map(mapInstalledPackageToPackage);
         const filtered: Package[] = [];
         for (const pkg of packages) {
-            if (STANDARD_SUBSCRIBER_PACKAGE_NAMES.includes(pkg.subscriberPackageName)) {
+            if (standardSubscriberPackageNames.includes(pkg.subscriberPackageName)) {
                 this.ux.log(`Removing standard package from group: ${this.packageToString(pkg)}`);
             } else {
-                this.ux.log(`Add: ${this.packageToString(pkg)}`);
+                this.ux.log(`Add package to group: ${this.packageToString(pkg)}`);
                 filtered.push(pkg);
             }
         }
-        const file = path.join(packagesDir, `${this.flags.group}.json`);
-        fs.writeJSONSync(file, {packages: filtered}, {spaces: 2});
-        this.ux.log(`Package group written to ${file}`);
-        this.ux.warn('Some standard groups were removed automatically, please check the group and remove any other standard packages manually.');
+        return filtered;
     }
 
     private packageToString({subscriberPackageName, subscriberPackageVersionNumber}: Package): string {
         return `${subscriberPackageName} (${subscriberPackageVersionNumber})`;
     }
+
+    private logPackages(packages: Package[]): void {
+        this.ux.warn(`
+Some standard groups were removed automatically, please check the group and remove any other standard packages manually. 
+Add following configuration to your pony-config.yml and run 'sfdx pony:package:group:install' to install the package group:`);
+        this.ux.log(`
+packages:
+    default:
+${packages.map(toPackageYamlString).join('')}`);
+    }
 }
+
+const toPackageYamlString = (pkg): string => {
+    let result = '';
+    Object.entries(pkg).forEach(([key, value], idx) => {
+        result += '        ';
+        result += idx === 0 ? '-   ' : '    ';
+        result += `${key}: ${value}\n`;
+    });
+    return result;
+};

@@ -27,13 +27,13 @@ Create package group with 'sfdx pony:package:group:export' command.
 
     public async run(): Promise<void> {
         const project = await PonyProject.load();
-        const group = await project.getPackageGroup(this.flags.group);
+        const packages = await project.getPackageGroup(this.flags.group);
         const username = this.org?.getUsername();
         let count: number = 0;
-        for (const it of group.packages) {
+        for (const it of packages) {
             const versionNumber = it.subscriberPackageVersionNumber ? `@${it.subscriberPackageVersionNumber}` : '';
             const label = chalk.blueBright(`${it.subscriberPackageName}${versionNumber}`);
-            this.ux.startSpinner(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${group.packages.length})`);
+            this.ux.startSpinner(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${packages.length})`);
             const result = await sfdx.force.package.install({
                 apexcompile: it.apexCompile,
                 publishwait: it.publishWait,
