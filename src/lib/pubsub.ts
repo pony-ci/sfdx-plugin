@@ -5,7 +5,7 @@ import {Optional} from '@salesforce/ts-types';
 let registeredUX: Optional<UX>;
 let registeredLogger: Optional<Logger>;
 
-export async function getUX(): Promise<UX> {
+export function getUX(): UX {
     if (!registeredUX) {
         throw Error('No UX registered.');
     }
@@ -16,7 +16,7 @@ export function registerUX(ux: UX): void {
     registeredUX = ux;
 }
 
-export async function getLogger(): Promise<Logger> {
+export function getLogger(): Logger {
     if (!registeredLogger) {
         throw Error('No logger registered.');
     }

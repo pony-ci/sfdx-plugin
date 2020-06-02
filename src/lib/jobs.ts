@@ -50,6 +50,7 @@ export class Environment {
 
     public setEnv(name: string, value: Optional<EnvValue>): void {
         this.variables[name] = value;
+        getLogger().info(`set env [${name}]="${value}"`);
         this.sendMessage({
             env: {
                 variables: this.variables
@@ -112,8 +113,8 @@ function isValidEnvValue(value: Optional<string>): boolean {
 }
 
 export async function executeStep(jobs: Jobs, step: Step, environment: Environment): Promise<Environment> {
-    const ux = await getUX();
-    const logger = await getLogger();
+    const ux = getUX();
+    const logger = getLogger();
     logger.info('run step', step, environment);
     const stepKey = Object.keys(step)[0];
     const stepValue = environment.fillString(Object.values(step)[0]);
@@ -139,22 +140,22 @@ export async function executeStep(jobs: Jobs, step: Step, environment: Environme
 async function executeCommand(stepKey: string, stepValue: string, environment: Environment): Promise<Environment> {
     const ux = await getUX();
     const logger = await getLogger();
-    let command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
+    const command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
     ux.log(`${chalk.blueBright(`[run] ${command}`)}`);
     const supportsEnvArg = (c) => [
         'pony:org:create',
         'pony:source:content:replace',
         'pony:source:push'
     ].some(it => c.includes(it));
-    command = supportsEnvArg(command)
+    const commandWithEnv = supportsEnvArg(command)
         ? `${command} --ponyenv '${Environment.stringify(environment)}'` : command;
-    logger.info('spawn', command);
-    const cmd = spawn(command, [], {
+    logger.info('spawn', commandWithEnv);
+    const cmd = spawn(commandWithEnv, [], {
         shell: true,
         stdio: ['inherit', 'inherit', 'inherit', 'ipc']
     });
     let newEnvironment = environment;
-    cmd.on('message', (message) => {
+    cmd.on('message', async (message) => {
         if (isIPCMessage(message)) {
             logger.info('ipc message', JSON.stringify(message, null, 4));
             const {env} = message.pony;

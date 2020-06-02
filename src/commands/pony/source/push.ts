@@ -53,7 +53,7 @@ export default class SourcePushCommand extends PonyCommand {
         if (await project.hasJob(PONY_PRE_SOURCE_PUSH)) {
             env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
         }
-        this.ux.log('Pushing source');
+        this.ux.log('Pushing source...');
         let pushSuccess = false;
         try {
             await sfdx.force.source.push({
@@ -66,6 +66,7 @@ export default class SourcePushCommand extends PonyCommand {
         } catch (e) {
             throw Error('Push failed.');
         } finally {
+            this.ux.log(`Pushing source... ${pushSuccess ? 'done' : 'failed'}`);
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }
         if (await project.hasJob(PONY_POST_SOURCE_PUSH)) {

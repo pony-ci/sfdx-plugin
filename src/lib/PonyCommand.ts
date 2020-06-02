@@ -1,9 +1,9 @@
 import {IConfig} from '@oclif/config';
 import {SfdxCommand, UX} from '@salesforce/command';
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {isArray, isPlainObject} from '@salesforce/ts-types';
 import {EOL} from 'os';
-import {EnvValue, IPCMessage} from './jobs';
+import {hasProp} from '../type-guards/general';
 import {registerLogger, registerUX} from './pubsub';
 
 const run = async (that: PonyCommand, ux: UX, logger: Logger, thatRun) => {
@@ -33,7 +33,7 @@ function preprocessError(errors: unknown): unknown {
     if (errors instanceof String || errors instanceof Error) {
         return errors;
     }
-    if (errors instanceof SfdxError) {
+    if (isPlainObject(errors) && hasProp(errors, 'commandName') && hasProp(errors, 'message')) {
         return (errors.commandName ? `[${errors.commandName}] ` : '') + errors.message;
     }
     if (isArray(errors)) {
@@ -43,7 +43,8 @@ function preprocessError(errors: unknown): unknown {
         if (errors.every(it => isPlainObject(it) && 'commandName' in it && 'message' in it)) {
             return errors.map(preprocessError).join(EOL + EOL);
         }
-        return JSON.stringify(errors, null, 3);
+        return JSON.stringify(errors, null, 4);
     }
-    return JSON.stringify(errors, null, 3);
+    console.log('1');
+    return JSON.stringify(errors, null, 4);
 }

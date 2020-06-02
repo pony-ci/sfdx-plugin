@@ -1,14 +1,13 @@
 import {flags, FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {Connection} from '@salesforce/core';
 import {isArray, isBoolean, isNumber, isString} from '@salesforce/ts-types';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import {DataConfig} from '../../..';
 import {describeSObject} from '../../../lib/data/sObject';
-import {deleteRecords, insertRecords, queryRecords, Record} from '../../../lib/force';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
+import {Record, SalesforceApi} from '../../../lib/salesforce-api';
 import {RelationshipField, SObjectName} from '../../../types/data-config.schema';
 import {defaultRecordsDir, defaultSoqlDeleteDir} from './export';
 
@@ -40,10 +39,14 @@ export default class DataImportCommand extends PonyCommand {
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<void> {
-        const conn = this.org?.getConnection();
-        if (!conn) {
-            throw Error(`Couldn't connect to ${this.org?.getUsername()}`);
+        if (!(await this.canContinue())) {
+            this.ux.warn('Org import forbidden.');
+            return;
         }
+        if (!this.org) {
+            throw Error('Org is required.');
+        }
+        const api = SalesforceApi.create(this.org, this.ux);
         const project = await PonyProject.load();
         const data = await project.getDataConfig();
         const recordsDir = data?.sObjects?.recordsDir || defaultRecordsDir;
@@ -58,12 +61,22 @@ export default class DataImportCommand extends PonyCommand {
                 throw Error(`File with records not found: ${file}`);
             }
         }
-        await this.deleteRecords(conn, data, importOrder);
-        await this.importRecords(conn, data, recordsDir, importOrder);
+        await this.deleteRecords(api, data, importOrder);
+        await this.importRecords(api, data, recordsDir, importOrder);
+    }
+
+    private async canContinue(): Promise<boolean> {
+        const {noprompt} = this.flags;
+        const isScratchOrg = await this.org?.getDevHubOrg() !== undefined;
+        if (!noprompt && !isScratchOrg) {
+            const continuePrompt = await this.ux.prompt('Import in a non scratch org. Allow import (y/n)');
+            return ['y', 'yes'].includes(continuePrompt.toLowerCase());
+        }
+        return true;
     }
 
     private async importRecords(
-        conn: Connection, data: DataConfig, recordsDir: string, importOrder: SObjectName[]
+        api: SalesforceApi, data: DataConfig, recordsDir: string, importOrder: SObjectName[]
     ): Promise<void> {
         const {targetusername} = this.flags;
         const relationships = data?.sObjects?.import?.relationships || {};
@@ -78,12 +91,12 @@ export default class DataImportCommand extends PonyCommand {
                 continue;
             }
             this.ux.log(chalk.blueBright.bold(`Importing ${allCount} ${allCount === 1 ? describe.label : describe.labelPlural}`));
-            await this.populateRelationships(conn, records, relationships[sObjectName] || [], sObjectName);
+            await this.populateRelationships(api, records, relationships[sObjectName] || [], sObjectName);
             let importedCount = 0;
             let i = 0;
             this.ux.startSpinner(`0/${allCount}`);
             do {
-                const importedRecords = await this.importRecordsChunk(conn, records, i++, chunkSize, sObjectName);
+                const importedRecords = await this.importRecordsChunk(api, records, i++, chunkSize, sObjectName);
                 importedCount += importedRecords.length;
                 this.ux.startSpinner(`${importedCount}/${allCount}`);
             } while (importedCount !== allCount);
@@ -92,7 +105,7 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async populateRelationships(
-        conn: Connection, records: Record[], relationshipFields: RelationshipField[], sObjectName: string
+        api: SalesforceApi, records: Record[], relationshipFields: RelationshipField[], sObjectName: string
     ): Promise<void> {
         const {targetusername} = this.flags;
         const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
@@ -108,9 +121,10 @@ export default class DataImportCommand extends PonyCommand {
             }
             const sourceSObject = describeRelationship.referenceTo?.[0];
             const sourceValues = this.getSourceFieldValues(records, relationshipName, fieldName);
+            // todo it.replace(`'`, `\'`);
             const sourceValuesStr = sourceValues.map(it => `'${it}'`).join(',');
             const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})`;
-            const relatedRecords = sourceValues.length ? await queryRecords(conn, this.ux, query) : [];
+            const relatedRecords = sourceValues.length ? await api.query(query) : [];
             for (const record of records) {
                 const sourceValue = record[relationshipName]?.[fieldName];
                 if (sourceValue) {
@@ -135,7 +149,7 @@ export default class DataImportCommand extends PonyCommand {
     }
 
     private async importRecordsChunk(
-        conn: Connection, allRecords: Record[], chunkIndex: number, chunkSize: number, sObjectName: string
+        api: SalesforceApi, allRecords: Record[], chunkIndex: number, chunkSize: number, sObjectName: string
     ): Promise<Record[]> {
         const records = allRecords.slice(chunkIndex * chunkSize, (chunkIndex * chunkSize) + chunkSize);
         if (!records.length) {
@@ -150,27 +164,16 @@ export default class DataImportCommand extends PonyCommand {
             }
             return record;
         });
-        await insertRecords(conn, this.ux, sObjectName, recordsToInsert);
+        await api.insert(sObjectName, recordsToInsert);
         return records;
     }
 
-    private async deleteRecords(conn: Connection, data: DataConfig, importOrder: SObjectName[]): Promise<void> {
-        const {noprompt, targetusername} = this.flags;
+    private async deleteRecords(api: SalesforceApi, data: DataConfig, importOrder: SObjectName[]): Promise<void> {
+        const {targetusername} = this.flags;
         const deleteBeforeImport = data.sObjects?.import?.deleteBeforeImport;
         const soqlDeleteDir = data?.sObjects?.import?.soqlDeleteDir || defaultSoqlDeleteDir;
         const deleteOrder = deleteBeforeImport === false
             ? [] : isArray(deleteBeforeImport) ? deleteBeforeImport : [...importOrder].reverse();
-        const isScratchOrg = await this.org?.getDevHubOrg() !== undefined;
-        let continuePrompt = 'y';
-        if (!noprompt && !isScratchOrg && deleteOrder.length) {
-            continuePrompt = await this.ux.prompt(
-                'Target org is not a scratch org, allow records deletion before import (y/n)');
-        }
-        const canContinue = ['y', 'yes'].includes(continuePrompt.toLowerCase());
-        if (!canContinue) {
-            this.ux.warn('Org deletion forbidden.');
-            return;
-        }
         for (const sObjectName of deleteOrder) {
             await describeSObject(sObjectName, targetusername, {ux: this.ux});
         }
@@ -178,7 +181,7 @@ export default class DataImportCommand extends PonyCommand {
             const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
             this.ux.startSpinner(chalk.blueBright.bold(`Deleting ${describe.labelPlural}`));
             const deleteSoql = toDeleteSoql(soqlDeleteDir, sObjectName);
-            await deleteRecords(conn, this.ux, sObjectName, deleteSoql);
+            await api.delete(sObjectName, deleteSoql);
             this.ux.stopSpinner();
         }
     }

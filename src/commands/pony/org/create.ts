@@ -80,15 +80,17 @@ Flow:
             env = await project.hasJob(PONY_PRE_ORG_CREATE)
                 ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
                 : env;
-            this.ux.log('Creating scratch org');
+            this.ux.startSpinner('Creating scratch org');
             const args = this.getOrgCreateArgs(project, orgCreate);
             orgCreateResult = await sfdx.force.org.create(this.options, args);
             if (isJsonMap(orgCreateResult) && 'username' in orgCreateResult && isString(orgCreateResult.username)) {
+                this.ux.stopSpinner();
                 org = await Org.create({aliasOrUsername: orgCreateResult.username});
                 env.setEnv('username', org.getUsername());
                 env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             } else {
-                throw Error(`Unexpected 'force:org:create' result: ${JSON.stringify(orgCreateResult)}`);
+                this.ux.error(JSON.stringify(orgCreateResult, null, 4));
+                this.ux.stopSpinner('failed');
             }
         }
         if (await project.hasJob(PONY_POST_ORG_CREATE)) {
