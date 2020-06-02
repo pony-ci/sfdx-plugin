@@ -25,6 +25,27 @@
     },
     "sourceValidate": {
       "$ref": "source-validate.schema.json"
+    },
+    "users": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/user"
+      }
+    }
+  },
+  "definitions": {
+    "user": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
     }
   }
 }

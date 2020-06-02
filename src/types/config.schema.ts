@@ -16,6 +16,9 @@ export interface Config {
    */
   sourceSort?: ("all" | "source" | "none") | [string];
   sourceValidate?: SourceValidate;
+  users?: {
+    [k: string]: User;
+  };
 }
 export interface DataConfig {
   sObjects?: {
@@ -77,4 +80,7 @@ export interface OrgWideEmailAddressReplacement {
 export interface SourceValidate {
   deleteOrg?: boolean | ("always" | "never" | "onSuccess");
   trackedFieldHistory?: boolean | ["error" | "warning" | "info", number, ...string[]];
+}
+export interface User {
+  [k: string]: string | boolean;
 }

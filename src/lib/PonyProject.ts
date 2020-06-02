@@ -48,6 +48,10 @@ export default class PonyProject {
         return path.basename(this.projectDir).toLowerCase().replace(/[^a-z0-9-_]/g, '');
     }
 
+    public getNormalizedProjectName(): string {
+        return this.getProjectName().slice(0, 10);
+    }
+
     public async getPackageGroup(name: string = 'default'): Promise<PackageGroup> {
         if (!this.packageGroups.name) {
             this.packageGroups.name = await readPackageGroup(name, this.projectDir);

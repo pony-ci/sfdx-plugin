@@ -85,7 +85,7 @@ If not specified, the profile is assigned to target username.
         if (assigner) {
             return assigner;
         }
-        const assignerUsername = `${project.getProjectName().slice(0, 10)}-${new Date().valueOf()}@pony.assigner`;
+        const assignerUsername = `${project.getNormalizedProjectName()}-${new Date().valueOf()}@pony.assigner`;
         this.log(`Creating a user ${assignerUsername} who will assign the profile.`);
         await sfdx.force.user.create({
             targetusername,

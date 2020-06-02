@@ -13,11 +13,9 @@ export default class UserUpdateCommand extends PonyCommand {
         values: flags.string({
             char: 'v',
             description: 'a list of <fieldName>=<value> pairs to search for',
-            multiple: true
+            required: true,
         })
     };
-
-    protected static strict: boolean = false;
 
     public async run(): Promise<void> {
         const {values} = this.flags;
