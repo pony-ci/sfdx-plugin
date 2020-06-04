@@ -86,15 +86,17 @@ Flow:
                 : env;
             this.ux.startSpinner('Creating scratch org');
             const args = this.getOrgCreateArgs(project, orgCreate);
-            orgCreateResult = await sfdx.force.org.create(this.options, args);
+            try {
+                orgCreateResult = await sfdx.force.org.create(this.options, args);
+            } catch (e) {
+                this.ux.stopSpinner('failed');
+                throw e;
+            }
             if (isJsonMap(orgCreateResult) && 'username' in orgCreateResult && isString(orgCreateResult.username)) {
                 this.ux.stopSpinner();
                 org = await Org.create({aliasOrUsername: orgCreateResult.username});
                 env.setEnv('username', org.getUsername());
                 env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
-            } else {
-                this.ux.error(JSON.stringify(orgCreateResult, null, 4));
-                this.ux.stopSpinner('failed');
             }
         }
         if (await project.hasJob(PONY_POST_ORG_CREATE)) {
