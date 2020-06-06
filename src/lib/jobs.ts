@@ -2,7 +2,7 @@ import {Dictionary, isAnyJson, isArray, isJsonMap, isString, Optional} from '@sa
 import chalk from 'chalk';
 import {spawn} from 'child_process';
 import {Jobs} from '..';
-import {Job, Step} from '../types/jobs.schema';
+import {Step} from '../types/jobs.schema';
 import {getLogger, getUX} from './pubsub';
 
 export interface IPCMessage {
@@ -89,21 +89,30 @@ export class Environment {
     }
 }
 
-export async function executeJobByName(jobs: Jobs, name: string, env: Environment): Promise<Environment> {
+export async function executeJobByName(
+    jobs: Jobs, name: string, env: Environment, hrtimeInit?: [number, number]
+): Promise<Environment> {
     if (!jobs[name]) {
         throw Error(`Job not found: ${name}`);
     }
     const ux = await getUX();
-    ux.log(chalk.blueBright.bold(`=== [job] ${name}`));
-    return executeJob(jobs, jobs[name], env);
-}
-
-export async function executeJob(jobs: Jobs, job: Job, env: Environment): Promise<Environment> {
     const logger = await getLogger();
-    logger.info('run job', job, env);
+    ux.log(chalk.blueBright.bold(`=== [job] ${name}`));
+    logger.info('run job', jobs[name], env);
     let currEnv = env;
-    for (const step of job.steps || []) {
-        currEnv = await executeStep(jobs, step, currEnv);
+    const hrtime: [number, number] = hrtimeInit || process.hrtime();
+    for (const step of jobs[name].steps || []) {
+        const hrtimeStep = process.hrtime();
+        const isJobStep = Object.keys(step)[0] === 'job';
+        try {
+            currEnv = await executeStep(jobs, step, currEnv, hrtime);
+        } catch (e) {
+            throw e;
+        } finally {
+            if (!isJobStep) {
+                ux.log(`step time: ${secondsFormatter(process.hrtime(hrtimeStep)[0])}, total time: ${secondsFormatter(process.hrtime(hrtime)[0])}`);
+            }
+        }
     }
     return currEnv;
 }
@@ -112,7 +121,9 @@ function isValidEnvValue(value: Optional<string>): boolean {
     return !(isString(value) && !RegExp('^[a-zA-Z_]+=.*$').test(value));
 }
 
-export async function executeStep(jobs: Jobs, step: Step, environment: Environment): Promise<Environment> {
+export async function executeStep(
+    jobs: Jobs, step: Step, environment: Environment, hrtime: [number, number]
+): Promise<Environment> {
     const ux = getUX();
     const logger = getLogger();
     logger.info('run step', step, environment);
@@ -130,7 +141,7 @@ export async function executeStep(jobs: Jobs, step: Step, environment: Environme
         ux.log(`${chalk.blueBright(`[echo]`)} ${Object.values(step)[0]}`);
         ux.log(stepValue);
     } else if (stepKey === 'job') {
-        return executeJobByName(jobs, stepValue, newEnv);
+        return executeJobByName(jobs, stepValue, newEnv, hrtime);
     } else {
         return executeCommand(stepKey, stepValue, newEnv);
     }
@@ -167,3 +178,13 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
         cmd.on('close', (code) => code ? reject(error(code)) : resolve(newEnvironment));
     });
 }
+
+function secondsFormatter(secs: number): string {
+    const [h, m, s]: number[] = secondsParser(secs);
+    const seconds = (h + m + s) === 0 ? '<1s' : s > 0 ? `${s}s` : '';
+    return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m ` : ''}${seconds}`;
+}
+
+const secondsParser = (secs: number) => [
+    Math.floor(secs / 3600), Math.floor(secs % 3600 / 60), Math.floor(secs % 3600 % 60)
+];
