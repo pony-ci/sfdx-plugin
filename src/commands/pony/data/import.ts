@@ -7,7 +7,7 @@ import {DataConfig} from '../../..';
 import {describeSObject} from '../../../lib/data/sObject';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
-import {Record, SalesforceApi} from '../../../lib/salesforce-api';
+import {Record, SalesforceApi} from '../../../lib/salesforceApi';
 import {RelationshipField, SObjectName} from '../../../types/data-config.schema';
 import {defaultRecordsDir, defaultSoqlDeleteDir} from './export';
 
@@ -121,9 +121,9 @@ export default class DataImportCommand extends PonyCommand {
             }
             const sourceSObject = describeRelationship.referenceTo?.[0];
             const sourceValues = this.getSourceFieldValues(records, relationshipName, fieldName);
-            // todo it.replace(`'`, `\'`);
-            const sourceValuesStr = sourceValues.map(it => `'${it}'`).join(',');
-            const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})`;
+            const sourceValuesStr = sourceValues.map(it => `'${it.replace(`'`, `\\'`)}'`).join(',');
+            const recordTypeWhereClause = sourceSObject === 'RecordType' ? ` AND SObjectType = '${sObjectName}'` : '';
+            const query = `SELECT Id,${fieldName} FROM ${sourceSObject} WHERE ${fieldName} IN (${sourceValuesStr})${recordTypeWhereClause}`;
             const relatedRecords = sourceValues.length ? await api.query(query) : [];
             for (const record of records) {
                 const sourceValue = record[relationshipName]?.[fieldName];
@@ -174,9 +174,6 @@ export default class DataImportCommand extends PonyCommand {
         const soqlDeleteDir = data?.sObjects?.import?.soqlDeleteDir || defaultSoqlDeleteDir;
         const deleteOrder = deleteBeforeImport === false
             ? [] : isArray(deleteBeforeImport) ? deleteBeforeImport : [...importOrder].reverse();
-        for (const sObjectName of deleteOrder) {
-            await describeSObject(sObjectName, targetusername, {ux: this.ux});
-        }
         for (const sObjectName of deleteOrder) {
             const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
             this.ux.startSpinner(chalk.blueBright.bold(`Deleting ${describe.labelPlural}`));
