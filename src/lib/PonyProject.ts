@@ -1,22 +1,11 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
 import {AnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
-import {existsSync} from 'fs';
 import fs, {readFileSync} from 'fs-extra';
 import https from 'https';
 import path from 'path';
 import slash from 'slash';
 import yaml from 'yaml';
-import {
-    Config,
-    DataConfig,
-    isConfig,
-    isDataConfig,
-    isPackageGroup,
-    PackageGroup,
-    validateConfig,
-    validateDataConfig,
-    validatePackageGroup
-} from '..';
+import {Config, DataConfig, isConfig, PackageGroup, validateConfig} from '..';
 import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
@@ -107,9 +96,9 @@ export default class PonyProject {
         return name in jobs;
     }
 
-    public async executeJobByName(name: string, env: Environment): Promise<Environment> {
+    public async executeJobByName(name: string, env: Environment, hrtime: [number, number]): Promise<Environment> {
         const {jobs = {}} = await this.getPonyConfig();
-        return executeJobByName(jobs, name, env);
+        return executeJobByName(jobs, name, env, hrtime);
     }
 }
 

@@ -74,6 +74,7 @@ Flow:
         const {orgCreate = {}} = await project.getPonyConfig();
         let org: Optional<Org> = this.org;
         let orgCreateResult: AnyJson = {};
+        const hrtime = process.hrtime();
         if (targetusername) {
             if (!org) {
                 throw Error(`Non existing user ${targetusername}`);
@@ -82,7 +83,7 @@ Flow:
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
             env = await project.hasJob(PONY_PRE_ORG_CREATE)
-                ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
+                ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env, hrtime)
                 : env;
             this.ux.startSpinner('Creating scratch org');
             const args = this.getOrgCreateArgs(project, orgCreate);
@@ -100,7 +101,7 @@ Flow:
             }
         }
         if (await project.hasJob(PONY_POST_ORG_CREATE)) {
-            await project.executeJobByName(PONY_POST_ORG_CREATE, env);
+            await project.executeJobByName(PONY_POST_ORG_CREATE, env, hrtime);
         }
         return orgCreateResult;
     }

@@ -30,7 +30,7 @@ export default class RunCommand extends PonyCommand {
         const config = await project.getPonyConfig();
         const jobs = config.jobs || {};
         if (jobs[job]) {
-            await executeJobByName(jobs, job, Environment.create());
+            await executeJobByName(jobs, job, Environment.create(), process.hrtime());
         } else if (!onlyifdefined) {
             throw Error(`Job not found: ${job}`);
         }

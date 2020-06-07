@@ -50,8 +50,9 @@ export default class SourcePushCommand extends PonyCommand {
         const backup = FilesBackup.create(project.projectDir);
         backup.clean();
         let env = Environment.parse(this.flags.ponyenv);
+        const hrtime = process.hrtime();
         if (await project.hasJob(PONY_PRE_SOURCE_PUSH)) {
-            env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
+            env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env, hrtime);
         }
         this.ux.log('Pushing source...');
         let pushSuccess = false;
@@ -70,7 +71,7 @@ export default class SourcePushCommand extends PonyCommand {
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }
         if (await project.hasJob(PONY_POST_SOURCE_PUSH)) {
-            await project.executeJobByName(PONY_POST_SOURCE_PUSH, env);
+            await project.executeJobByName(PONY_POST_SOURCE_PUSH, env, hrtime);
         }
     }
 }

@@ -90,7 +90,7 @@ export class Environment {
 }
 
 export async function executeJobByName(
-    jobs: Jobs, name: string, env: Environment, hrtimeInit?: [number, number]
+    jobs: Jobs, name: string, env: Environment, hrtime: [number, number]
 ): Promise<Environment> {
     if (!jobs[name]) {
         throw Error(`Job not found: ${name}`);
@@ -100,7 +100,6 @@ export async function executeJobByName(
     ux.log(chalk.blueBright.bold(`=== [job] ${name}`));
     logger.info('run job', jobs[name], env);
     let currEnv = env;
-    const hrtime: [number, number] = hrtimeInit || process.hrtime();
     for (const step of jobs[name].steps || []) {
         const hrtimeStep = process.hrtime();
         const isJobStep = Object.keys(step)[0] === 'job';
@@ -110,7 +109,7 @@ export async function executeJobByName(
             throw e;
         } finally {
             if (!isJobStep) {
-                ux.log(`step time: ${secondsFormatter(process.hrtime(hrtimeStep)[0])}, total time: ${secondsFormatter(process.hrtime(hrtime)[0])}`);
+                ux.log(`time: ${secondsFormatter(process.hrtime(hrtimeStep)[0])}, total time: ${secondsFormatter(process.hrtime(hrtime)[0])}`);
             }
         }
     }
