@@ -6,7 +6,7 @@ import {sfdx} from '../../..';
 import PonyCommand from '../../../lib/PonyCommand';
 import {tmp} from '../../../lib/tmp';
 
-interface ConnectedAppCommand {
+interface ConnectedApp {
     label: string;
     fullName: string;
     oauthConfig?: {
@@ -84,7 +84,7 @@ const scopeOptions = [
     'Eclair'
 ];
 
-export default class ConnectedAppCreate extends PonyCommand {
+export default class ConnectedAppCreateCommand extends PonyCommand {
 
     public static description: string = ``;
 
