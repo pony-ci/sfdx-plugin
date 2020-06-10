@@ -1,11 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/package-group.schema.json",
-  "title": "Package Group",
-  "type": "array",
-  "additionalItems": false,
-  "items": {
-    "$ref": "#/definitions/package"
+  "title": "Package Groups",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "additionalItems": false,
+    "items": {
+      "$ref": "#/definitions/package"
+    }
   },
   "definitions": {
     "package": {
@@ -13,42 +16,29 @@
       "title": "Package",
       "additionalProperties": false,
       "required": [
-        "subscriberPackageName",
-        "subscriberPackageVersionId"
+        "SubscriberPackageName",
+        "SubscriberPackageVersionId"
       ],
       "properties": {
-        "subscriberPackageId": {
+        "SubscriberPackageId": {
           "type": "string"
         },
-        "subscriberPackageName": {
+        "SubscriberPackageName": {
           "type": "string"
         },
-        "subscriberPackageNamespace": {
+        "SubscriberPackageNamespace": {
           "type": "string"
         },
-        "subscriberPackageVersionId": {
+        "SubscriberPackageVersionId": {
           "type": "string",
           "description": "ID (starts with 04t) or alias of the package version to install"
         },
-        "subscriberPackageVersionName": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            }
-          ]
+        "SubscriberPackageVersionName": {
+          "type": "string"
         },
-        "subscriberPackageVersionNumber": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            }
-          ]        },
+        "SubscriberPackageVersionNumber": {
+          "type": "string"
+        },
         "apexCompile": {
           "type": "string",
           "enum": [

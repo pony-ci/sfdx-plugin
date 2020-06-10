@@ -31,16 +31,16 @@ Create package group with 'sfdx pony:package:group:export' command.
         const username = this.org?.getUsername();
         let count: number = 0;
         for (const it of packages) {
-            const versionNumber = it.subscriberPackageVersionNumber ? `@${it.subscriberPackageVersionNumber}` : '';
-            const label = chalk.blueBright(`${it.subscriberPackageName}${versionNumber}`);
-            this.ux.startSpinner(`Installing package ${label} [${it.subscriberPackageVersionId}] (${++count}/${packages.length})`);
+            const versionNumber = it.SubscriberPackageVersionNumber ? `@${it.SubscriberPackageVersionNumber}` : '';
+            const label = chalk.blueBright(`${it.SubscriberPackageName}${versionNumber}`);
+            this.ux.startSpinner(`Installing package ${label} [${it.SubscriberPackageVersionId}] (${++count}/${packages.length})`);
             const result = await sfdx.force.package.install({
                 apexcompile: it.apexCompile,
                 publishwait: it.publishWait,
                 installationkey: it.installationKey,
                 securitytype: it.securityType,
                 upgradetype: it.upgradeType,
-                package: it.subscriberPackageVersionId,
+                package: it.SubscriberPackageVersionId,
                 wait: it.wait || 200,
                 targetusername: username,
                 quiet: true,

@@ -46,7 +46,7 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
 
     public async run(): Promise<void> {
         const project = await PonyProject.load();
-        const {sourceSort} = await project.getPonyConfig();
+        const {sourceSort} = project.ponyConfig;
         const {files} = this.flags;
         if (files) {
             for (const file of files) {
@@ -115,8 +115,8 @@ function stringCompare(a: string, b: string): number {
     return 0;
 }
 
-function sort(component: Component, sortDefinition: SortDefinition): [string, string][] {
-    const allDuplicates: [string, any][] = [];
+function sort(component: Component, sortDefinition: SortDefinition): [string, unknown][] {
+    const allDuplicates: [string, unknown][] = [];
     const root = Object.values(component)[0];
     if (!root) {
         throw Error('Invalid component.');

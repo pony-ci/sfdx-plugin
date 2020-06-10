@@ -24,7 +24,7 @@ export default class DataExportCommand extends PonyCommand {
 
     public async run(): Promise<void> {
         const project = await PonyProject.load();
-        const {sObjects = {}} = await project.getDataConfig();
+        const {sObjects = {}} = project.dataConfig;
         const recordsDir = sObjects.recordsDir || defaultRecordsDir;
         const soqlExportDir = sObjects.export?.soqlExportDir || defaultSoqlExportDir;
         const exportOrder = sObjects.export?.order || reversedOrder;

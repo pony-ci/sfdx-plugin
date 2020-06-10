@@ -39,7 +39,7 @@ export default class SourcePushCommand extends PonyCommand {
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.create()),
+            default: Environment.stringify(Environment.default()),
             hidden: true
         })
     };
@@ -50,9 +50,8 @@ export default class SourcePushCommand extends PonyCommand {
         const backup = FilesBackup.create(project.projectDir);
         backup.clean();
         let env = Environment.parse(this.flags.ponyenv);
-        const hrtime = process.hrtime();
         if (await project.hasJob(PONY_PRE_SOURCE_PUSH)) {
-            env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env, hrtime);
+            env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
         }
         this.ux.log('Pushing source...');
         let pushSuccess = false;
@@ -71,7 +70,7 @@ export default class SourcePushCommand extends PonyCommand {
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }
         if (await project.hasJob(PONY_POST_SOURCE_PUSH)) {
-            await project.executeJobByName(PONY_POST_SOURCE_PUSH, env, hrtime);
+            await project.executeJobByName(PONY_POST_SOURCE_PUSH, env);
         }
     }
 }

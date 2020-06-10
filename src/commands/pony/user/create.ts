@@ -20,7 +20,7 @@ export default class UserCreateCommand extends PonyCommand {
 
     public async run(): Promise<void> {
         const project = await PonyProject.load();
-        const {users = {}} = await project.getPonyConfig();
+        const {users = {}} = project.ponyConfig;
         const d = new Date();
         const names = this.flags.name.split(',').map(it => it.trim());
         for (const name of names) {

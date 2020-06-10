@@ -28,12 +28,12 @@ interface InstalledPackage {
 
 function mapInstalledPackageToPackage(pkg: InstalledPackage): Package {
     return {
-        subscriberPackageId: pkg.SubscriberPackageId,
-        subscriberPackageName: pkg.SubscriberPackageName,
-        subscriberPackageNamespace: pkg.SubscriberPackageNamespace,
-        subscriberPackageVersionId: pkg.SubscriberPackageVersionId,
-        subscriberPackageVersionName: pkg.SubscriberPackageVersionName,
-        subscriberPackageVersionNumber: pkg.SubscriberPackageVersionNumber,
+        SubscriberPackageId: pkg.SubscriberPackageId,
+        SubscriberPackageName: pkg.SubscriberPackageName,
+        SubscriberPackageNamespace: pkg.SubscriberPackageNamespace,
+        SubscriberPackageVersionId: pkg.SubscriberPackageVersionId,
+        SubscriberPackageVersionName: pkg.SubscriberPackageVersionName,
+        SubscriberPackageVersionNumber: pkg.SubscriberPackageVersionNumber,
     };
 }
 
@@ -73,7 +73,7 @@ Exported package group is a ordered list of packages that can be installed with 
         const packages: Package[] = installedPackages.map(mapInstalledPackageToPackage);
         const filtered: Package[] = [];
         for (const pkg of packages) {
-            if (standardSubscriberPackageNames.includes(pkg.subscriberPackageName)) {
+            if (standardSubscriberPackageNames.includes(pkg.SubscriberPackageName)) {
                 this.ux.log(`Removing standard package from group: ${this.packageToString(pkg)}`);
             } else {
                 this.ux.log(`Add package to group: ${this.packageToString(pkg)}`);
@@ -83,8 +83,8 @@ Exported package group is a ordered list of packages that can be installed with 
         return filtered;
     }
 
-    private packageToString({subscriberPackageName, subscriberPackageVersionNumber}: Package): string {
-        return `${subscriberPackageName} (${subscriberPackageVersionNumber})`;
+    private packageToString({SubscriberPackageName, SubscriberPackageVersionNumber}: Package): string {
+        return `${SubscriberPackageName} (${SubscriberPackageVersionNumber})`;
     }
 
     private logPackages(packages: Package[]): void {

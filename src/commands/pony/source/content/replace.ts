@@ -27,7 +27,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.create()),
+            default: Environment.stringify(Environment.default()),
             hidden: true
         })
     };
@@ -38,7 +38,7 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         const env = Environment.parse(this.flags.ponyenv);
         const {replacement} = this.flags;
         const project = await PonyProject.load();
-        const {replacements = {}} = await project.getPonyConfig();
+        const {replacements = {}} = project.ponyConfig;
         const rpl = replacements[replacement];
         if (rpl) {
             if (isInnerTextReplacement(rpl) && rpl.innerText) {

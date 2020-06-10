@@ -14,7 +14,7 @@ export default class RunCommand extends PonyCommand {
 
     public static readonly flagsConfig: FlagsConfig = {
         onlyifdefined: flags.boolean({
-            description: 'execute the job only if defined',
+            description: 'execute the job only if defined, otherwise throw error',
             default: false
         })
     };
@@ -27,10 +27,10 @@ export default class RunCommand extends PonyCommand {
         const {onlyifdefined} = this.flags;
         const {job} = this.args;
         const project = await PonyProject.load();
-        const config = await project.getPonyConfig();
+        const config = project.ponyConfig;
         const jobs = config.jobs || {};
-        if (jobs[job]) {
-            await executeJobByName(jobs, job, Environment.create(), process.hrtime());
+        if (project.hasJob(job)) {
+            await executeJobByName(jobs, job, Environment.default());
         } else if (!onlyifdefined) {
             throw Error(`Job not found: ${job}`);
         }

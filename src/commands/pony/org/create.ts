@@ -46,7 +46,7 @@ Flow:
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.create()),
+            default: Environment.stringify(Environment.default()),
             hidden: true
         })
     };
@@ -64,6 +64,7 @@ Flow:
             setdefaultusername: this.flags.setdefaultusername,
             setalias: this.flags.setalias,
             durationdays: this.flags.durationdays,
+            somethingElse: 'aadsa'
         };
     }
 
@@ -71,10 +72,11 @@ Flow:
         const {targetusername} = this.flags;
         let env = Environment.parse(this.flags.ponyenv);
         const project = await PonyProject.load();
-        const {orgCreate = {}} = await project.getPonyConfig();
-        let org: Optional<Org> = this.org;
+        const {orgCreate = {}} = project.ponyConfig;
+        let org = this.org;
         let orgCreateResult: AnyJson = {};
-        const hrtime = process.hrtime();
+        // todo cant specify both alias and targetusername
+        // todo decide whether use default org instead of targetusername
         if (targetusername) {
             if (!org) {
                 throw Error(`Non existing user ${targetusername}`);
@@ -83,7 +85,7 @@ Flow:
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
             env = await project.hasJob(PONY_PRE_ORG_CREATE)
-                ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env, hrtime)
+                ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
                 : env;
             this.ux.startSpinner('Creating scratch org');
             const args = this.getOrgCreateArgs(project, orgCreate);
@@ -95,13 +97,14 @@ Flow:
             }
             if (isJsonMap(orgCreateResult) && 'username' in orgCreateResult && isString(orgCreateResult.username)) {
                 this.ux.stopSpinner();
+                this.ux.log(`Successfully created scratch org: ${orgCreateResult.orgId}, username: ${orgCreateResult.username}`);
                 org = await Org.create({aliasOrUsername: orgCreateResult.username});
                 env.setEnv('username', org.getUsername());
                 env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             }
         }
         if (await project.hasJob(PONY_POST_ORG_CREATE)) {
-            await project.executeJobByName(PONY_POST_ORG_CREATE, env, hrtime);
+            await project.executeJobByName(PONY_POST_ORG_CREATE, env);
         }
         return orgCreateResult;
     }

@@ -14,6 +14,7 @@ export interface IPCMessage {
 }
 
 type Variables = Dictionary<EnvValue>;
+type HrTime = [number, number];
 
 export const isIPCMessage = (value: unknown): value is IPCMessage =>
     isAnyJson(value) && isJsonMap(value) && 'pony' in value && isJsonMap(value.pony);
@@ -25,23 +26,29 @@ function isEnvValue(value: unknown): value is EnvValue {
 }
 
 export class Environment {
-    public readonly variables: Variables;
+    public readonly hrtime: [number, number];
+    private readonly variables: Variables;
 
-    private constructor(variables: Variables) {
+    private constructor(variables: Variables, hrtime: HrTime) {
         this.variables = variables;
+        this.hrtime = hrtime;
     }
 
-    public static create(variables: Variables = {}): Environment {
-        return new Environment(variables);
+    public static create(variables: Variables, hrtime: HrTime): Environment {
+        return new Environment(variables, hrtime);
     }
 
     public static parse(json: string): Environment {
-        const {variables} = JSON.parse(json);
-        return Environment.create(variables);
+        const {variables, hrtime} = JSON.parse(json);
+        return Environment.create(variables, hrtime);
+    }
+
+    public static default(): Environment {
+        return Environment.create({}, process.hrtime());
     }
 
     public static stringify(env: Environment): string {
-        return JSON.stringify({variables: env.variables});
+        return JSON.stringify({variables: env.variables, hrtime: env.hrtime});
     }
 
     public getEnv(name: string): Optional<EnvValue> {
@@ -90,7 +97,7 @@ export class Environment {
 }
 
 export async function executeJobByName(
-    jobs: Jobs, name: string, env: Environment, hrtime: [number, number]
+    jobs: Jobs, name: string, env: Environment
 ): Promise<Environment> {
     if (!jobs[name]) {
         throw Error(`Job not found: ${name}`);
@@ -104,12 +111,12 @@ export async function executeJobByName(
         const hrtimeStep = process.hrtime();
         const isJobStep = Object.keys(step)[0] === 'job';
         try {
-            currEnv = await executeStep(jobs, step, currEnv, hrtime);
+            currEnv = await executeStep(jobs, step, currEnv);
         } catch (e) {
             throw e;
         } finally {
             if (!isJobStep) {
-                ux.log(`time: ${secondsFormatter(process.hrtime(hrtimeStep)[0])}, total time: ${secondsFormatter(process.hrtime(hrtime)[0])}`);
+                ux.log(`time: ${secondsFormatter(process.hrtime(hrtimeStep)[0])} | total time: ${secondsFormatter(process.hrtime(env.hrtime)[0])}`);
             }
         }
     }
@@ -121,7 +128,7 @@ function isValidEnvValue(value: Optional<string>): boolean {
 }
 
 export async function executeStep(
-    jobs: Jobs, step: Step, environment: Environment, hrtime: [number, number]
+    jobs: Jobs, step: Step, environment: Environment
 ): Promise<Environment> {
     const ux = getUX();
     const logger = getLogger();
@@ -140,7 +147,7 @@ export async function executeStep(
         ux.log(`${chalk.blueBright(`[echo]`)} ${Object.values(step)[0]}`);
         ux.log(stepValue);
     } else if (stepKey === 'job') {
-        return executeJobByName(jobs, stepValue, newEnv, hrtime);
+        return executeJobByName(jobs, stepValue, newEnv);
     } else {
         return executeCommand(stepKey, stepValue, newEnv);
     }
@@ -169,7 +176,7 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
         if (isIPCMessage(message)) {
             logger.info('ipc message', JSON.stringify(message, null, 4));
             const {env} = message.pony;
-            newEnvironment = Environment.create(env.variables);
+            newEnvironment = Environment.create(env.variables, newEnvironment.hrtime);
         }
     });
     return new Promise((resolve, reject) => {

@@ -1,11 +1,20 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
 import {AnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
-import fs, {readFileSync} from 'fs-extra';
+import fs, {readFileSync, readJSONSync} from 'fs-extra';
 import https from 'https';
 import path from 'path';
 import slash from 'slash';
 import yaml from 'yaml';
-import {Config, DataConfig, isConfig, PackageGroup, validateConfig} from '..';
+import {
+    Config,
+    DataConfig,
+    isConfig,
+    isPackageGroups,
+    Package,
+    PackageGroups,
+    validateConfig,
+    validatePackageGroups
+} from '..';
 import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
@@ -14,23 +23,24 @@ type Task = (arg: TaskArg) => TaskResult;
 type TaskArg = object;
 type TaskResult = unknown;
 
-type TaskDefinitions = { [key: string]: Task };
-
 export default class PonyProject {
 
     public readonly projectDir: string;
+    public ponyConfig: Config;
+    public dataConfig: DataConfig;
     private sfdxProject: Optional<SfdxProject>;
     private sfdxProjectJson: Optional<SfdxProjectJson>;
-    private ponyConfig: Optional<Config>;
-    private dataConfig: Optional<DataConfig>;
-    private readonly packageGroups: { [name: string]: PackageGroup } = {};
 
-    private constructor(projectDir: string) {
+    private constructor(projectDir: string, ponyConfig: Config, dataConfig: DataConfig) {
         this.projectDir = projectDir;
+        this.ponyConfig = ponyConfig;
+        this.dataConfig = dataConfig;
     }
 
     public static async load(projectDir: string = process.cwd()): Promise<PonyProject> {
-        return new PonyProject(projectDir);
+        const ponyConfig = await readConfig(projectDir);
+        const dataConfig = ponyConfig.data || {};
+        return new PonyProject(projectDir, ponyConfig, dataConfig);
     }
 
     public getProjectName(): string {
@@ -41,21 +51,12 @@ export default class PonyProject {
         return this.getProjectName().slice(0, 10);
     }
 
-    public async getPackageGroup(name: string = 'default'): Promise<PackageGroup> {
-        const {packages = {}} = await this.getPonyConfig();
-        return packages[name];
-    }
-
-    public async getPonyConfig(): Promise<Config> {
-        if (!this.ponyConfig) {
-            this.ponyConfig = await readConfig(this.projectDir);
+    public async getPackageGroup(name: string = 'default'): Promise<Package[]> {
+        const packageGroups = await readPackageGroups(this.projectDir);
+        if (name in packageGroups) {
+            return packageGroups[name];
         }
-        return this.ponyConfig;
-    }
-
-    public async getDataConfig(): Promise<DataConfig> {
-        const config = await this.getPonyConfig();
-        return config.data || {};
+        throw new Error(`No group named ${name} found.`);
     }
 
     public async getSfdxProjectJson(): Promise<SfdxProjectJson> {
@@ -91,15 +92,27 @@ export default class PonyProject {
         );
     }
 
-    public async hasJob(name: string): Promise<boolean> {
-        const {jobs = {}} = await this.getPonyConfig();
+    public hasJob(name: string): boolean {
+        const {jobs = {}} = this.ponyConfig;
         return name in jobs;
     }
 
-    public async executeJobByName(name: string, env: Environment, hrtime: [number, number]): Promise<Environment> {
-        const {jobs = {}} = await this.getPonyConfig();
-        return executeJobByName(jobs, name, env, hrtime);
+    public async executeJobByName(name: string, env: Environment): Promise<Environment> {
+        const {jobs = {}} = this.ponyConfig;
+        return executeJobByName(jobs, name, env);
     }
+}
+
+async function readPackageGroups(projectDir: string): Promise<PackageGroups> {
+    const file = path.join(projectDir, '/data/groups/packages.json');
+    if (!fs.existsSync(file)) {
+        return {};
+    }
+    const groups = readJSONSync(file);
+    if (!isPackageGroups(groups)) {
+        throw Error(`${validatePackageGroups(groups)}`);
+    }
+    return groups;
 }
 
 async function readConfig(projectDir: string): Promise<Config> {

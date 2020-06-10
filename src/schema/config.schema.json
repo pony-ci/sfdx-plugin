@@ -14,11 +14,6 @@
     "jobs": {
       "$ref": "jobs.schema.json"
     },
-    "packages": {
-      "additionalProperties": {
-        "$ref": "package-group.schema.json"
-      }
-    },
     "orgCreate": {
       "$ref": "org-create.schema.json"
     },

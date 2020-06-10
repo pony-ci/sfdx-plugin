@@ -41,7 +41,7 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
     public async run(): Promise<AnyJson> {
         const project = await PonyProject.load();
-        const data = await project.getDataConfig();
+        const data = project.dataConfig;
         const query = await this.buildQuery();
         const soqlExportDir = data?.sObjects?.export?.soqlExportDir || 'data/soql/export';
         await this.writeQuery(query, soqlExportDir);

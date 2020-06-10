@@ -48,7 +48,7 @@ export default class DataImportCommand extends PonyCommand {
         }
         const api = SalesforceApi.create(this.org, this.ux);
         const project = await PonyProject.load();
-        const data = await project.getDataConfig();
+        const data = project.dataConfig;
         const recordsDir = data?.sObjects?.recordsDir || defaultRecordsDir;
         const importOrder = data?.sObjects?.import?.order || [];
         if (!importOrder.length) {

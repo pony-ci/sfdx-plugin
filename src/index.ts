@@ -9,3 +9,4 @@ export * from './type-guards/schema';
 
 export * from './types/config.schema';
 export {Replacement, OrgWideEmailAddressReplacement, InnerTextReplacement} from './types/replacements.schema';
+export * from './types/package-groups.schema';
