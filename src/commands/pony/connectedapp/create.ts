@@ -1,6 +1,7 @@
 import {flags, FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {definiteValuesOf} from '@salesforce/ts-types';
 import {ensureDirSync, writeFileSync} from 'fs-extra';
+import {EOL} from 'os';
 import path from 'path';
 import {sfdx} from '../../..';
 import PonyCommand from '../../../lib/PonyCommand';
@@ -10,18 +11,15 @@ interface ConnectedApp {
     label: string;
     fullName: string;
     oauthConfig?: {
-        callbackurl?: string;
+        callbackUrl?: string;
         scopes?: string[];
-        isadminapproved?: string;
         certificate?: string;
     };
-    profilename?: string[];
-    permissionsetname?: string[];
-    contactemail: string;
+    contactEmail: string;
 }
 
 function createConnectedAppComponentString(
-    {label, fullName, oauthConfig, contactemail, permissionsetname, profilename}: ConnectedApp
+    {label, fullName, oauthConfig, contactEmail}: ConnectedApp
 ): string {
     const gt = '<';
     const result: string[] = [
@@ -32,33 +30,24 @@ function createConnectedAppComponentString(
     result.push(`  <fullName>${fullName}</fullName>`);
     if (oauthConfig && definiteValuesOf(oauthConfig).length) {
         result.push(`  <oauthConfig>`);
-        if (oauthConfig.callbackurl) {
-            result.push(`    <callbackUrl>${oauthConfig.callbackurl}</callbackUrl>`);
-        }
-        if (oauthConfig.isadminapproved) {
-            result.push(`    <isAdminApproved>${oauthConfig.isadminapproved}</isAdminApproved>`);
+        if (oauthConfig.callbackUrl) {
+            result.push(`    <callbackUrl>${oauthConfig.callbackUrl}</callbackUrl>`);
         }
         if (oauthConfig.scopes && oauthConfig.scopes.length) {
             result.push(...oauthConfig.scopes.map(scope => `    <scopes>${scope}</scopes>`));
         }
         result.push(`  </oauthConfig>`);
     }
-    if (permissionsetname) {
-        result.push(...permissionsetname.map(it => `  <permissionSetName>${it}</permissionSetName>`));
-    }
-    if (profilename) {
-        result.push(...profilename.map(it => `  <profileName>${it}</profileName>`));
-    }
-    result.push(`  <contactEmail>${contactemail}</contactEmail>`);
+    result.push(`  <contactEmail>${contactEmail}</contactEmail>`);
     result.push(`</ConnectedApp>`);
-    return result.join('\n');
+    return result.join(EOL);
 }
 
-function packageXml(apiVersion: string): string {
+function packageXml(apiVersion: string, connectedAppName: string): string {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
   <types>
-    <members>*</members>
+    <members>${connectedAppName}</members>
     <name>ConnectedApp</name>
   </types>
   <version>${apiVersion}</version>
@@ -86,7 +75,13 @@ const scopeOptions = [
 
 export default class ConnectedAppCreateCommand extends PonyCommand {
 
-    public static description: string = ``;
+    public static description: string = `create connected app
+Set target org to deploy the app.
+Set target directory to write the app.
+
+Example:
+    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt --callbackurl http://localhost:1717/OauthRedirect
+    `;
 
     protected static flagsConfig: FlagsConfig = {
         label: flags.string({
@@ -112,7 +107,7 @@ export default class ConnectedAppCreateCommand extends PonyCommand {
         }),
         targetdir: flags.string({
             char: 'd',
-            description: 'target directory for connected app'
+            description: 'directory for the connected app'
         }),
         noprompt: flags.boolean({
             char: 'p',
@@ -121,13 +116,10 @@ export default class ConnectedAppCreateCommand extends PonyCommand {
     };
 
     protected static supportsUsername: boolean = true;
-    protected static requiresProject: boolean = true;
 
-    public async run(): Promise<void> {
+    public async run(): Promise<ConnectedApp> {
         const {
-            scopes, label, contactemail,
-            callbackurl, certificate, isadminapproved,
-            profilename, permissionsetname, targetdir, noprompt
+            scopes, label, contactemail, callbackurl, certificate, targetdir, noprompt
         } = this.flags;
         const scopesArray = scopes && scopes.split(',').map(it => it.trim());
         if (scopesArray) {
@@ -137,19 +129,17 @@ export default class ConnectedAppCreateCommand extends PonyCommand {
             }
         }
         const fullName = label.replace(' ', '_');
-        const app = createConnectedAppComponentString({
+        const appObject: ConnectedApp = {
             label,
             fullName,
-            contactemail,
+            contactEmail: contactemail,
             oauthConfig: {
                 scopes: scopesArray,
-                isadminapproved,
-                callbackurl,
+                callbackUrl: callbackurl,
                 certificate
-            },
-            permissionsetname: permissionsetname && permissionsetname.split(',').map(it => it.trim()),
-            profilename: profilename && profilename.split(',').map(it => it.trim())
-        });
+            }
+        };
+        const app = createConnectedAppComponentString(appObject);
         if (targetdir) {
             ensureDirSync(targetdir);
             const file = path.join(targetdir, `${fullName}.connectedApp-meta.xml`);
@@ -161,7 +151,7 @@ export default class ConnectedAppCreateCommand extends PonyCommand {
             const {path: dirPath} = await tmp.dir();
             ensureDirSync(path.join(dirPath, `connectedApps/`));
             writeFileSync(path.join(dirPath, `connectedApps/${fullName}.connectedApp`), app);
-            writeFileSync(path.join(dirPath, 'package.xml'), packageXml(apiVersion));
+            writeFileSync(path.join(dirPath, 'package.xml'), packageXml(apiVersion, fullName));
             const confirm = noprompt ||
                 await this.ux.confirm(`Going to deploy to ${this.org.getUsername()}. Continue?`);
             if (confirm) {
@@ -172,5 +162,6 @@ export default class ConnectedAppCreateCommand extends PonyCommand {
                 });
             }
         }
+        return appObject;
     }
 }
