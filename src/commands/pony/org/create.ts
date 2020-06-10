@@ -63,13 +63,11 @@ Flow:
             noancestors: this.flags.noancestors,
             setdefaultusername: this.flags.setdefaultusername,
             setalias: this.flags.setalias,
-            durationdays: this.flags.durationdays,
-            somethingElse: 'aadsa'
+            durationdays: this.flags.durationdays
         };
     }
 
     public async run(): Promise<AnyJson> {
-        const {targetusername} = this.flags;
         let env = Environment.parse(this.flags.ponyenv);
         const project = await PonyProject.load();
         const {orgCreate = {}} = project.ponyConfig;
