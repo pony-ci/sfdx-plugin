@@ -14,11 +14,11 @@ const PONY_POST_ORG_CREATE = 'pony:postOrgCreate';
 export default class OrgCreateCommand extends PonyCommand {
 
     public static description: string = `create a fully configured scratch org
-Flow:
-1) Set 'username' and 'devhubusername' env values if targetusername flag is set.
-2) Run '${PONY_PRE_ORG_CREATE}' job if targetusername flag is not set.
-3) Run 'force:org:create' command job and set 'username' and 'devhubusername' env values if targetusername flag is not set.
-4) Run '${PONY_POST_ORG_CREATE}' job.
+Execution Flow:
+1) Set 'username' and 'devhubusername' env values if existing org is used (either targetusername flag or default org).
+2) Run '${PONY_PRE_ORG_CREATE}' job if existing org is not used.
+3) Run 'force:org:create' command and set 'username' and 'devhubusername' env values if existing org is not used.
+4) Run '${PONY_POST_ORG_CREATE}' job on success.
 `;
     public static readonly varargs: boolean = true;
 
