@@ -1,7 +1,7 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {Org} from '@salesforce/core';
-import {AnyJson, Dictionary, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {AnyJson, Dictionary, isJsonMap, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {OrgCreateConfig, sfdx} from '../../..';
 import {Environment} from '../../../lib/jobs';
