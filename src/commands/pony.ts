@@ -1,7 +1,6 @@
 import {FlagsConfig} from '@salesforce/command';
 import {getUX} from '..';
 import PonyCommand from '../lib/PonyCommand';
-import PonyProject from '../lib/PonyProject';
 
 const DESCRIPTION = `Automate your application lifecycle.
 
@@ -20,7 +19,5 @@ export default class PonyBaseCommand extends PonyCommand {
     public async run(): Promise<void> {
         const ux = await getUX();
         ux.log(DESCRIPTION);
-        const project = await PonyProject.load();
-        console.log(await project.getPackageGroup());
     }
 }
