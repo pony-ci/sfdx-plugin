@@ -75,12 +75,8 @@ Flow:
         const {orgCreate = {}} = project.ponyConfig;
         let org = this.org;
         let orgCreateResult: AnyJson = {};
-        // todo cant specify both alias and targetusername
-        // todo decide whether use default org instead of targetusername
-        if (targetusername) {
-            if (!org) {
-                throw Error(`Non existing user ${targetusername}`);
-            }
+        if (org) {
+            this.ux.log(`Using existing org ${org.getOrgId()}, username: ${org.getUsername()}`);
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
