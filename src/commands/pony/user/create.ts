@@ -5,7 +5,8 @@ import PonyProject from '../../../lib/PonyProject';
 
 // @ts-ignore
 export default class UserCreateCommand extends PonyCommand {
-    public static readonly description: string = `create user`;
+
+    public static readonly description: string = `create a user by name defined in config`;
 
     public static readonly requiresUsername: boolean = true;
     public static readonly requiresProject: boolean = true;

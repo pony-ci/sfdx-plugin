@@ -86,7 +86,7 @@ ${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
         if (!supportedMetadataToSort.includes(type || '')) {
             throw Error(`Unsupported metadata: ${file}`);
         }
-        this.ux.log(`sorting: ${file}`);
+        this.ux.log(`sort: ${file}`);
         const content = await readComponent(file);
         if (!sortDefinitions.Profile) {
             throw Error(`Sort definition not defined for ${file}`);

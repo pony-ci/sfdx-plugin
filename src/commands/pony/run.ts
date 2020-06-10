@@ -6,7 +6,8 @@ import PonyProject from '../../lib/PonyProject';
 import Arg = Command.Arg;
 
 export default class RunCommand extends PonyCommand {
-    public static readonly description: string = `run job`;
+
+    public static readonly description: string = `run any job defined in config`;
 
     public static readonly supportsUsername: boolean = false;
     public static readonly supportsDevhubUsername: boolean = false;
