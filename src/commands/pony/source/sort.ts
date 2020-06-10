@@ -1,5 +1,5 @@
 import {flags, FlagsConfig} from '@salesforce/command';
-import {definiteEntriesOf, definiteValuesOf, isArray, isObject, isString} from '@salesforce/ts-types';
+import {definiteValuesOf, isArray, isObject, isString} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {EOL} from 'os';
 import path from 'path';
@@ -124,7 +124,7 @@ function sort(component: Component, sortDefinition: SortDefinition): [string, un
     for (const entry of definiteValuesOf(sortDefinition)) {
         const key = Object.keys(entry)[0];
         const value = entry[key];
-        if (isArray(root[key]) && root[key].length) {
+        if (root && isArray(root[key]) && root[key].length) {
             if (isInnerTextSortKey(value)) {
                 root[key].sort((a, b) => stringCompare(a[0], b[0]));
                 const {result, duplicates} = filterUnique(key, root[key],

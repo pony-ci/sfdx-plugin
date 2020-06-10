@@ -4,11 +4,6 @@ import {sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
 import PonyProject from '../../../../lib/PonyProject';
 
-// onbehalfof: flags.string({
-//     char: 'o',
-//     description: 'comma-separated list of usernames or aliases to assign the profile to (default: target username)'
-// }),
-
 export default class ProfileAssignCommand extends PonyCommand {
 
     public static description: string = `assign a profile to a user
