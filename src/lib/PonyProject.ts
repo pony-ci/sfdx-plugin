@@ -1,5 +1,6 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
 import {isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {existsSync} from 'fs';
 import fs, {readFileSync, readJSONSync} from 'fs-extra';
 import path from 'path';
 import slash from 'slash';
@@ -111,7 +112,8 @@ async function readPackageGroups(projectDir: string): Promise<PackageGroups> {
 }
 
 async function readConfig(projectDir: string): Promise<Config> {
-    const yml = readFileSync(path.join(projectDir, '.pony/pony-config.yml')).toString();
+    const file = path.join(projectDir, '.pony/pony-config.yml');
+    const yml = existsSync(file) ? readFileSync(file).toString() : '{}';
     const config = yaml.parse(yml);
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
