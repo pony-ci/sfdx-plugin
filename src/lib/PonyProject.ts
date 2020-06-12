@@ -18,9 +18,6 @@ import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
 
-type TaskArg = object;
-type TaskResult = unknown;
-
 export default class PonyProject {
 
     public readonly projectDir: string;
