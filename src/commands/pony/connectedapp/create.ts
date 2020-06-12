@@ -1,6 +1,6 @@
 import {flags, FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {definiteValuesOf} from '@salesforce/ts-types';
-import {ensureDirSync, writeFileSync} from 'fs-extra';
+import fs, {ensureDirSync, writeFileSync} from 'fs-extra';
 import {EOL} from 'os';
 import path from 'path';
 import {sfdx} from '../../..';
@@ -19,7 +19,7 @@ interface ConnectedApp {
 }
 
 function createConnectedAppComponentString(
-    {label, fullName, oauthConfig, contactEmail}: ConnectedApp
+    {label, oauthConfig, contactEmail}: ConnectedApp
 ): string {
     const gt = '<';
     const result: string[] = [
@@ -27,7 +27,6 @@ function createConnectedAppComponentString(
         `${gt}ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">`
     ];
     result.push(`  <label>${label}</label>`);
-    result.push(`  <fullName>${fullName}</fullName>`);
     if (oauthConfig && definiteValuesOf(oauthConfig).length) {
         result.push(`  <oauthConfig>`);
         if (oauthConfig.callbackUrl) {
@@ -35,6 +34,10 @@ function createConnectedAppComponentString(
         }
         if (oauthConfig.scopes && oauthConfig.scopes.length) {
             result.push(...oauthConfig.scopes.map(scope => `    <scopes>${scope}</scopes>`));
+        }
+        if (oauthConfig.certificate) {
+            const cert = fs.readFileSync(oauthConfig.certificate).toString();
+            result.push(`    <certificate>${cert}</certificate>`);
         }
         result.push(`  </oauthConfig>`);
     }
@@ -80,7 +83,7 @@ Set target org to deploy the app.
 Set target directory to write the app.
 
 Example:
-    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt --callbackurl http://localhost:1717/OauthRedirect
+    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com --callbackurl http://localhost:1717/OauthRedirect
     `;
 
     protected static flagsConfig: FlagsConfig = {
