@@ -14,58 +14,55 @@ const PONY_POST_ORG_CREATE = 'pony:postOrgCreate';
 export default class OrgCreateCommand extends PonyCommand {
 
     public static description: string = `create a fully configured scratch org
+    
+Provide key=value pairs while creating a scratch org. When creating scratch orgs, --targetdevhubusername (-v) must be a Dev Hub org.
+  
+No ancestors, no namespace, duration days, definition file and username generation
+options can be configured in pony config. 
+Duration days flag will override the value in config (or default value if not specified in config).
+  
 Execution Flow:
-1) Set 'username' and 'devhubusername' env values if existing org is used (either targetusername flag or default org).
-2) Run '${PONY_PRE_ORG_CREATE}' job if existing org is not used.
-3) Run 'force:org:create' command and set 'username' and 'devhubusername' env values if existing org is not used.
-4) Run '${PONY_POST_ORG_CREATE}' job on success.
+    1) Set 'username' and 'devhubusername' env values if existing org is used (either targetusername flag or default org).
+    2) Run '${PONY_PRE_ORG_CREATE}' job if existing org is not used.
+    3) Run 'force:org:create' command and set 'username' and 'devhubusername' env values if existing org is not used.
+    4) Run '${PONY_POST_ORG_CREATE}' job on success.
 `;
     public static readonly varargs: boolean = true;
 
     protected static flagsConfig: FlagsConfig = {
-        definitionfile: flags.filepath({
-            char: 'f',
-            description: 'path to an org definition file',
-            default: 'config/project-scratch-def.json'
-        }),
-        nonamespace: flags.boolean({
-            char: 'n', description: 'create the scratch org with no namespace'
-        }),
-        noancestors: flags.boolean({
-            char: 'c',
-            description: 'do not include second-generation package ancestors in the scratch org'
-        }),
         setdefaultusername: flags.boolean({
-            char: 's', description: 'set the created org as the default username'
+            char: 's',
+            description: 'set the created org as the default username',
+            required: false,
         }),
         setalias: flags.string({
-            char: 'a', description: 'alias for the created org'
+            char: 'a',
+            description: 'alias for the created org',
+            required: false,
         }),
         durationdays: flags.integer({
-            char: 'd', description: 'duration of the scratch org (in days)'
+            char: 'd',
+            description: 'duration of the scratch org; override value in config (in days) (default: config value or 7, min:1, max:30)',
+            required: false,
         }),
         ponyenv: flags.string({
             description: 'environment',
             default: Environment.stringify(Environment.default()),
+            required: true,
             hidden: true
-        })
+        }),
+        wait: flags.number({
+            char: 'w',
+            description: 'the streaming client socket timeout (in minutes)',
+            required: false,
+            min: 6,
+            default: 6
+        }),
     };
 
     protected static supportsUsername: boolean = true;
     protected static supportsDevhubUsername: boolean = true;
     protected static requiresProject: boolean = true;
-
-    private get options(): Dictionary<string> {
-        return {
-            targetdevhubusername: this.flags.targetdevhubusername,
-            definitionfile: this.flags.definitionfile,
-            nonamespace: this.flags.nonamespace,
-            noancestors: this.flags.noancestors,
-            setdefaultusername: this.flags.setdefaultusername,
-            setalias: this.flags.setalias,
-            durationdays: this.flags.durationdays
-        };
-    }
 
     public async run(): Promise<AnyJson> {
         let env = Environment.parse(this.flags.ponyenv);
@@ -84,7 +81,7 @@ Execution Flow:
             this.ux.startSpinner('Creating scratch org');
             const args = this.getOrgCreateArgs(project, orgCreate);
             try {
-                orgCreateResult = await sfdx.force.org.create(this.options, args);
+                orgCreateResult = await sfdx.force.org.create(this.getOptions(orgCreate), args);
             } catch (e) {
                 this.ux.stopSpinner('failed');
                 throw e;
@@ -101,6 +98,23 @@ Execution Flow:
             await project.executeJobByName(PONY_POST_ORG_CREATE, env);
         }
         return orgCreateResult;
+    }
+
+    private getOptions(orgCreate: OrgCreateConfig): Dictionary<string | boolean> {
+        const {
+            noAncestors, noNamespace, durationDays,
+            definitionFile = 'config/project-scratch-def.json'
+        } = orgCreate;
+        return {
+            targetdevhubusername: this.flags.targetdevhubusername,
+            nonamespace: noNamespace || false,
+            noancestors: noAncestors || false,
+            definitionfile: definitionFile,
+            setdefaultusername: this.flags.setdefaultusername,
+            setalias: this.flags.setalias,
+            durationdays: this.flags.durationdays || durationDays || 7,
+            wait: this.flags.wait
+        };
     }
 
     private getOrgCreateArgs(project: PonyProject, orgCreate: OrgCreateConfig): string[] {

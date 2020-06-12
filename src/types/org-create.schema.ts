@@ -7,4 +7,20 @@
 
 export interface OrgCreateConfig {
   generateUsername?: boolean;
+  /**
+   * do not include second-generation package ancestors in the scratch org
+   */
+  noAncestors?: boolean;
+  /**
+   * create the scratch org with no namespace
+   */
+  noNamespace?: boolean;
+  /**
+   * duration of the scratch org (in days)
+   */
+  durationDays?: number;
+  /**
+   * path to an org definition file
+   */
+  definitionFile?: string;
 }

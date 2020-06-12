@@ -5,9 +5,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "extends": {
-      "type": "string"
-    },
     "data": {
       "$ref": "data-config.schema.json"
     },

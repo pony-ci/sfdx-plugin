@@ -1,7 +1,6 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
-import {AnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
 import fs, {readFileSync, readJSONSync} from 'fs-extra';
-import https from 'https';
 import path from 'path';
 import slash from 'slash';
 import yaml from 'yaml';
@@ -19,7 +18,6 @@ import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
 
-type Task = (arg: TaskArg) => TaskResult;
 type TaskArg = object;
 type TaskResult = unknown;
 
@@ -121,14 +119,6 @@ async function readConfig(projectDir: string): Promise<Config> {
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
     }
-    if (config.extends) {
-        const extensionYml = readFileSync(config.extends).toString();
-        const extension = yaml.parse(extensionYml);
-        if (!isConfig(extension)) {
-            throw Error(`${validateConfig(extension)}`);
-        }
-        return Object.assign(extension, config);
-    }
     if (config.data) {
         const relationshipNameRegex = /^[a-zA-Z0-9_]+.[a-zA-Z0-9_]+$/;
         const relationships = config.data.sObjects?.import?.relationships || {};
@@ -145,34 +135,4 @@ async function readConfig(projectDir: string): Promise<Config> {
         }
     }
     return config;
-}
-
-async function readJSONExtension(extension: string): Promise<AnyJson> {
-    return new Promise((resolve, reject) => {
-        // tslint:disable-next-line:no-http-string
-        if (['http://', 'https://'].some(it => extension.startsWith(it))) {
-            https.get(extension, (resp) => {
-                let data = '';
-                resp.on('data', (chunk) => {
-                    data += chunk;
-                });
-                resp.on('end', () => resolve(JSON.parse(data)));
-            }).on('error', (err) => {
-                reject(err);
-            });
-        } else {
-            reject(`Unsupported extension: ${extension}`);
-        }
-    });
-}
-
-function readJsonFileIfExists(file: string): Optional<AnyJson> {
-    try {
-        return fs.readJSONSync(file);
-    } catch (e) {
-        if (e.toString().includes('ENOENT')) {
-            return undefined;
-        }
-        throw e;
-    }
 }

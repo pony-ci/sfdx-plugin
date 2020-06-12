@@ -8,6 +8,28 @@
     "generateUsername": {
       "type": "boolean",
       "default": true
+    },
+    "noAncestors": {
+      "type": "boolean",
+      "description": "do not include second-generation package ancestors in the scratch org",
+      "default": false
+    },
+    "noNamespace": {
+      "type": "boolean",
+      "description": "create the scratch org with no namespace",
+      "default": false
+    },
+    "durationDays": {
+      "type": "number",
+      "description": "duration of the scratch org (in days)",
+      "default": 7,
+      "minimum": 1,
+      "maximum": 30
+    },
+    "definitionFile": {
+      "type": "string",
+      "description": "path to an org definition file",
+      "default": "config/project-scratch-def.json"
     }
   }
 }
