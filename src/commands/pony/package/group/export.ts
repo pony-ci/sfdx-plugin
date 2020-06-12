@@ -38,7 +38,7 @@ function mapInstalledPackageToPackage(pkg: InstalledPackage): Package {
 }
 
 export default class PackageGroupExportCommand extends PonyCommand {
-    public static readonly description: string = `export package group from configured org for scratch org creation
+    public static readonly description: string = `export a package group from configured org for scratch org creation
     
 Exported package group is an ordered list of packages that can be installed with the 'sfdx pony:package:group:install' command.
     `;

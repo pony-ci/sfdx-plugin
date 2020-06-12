@@ -17,10 +17,10 @@ export default class SourceSortCommand extends PonyCommand {
     public static readonly description: string = `sort xml source files
 
 If no files are specified, command will sort files defined in .pony/config.json.
-Possible values in the config are 'source', 'all', 'none' or array of files.
+Possible values in the config are 'source', 'all', 'none' or array of files, default value is 'source'.
 
 Supported metadata:
-${supportedMetadataToSort.map(it => `* ${it}`).join(EOL)}
+${supportedMetadataToSort.map(it => `   * ${it}`).join(EOL)}
 `;
 
     public static examples: string[] = [

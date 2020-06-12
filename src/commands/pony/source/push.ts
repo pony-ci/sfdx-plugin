@@ -12,10 +12,11 @@ const PONY_POST_SOURCE_PUSH = 'pony:postSourcePush';
 export default class SourcePushCommand extends PonyCommand {
 
     public static readonly description: string = `push source to a scratch org from the project
+
 Execution Flow:
-2) Run '${PONY_PRE_SOURCE_PUSH}' job if existing org is not used.
-3) Run 'force:source:push' command.
-4) Run '${PONY_POST_SOURCE_PUSH}' job on success.
+    1) Run '${PONY_PRE_SOURCE_PUSH}' job if existing org is not used.
+    2) Run 'force:source:push' command.
+    3) Run '${PONY_POST_SOURCE_PUSH}' job on success.
     `;
 
     public static readonly supportsUsername: boolean = true;

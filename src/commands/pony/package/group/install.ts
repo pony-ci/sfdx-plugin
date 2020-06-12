@@ -7,9 +7,9 @@ import PonyProject from '../../../../lib/PonyProject';
 
 export default class PackageGroupInstallCommand extends PonyCommand {
 
-    public static description: string = `install package group
+    public static description: string = `install a package group
 
-To create package group run the 'sfdx pony:package:group:export' command.    
+To create a package group run the 'sfdx pony:package:group:export' command.    
 `;
 
     protected static flagsConfig: FlagsConfig = {

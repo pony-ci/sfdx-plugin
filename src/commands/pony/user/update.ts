@@ -5,7 +5,7 @@ import PonyCommand from '../../../lib/PonyCommand';
 // @ts-ignore
 export default class UserUpdateCommand extends PonyCommand {
 
-    public static readonly description: string = `update admin user`;
+    public static readonly description: string = `update target user`;
 
     public static readonly requiresUsername: boolean = true;
     public static readonly requiresProject: boolean = true;
