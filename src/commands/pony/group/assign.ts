@@ -32,14 +32,13 @@ interface Group {
 export default class GroupAssignCommand extends PonyCommand {
 
     public static description: string = `assign public group
-This command is idempotent, which means you can run it multiple times with same result.
-    
+
 Developer Guide:
-* https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_group.htm
-* https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_groupmember.htm
+    * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_group.htm
+    * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_groupmember.htm
     
 Supported Group types:
-${supportedGroupTypes.map(it => `* ${it}`).join(EOL)}
+${supportedGroupTypes.map(it => `   * ${it}`).join(EOL)}
 `;
 
     public static examples: string[] = [

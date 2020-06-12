@@ -15,7 +15,7 @@ const toQueryFile = (soqlExportDir: string, sObjectName: string) =>
 
 export default class DataExportCommand extends PonyCommand {
 
-    public static description: string = ``;
+    public static description: string = `export records`;
 
     protected static flagsConfig: FlagsConfig = {};
 

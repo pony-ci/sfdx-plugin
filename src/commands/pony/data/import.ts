@@ -26,7 +26,7 @@ const toDeleteSoql = (soqlDeleteDir: string, sObjectName: string) => {
 
 export default class DataImportCommand extends PonyCommand {
 
-    public static description: string = ``;
+    public static description: string = `import records`;
 
     protected static flagsConfig: FlagsConfig = {
         noprompt: flags.boolean({
