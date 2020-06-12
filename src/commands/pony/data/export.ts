@@ -6,8 +6,8 @@ import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
 
 export const defaultRecordsDir = 'data/sObjects/';
-export const defaultSoqlExportDir = 'data/soql/export/';
-export const defaultSoqlDeleteDir = 'data/soql/delete/';
+export const defaultSoqlExportDir = 'scripts/soql/export/';
+export const defaultSoqlDeleteDir = 'scripts/soql/delete/';
 export const reversedOrder = 'reversedOrder';
 
 const toQueryFile = (soqlExportDir: string, sObjectName: string) =>

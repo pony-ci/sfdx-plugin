@@ -44,7 +44,7 @@
             },
             "soqlDeleteDir": {
               "type": "string",
-              "default": "data/soql/delete"
+              "default": "scripts/soql/delete"
             },
             "order":             {
               "type": "array",
@@ -76,7 +76,7 @@
           "properties": {
             "soqlExportDir": {
               "type": "string",
-              "default": "data/soql/export"
+              "default": "scripts/soql/export"
             },
             "order": {
               "oneOf": [

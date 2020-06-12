@@ -156,7 +156,7 @@ Example:
             writeFileSync(path.join(dirPath, `connectedApps/${fullName}.connectedApp`), app);
             writeFileSync(path.join(dirPath, 'package.xml'), packageXml(apiVersion, fullName));
             const confirm = noprompt ||
-                await this.ux.confirm(`Going to deploy to ${this.org.getUsername()}. Continue?`);
+                await this.ux.confirm(`Going to deploy to ${this.org.getUsername()}. Continue? [y/n]`);
             if (confirm) {
                 await sfdx.force.mdapi.deploy({
                     targetusername: this.org.getUsername(),

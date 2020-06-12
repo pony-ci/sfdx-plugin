@@ -69,7 +69,7 @@ export default class DataImportCommand extends PonyCommand {
         const {noprompt} = this.flags;
         const isScratchOrg = await this.org?.getDevHubOrg() !== undefined;
         if (!noprompt && !isScratchOrg) {
-            const continuePrompt = await this.ux.prompt('Import in a non scratch org. Allow import (y/n)');
+            const continuePrompt = await this.ux.prompt('Import in a non scratch org. Allow import? [y/n]');
             return ['y', 'yes'].includes(continuePrompt.toLowerCase());
         }
         return true;
