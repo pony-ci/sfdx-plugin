@@ -76,14 +76,14 @@ const scopeOptions = [
     'Eclair'
 ];
 
-export default class ConnectedAppCreateCommand extends PonyCommand {
+export default class ConnectedAppDeployCommand extends PonyCommand {
 
     public static description: string = `create connected app
-Set target org to deploy the app.
-Set target directory to write the app.
+
+Set target directory to write the connected app.
 
 Example:
-    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com --callbackurl http://localhost:1717/OauthRedirect
+    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com -u http://localhost:1717/OauthRedirect
     `;
 
     protected static flagsConfig: FlagsConfig = {
@@ -100,21 +100,28 @@ Example:
         scopes: flags.string({
             char: 's',
             description: `comma-separated OAuth scopes; valid values are ${scopeOptions.join(', ')}`,
+            required: false
         }),
         callbackurl: flags.string({
             description: 'callback url',
+            char: 'u',
+            required: false
         }),
         certificate: flags.string({
             char: 'c',
-            description: 'path to certificate'
+            description: 'path to certificate',
+            required: false
         }),
         targetdir: flags.string({
             char: 'd',
-            description: 'directory for the connected app'
+            description: 'directory for the connected app',
+            required: false
         }),
         noprompt: flags.boolean({
             char: 'p',
-            description: 'do not prompt connected app deployment'
+            description: 'do not prompt connected app deployment',
+            default: false,
+            required: false
         })
     };
 
