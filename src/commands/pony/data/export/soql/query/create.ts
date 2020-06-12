@@ -13,7 +13,7 @@ type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
 export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
-    public static description: string = `create soql file for exporting records`;
+    public static description: string = `create file with soql query for exporting records`;
 
     protected static flagsConfig: FlagsConfig = {
         sobjecttype: flags.string({
@@ -24,15 +24,18 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         noprompt: flags.boolean({
             char: 'p',
             description: 'no prompt to confirm overwrite',
-            default: false
+            default: false,
+            required: false
         }),
         excludeparentfields: flags.boolean({
-            description: 'by default parent field names are added, e.g. "RecordType.Name"',
-            default: false
+            description: 'exclude parent name fields, e.g. "RecordType.Name"',
+            default: false,
+            required: false
         }),
         includenoncreateable: flags.boolean({
-            description: 'by default only createable fields are added',
-            default: false
+            description: 'include only createable fields are added',
+            default: false,
+            required: false
         })
     };
 
@@ -43,7 +46,7 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         const project = await PonyProject.load();
         const data = project.dataConfig;
         const query = await this.buildQuery();
-        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || 'data/soql/export';
+        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || 'scripts/soql/export';
         await this.writeQuery(query, soqlExportDir);
         return {query};
     }
