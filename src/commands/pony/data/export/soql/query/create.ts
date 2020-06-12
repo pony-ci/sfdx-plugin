@@ -8,6 +8,7 @@ import path from 'path';
 import {sfdx} from '../../../../../..';
 import PonyCommand from '../../../../../../lib/PonyCommand';
 import PonyProject from '../../../../../../lib/PonyProject';
+import {defaultSoqlExportDir} from '../../../export';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
@@ -46,7 +47,7 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         const project = await PonyProject.load();
         const data = project.dataConfig;
         const query = await this.buildQuery();
-        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || 'scripts/soql/export';
+        const soqlExportDir = data?.sObjects?.export?.soqlExportDir || defaultSoqlExportDir;
         await this.writeQuery(query, soqlExportDir);
         return {query};
     }
