@@ -5,10 +5,10 @@ import fs from 'fs-extra';
 import {DescribeSObjectResult, Field} from 'jsforce/describe-result';
 import {EOL} from 'os';
 import path from 'path';
-import {sfdx} from '../../../../../..';
-import PonyCommand from '../../../../../../lib/PonyCommand';
-import PonyProject from '../../../../../../lib/PonyProject';
-import {defaultSoqlExportDir} from '../../../export';
+import {sfdx} from '../../../../..';
+import PonyCommand from '../../../../../lib/PonyCommand';
+import PonyProject from '../../../../../lib/PonyProject';
+import {defaultSoqlExportDir} from '../../export';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
@@ -67,7 +67,7 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
         const nameField = getNameFields(described).find(() => true);
         const orderByClause = nameField ? `${EOL}ORDER BY ${nameField.name}` : '';
-        const fieldsClause = soqlFieldNames.map(it => `    ${it}`).join(`,${EOL}`);
+        const fieldsClause = [...new Set(soqlFieldNames)].map(it => `    ${it}`).join(`,${EOL}`);
         return `SELECT${EOL}${fieldsClause}${EOL}FROM ${sobjecttype}${orderByClause}${EOL}`;
     }
 

@@ -133,9 +133,11 @@ function sort(component: Component, sortDefinition: SortDefinition): [string, un
                 duplicates.forEach(it => allDuplicates.push([key, it]));
             } else {
                 for (const val of value) {
-                    root[key].sort((a, b) => {
+                    root[key] = root[key].sort((a, b) => {
                         if (a[val] && a[val].length && b[val] && b[val].length) {
                             return stringCompare(a[val][0], b[val][0]);
+                        } else if (!a[val] && !b[val]) {
+                            return 0;
                         }
                         return a[val] && a[val].length ? 1 : -1;
                     });

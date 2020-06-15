@@ -15,7 +15,10 @@ const toQueryFile = (soqlExportDir: string, sObjectName: string) =>
 
 export default class DataExportCommand extends PonyCommand {
 
-    public static description: string = `export records`;
+    public static description: string = `export records
+    
+Use 'sfdx force:data:soql:query:create' command to create a query for export.
+`;
 
     protected static flagsConfig: FlagsConfig = {};
 

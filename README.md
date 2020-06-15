@@ -25,8 +25,8 @@ USAGE
 * [`sfdx pony [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-pony---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [-u <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyconnectedappdeploy--l-string--e-string--s-string--u-string--c-string--d-string--p--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataexport--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-* [`sfdx pony:data:export:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataexportsoqlquerycreate--s-string--p---excludeparentfields---includenoncreateable--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:import [--noprompt] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataimport---noprompt--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydatasoqlquerycreate--s-string--p---excludeparentfields---includenoncreateable--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:group:assign -g <string> [-t AllCustomerPortal|ChannelProgramGroup|CollaborationGroup|Manager|ManagerAndSubordinatesInternal|Organization|PRMOrganization|Queue|Regular|Role|RoleAndSubordinates|RoleAndSubordinatesInternal|Territory|TerritoryAndSubordinates] [--userorgroup <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponygroupassign--g-string--t-allcustomerportalchannelprogramgroupcollaborationgroupmanagermanagerandsubordinatesinternalorganizationprmorganizationqueueregularroleroleandsubordinatesroleandsubordinatesinternalterritoryterritoryandsubordinates---userorgroup-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:org:create [name=value...] [-s] [-a <string>] [-d <integer>] [-w <number>] [-v <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyorgcreate-namevalue--s--a-string--d-integer--w-number--v-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:package:group:export [-n <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponypackagegroupexport--n-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
@@ -107,6 +107,8 @@ DESCRIPTION
 
 ## `sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
+export records
+
 ```
 USAGE
   $ sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel 
@@ -123,43 +125,14 @@ OPTIONS
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
-```
 
-## `sfdx pony:data:export:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
-
-create soql file for exporting records
-
-```
-USAGE
-  $ sfdx pony:data:export:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u 
-  <string>] [--apiversion <string>] [--json] [--loglevel 
-  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
-
-OPTIONS
-  -p, --noprompt                                                                    no prompt to confirm overwrite
-
-  -s, --sobjecttype=sobjecttype                                                     (required) the API name of the
-                                                                                    object to create query
-
-  -u, --targetusername=targetusername                                               username or alias for the target
-                                                                                    org; overrides default target org
-
-  --apiversion=apiversion                                                           override the api version used for
-                                                                                    api requests made by this command
-
-  --excludeparentfields                                                             by default parent field names are
-                                                                                    added, e.g. "RecordType.Name"
-
-  --includenoncreateable                                                            by default only createable fields
-                                                                                    are added
-
-  --json                                                                            format output as json
-
-  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
-                                                                                    this command invocation
+DESCRIPTION
+  Use 'sfdx force:data:soql:query:create' command to create a query for export.
 ```
 
 ## `sfdx pony:data:import [--noprompt] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+import records
 
 ```
 USAGE
@@ -180,6 +153,39 @@ OPTIONS
 
   --noprompt                                                                        Allow data import to all instances
                                                                                     without prompt.
+```
+
+## `sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+create file with soql query for exporting records
+
+```
+USAGE
+  $ sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] 
+  [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+
+OPTIONS
+  -p, --noprompt                                                                    no prompt to confirm overwrite
+
+  -s, --sobjecttype=sobjecttype                                                     (required) the API name of the
+                                                                                    object to create query
+
+  -u, --targetusername=targetusername                                               username or alias for the target
+                                                                                    org; overrides default target org
+
+  --apiversion=apiversion                                                           override the api version used for
+                                                                                    api requests made by this command
+
+  --excludeparentfields                                                             exclude parent name fields, e.g.
+                                                                                    "RecordType.Name"
+
+  --includenoncreateable                                                            include only createable fields are
+                                                                                    added
+
+  --json                                                                            format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
+                                                                                    this command invocation
 ```
 
 ## `sfdx pony:group:assign -g <string> [-t AllCustomerPortal|ChannelProgramGroup|CollaborationGroup|Manager|ManagerAndSubordinatesInternal|Organization|PRMOrganization|Queue|Regular|Role|RoleAndSubordinates|RoleAndSubordinatesInternal|Territory|TerritoryAndSubordinates] [--userorgroup <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
@@ -219,27 +225,25 @@ OPTIONS
       ID of the User or Group that is a direct member of the group (default: target username)
 
 DESCRIPTION
-  This command is idempotent, which means you can run it multiple times with same result.
-    
   Developer Guide:
-  * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_group.htm
-  * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_groupmember.htm
+       * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_group.htm
+       * https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_groupmember.htm
     
   Supported Group types:
-  * AllCustomerPortal
-  * ChannelProgramGroup
-  * CollaborationGroup
-  * Manager
-  * ManagerAndSubordinatesInternal
-  * Organization
-  * PRMOrganization
-  * Queue
-  * Regular
-  * Role
-  * RoleAndSubordinates
-  * RoleAndSubordinatesInternal
-  * Territory
-  * TerritoryAndSubordinates
+      * AllCustomerPortal
+      * ChannelProgramGroup
+      * CollaborationGroup
+      * Manager
+      * ManagerAndSubordinatesInternal
+      * Organization
+      * PRMOrganization
+      * Queue
+      * Regular
+      * Role
+      * RoleAndSubordinates
+      * RoleAndSubordinatesInternal
+      * Territory
+      * TerritoryAndSubordinates
 
 EXAMPLES
   $ sfdx pony:group:assign -g My_Queue
@@ -302,7 +306,7 @@ DESCRIPTION
 
 ## `sfdx pony:package:group:export [-n <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-export package group from configured org for scratch org creation
+export a package group from configured org for scratch org creation
 
 ```
 USAGE
@@ -331,7 +335,7 @@ DESCRIPTION
 
 ## `sfdx pony:package:group:install [-g <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-install package group
+install a package group
 
 ```
 USAGE
@@ -354,12 +358,12 @@ OPTIONS
                                                                                     this command invocation
 
 DESCRIPTION
-  To create package group run the 'sfdx pony:package:group:export' command.
+  To create a package group run the 'sfdx pony:package:group:export' command.
 ```
 
 ## `sfdx pony:run [--onlyifdefined] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-run any job defined in config
+run job defined in config
 
 ```
 USAGE
@@ -425,9 +429,9 @@ OPTIONS
 
 DESCRIPTION
   Execution Flow:
-  2) Run 'pony:preSourcePush' job if existing org is not used.
-  3) Run 'force:source:push' command.
-  4) Run 'pony:postSourcePush' job on success.
+       1) Run 'pony:preSourcePush' job if existing org is not used.
+       2) Run 'force:source:push' command.
+       3) Run 'pony:postSourcePush' job on success.
 ```
 
 ## `sfdx pony:source:sort [-f <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
@@ -448,10 +452,10 @@ OPTIONS
 
 DESCRIPTION
   If no files are specified, command will sort files defined in .pony/config.json.
-  Possible values in the config are 'source', 'all', 'none' or array of files.
+  Possible values in the config are 'source', 'all', 'none' or array of files, default value is 'source'.
 
   Supported metadata:
-  * Profile
+      * Profile
 
 EXAMPLES
   $ sfdx pony:source:sort
@@ -522,7 +526,7 @@ DESCRIPTION
 
 ## `sfdx pony:user:update -v <string> [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-update admin user
+update target user
 
 ```
 USAGE
