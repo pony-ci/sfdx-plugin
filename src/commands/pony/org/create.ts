@@ -70,7 +70,9 @@ Execution Flow:
         const {orgCreate = {}} = project.ponyConfig;
         let orgCreateResult: AnyJson = {};
         let useExisting = false;
-        if (this.org) {
+        if (this.flags.targetusername) {
+            useExisting = true;
+        } else if (this.org) {
             useExisting = await this.ux.confirm(`Use existing org ${this.org.getOrgId()}, username: ${this.org.getUsername()}? [y/n]`);
         }
         let org;
