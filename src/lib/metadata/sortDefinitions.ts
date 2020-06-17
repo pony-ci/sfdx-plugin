@@ -8,6 +8,7 @@ export const isSortedByInnerText = (it: unknown) =>
 
 export const isInnerTextSortKey = (it: unknown) => isString(it) && it === innerTextSortKey;
 
+// from most significant to least
 export type SortDefinition = Dictionary<'__inner_text__' | string[]>[];
 
 export const supportedMetadataToSort: MetadataType[] = [
@@ -21,7 +22,7 @@ export const sortDefinitions: Dictionary<SortDefinition> = {
         {externalDataSourceAccesses: ['externalDataSource']},
         {fieldPermissions: ['field']},
         {flowAccesses: ['flow']},
-        {layoutAssignments: ['recordType', 'layout']},
+        {layoutAssignments: ['layout', 'recordType']},
         {objectPermissions: ['object']},
         {pageAccesses: ['apexPage']},
         {recordTypeVisibilities: ['recordType']},

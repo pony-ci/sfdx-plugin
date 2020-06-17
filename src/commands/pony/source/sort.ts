@@ -122,30 +122,37 @@ function sort(component: Component, sortDefinition: SortDefinition): [string, un
         throw Error('Invalid component.');
     }
     for (const entry of definiteValuesOf(sortDefinition)) {
-        const key = Object.keys(entry)[0];
-        const value = entry[key];
-        if (root && isArray(root[key]) && root[key].length) {
+        const xmlName = Object.keys(entry)[0];
+        const value = entry[xmlName];
+        if (root && isArray(root[xmlName]) && root[xmlName].length) {
             if (isInnerTextSortKey(value)) {
-                root[key].sort((a, b) => stringCompare(a[0], b[0]));
-                const {result, duplicates} = filterUnique(key, root[key],
+                root[xmlName].sort((a, b) => stringCompare(a[0], b[0]));
+                const {result, duplicates} = filterUnique(xmlName, root[xmlName],
                     (it) => isArray(it) && isString(it[0]) ? it[0] : '');
-                root[key] = result;
-                duplicates.forEach(it => allDuplicates.push([key, it]));
+                root[xmlName] = result;
+                duplicates.forEach(it => allDuplicates.push([xmlName, it]));
             } else {
-                for (const val of value) {
-                    root[key] = root[key].sort((a, b) => {
-                        if (a[val] && a[val].length && b[val] && b[val].length) {
-                            return stringCompare(a[val][0], b[val][0]);
-                        } else if (!a[val] && !b[val]) {
-                            return 0;
-                        }
-                        return a[val] && a[val].length ? 1 : -1;
-                    });
-                }
-                const {result, duplicates} = filterUnique(key, root[key], (it) =>
+                const {result, duplicates} = filterUnique(xmlName, root[xmlName], (it) =>
                     value.map(val => isObject(it) && isArray(it[val]) && it[val].length ? it[val][0] : '').join('!!'));
-                root[key] = result;
-                duplicates.forEach(it => allDuplicates.push([key, it]));
+                root[xmlName] = result;
+                duplicates.forEach(it => allDuplicates.push([xmlName, it]));
+                const hasItem = (it) => Boolean(it && isArray(it) && it.length && it[0]);
+                root[xmlName] = root[xmlName].sort((a, b) => {
+                    let eq = 0;
+                    for (const val of value) {
+                        if (hasItem(a[val]) && hasItem(b[val])) {
+                            eq = stringCompare(a[val][0], b[val][0]);
+                            if (eq !== 0) {
+                                return eq;
+                            }
+                        } else if (!hasItem(a[val]) && !hasItem(b[val])) {
+                            eq = 0;
+                        } else {
+                            eq = hasItem(a[val]) ? 1 : -1;
+                        }
+                    }
+                    return eq;
+                });
             }
         }
     }
