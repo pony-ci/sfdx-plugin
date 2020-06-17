@@ -83,7 +83,7 @@ export default class ConnectedAppDeployCommand extends PonyCommand {
 Set target directory to write the connected app.
 
 Example:
-    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com -u http://localhost:1717/OauthRedirect
+    sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com --callbackurl http://localhost:1717/OauthRedirect
     `;
 
     protected static flagsConfig: FlagsConfig = {
@@ -104,7 +104,6 @@ Example:
         }),
         callbackurl: flags.string({
             description: 'callback url',
-            char: 'u',
             required: false
         }),
         certificate: flags.string({
