@@ -124,7 +124,7 @@ Execution Flow:
         const isUsernameSet = Object.keys(this.varargs || {}).map(it => it.toLowerCase()).includes('username');
         const generateUsername = orgCreate?.generateUsername !== false;
         if (!isUsernameSet && generateUsername) {
-            args.push(`username=${this.getUsername(project.getProjectName())}`);
+            args.push(`username=${this.getUsername(project.getNormalizedProjectName())}`);
         }
         return args;
     }
@@ -145,6 +145,6 @@ Execution Flow:
         }
         let d = `${new Date().valueOf()}`;
         d = branch.length ? d.slice(-6) : d.slice(-12);
-        return `${projectName.substr(0, 10)}${branch}-${d}@ponyci.com`;
+        return `${projectName}${branch}-${d}@ponyci.com`;
     }
 }
