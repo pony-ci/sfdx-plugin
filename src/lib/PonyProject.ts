@@ -112,14 +112,14 @@ async function readPackageGroups(projectDir: string): Promise<PackageGroups> {
 }
 
 async function readConfig(projectDir: string): Promise<Config> {
-    const file = path.join(projectDir, '.pony/pony-config.yml');
+    const file = path.join(projectDir, '.pony/config.yml');
     const yml = existsSync(file) ? readFileSync(file).toString() : '{}';
     const config = yaml.parse(yml);
     if (!isConfig(config)) {
         throw Error(`${validateConfig(config)}`);
     }
     if (config.data) {
-        const relationshipNameRegex = /^[a-zA-Z0-9_]+.[a-zA-Z0-9_]+$/;
+        const relationshipNameRegex = /^[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+$/;
         const relationships = config.data.sObjects?.import?.relationships || {};
         for (const [sObject, fields] of Object.entries(relationships)) {
             for (const field of fields) {

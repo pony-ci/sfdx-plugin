@@ -23,7 +23,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`sfdx pony [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-pony---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-* [`sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [-u <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyconnectedappdeploy--l-string--e-string--s-string--u-string--c-string--d-string--p--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [--callbackurl <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyconnectedappdeploy--l-string--e-string--s-string---callbackurl-string--c-string--d-string--p--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataexport--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:import [--noprompt] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataimport---noprompt--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydatasoqlquerycreate--s-string--p---excludeparentfields---includenoncreateable--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
@@ -52,14 +52,14 @@ OPTIONS
                                                                                     this command invocation
 ```
 
-## `sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [-u <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [--callbackurl <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 create connected app
 
 ```
 USAGE
-  $ sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [-u <string>] [-c <string>] [-d <string>] [-p] 
-  [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  $ sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [--callbackurl <string>] [-c <string>] [-d 
+  <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
@@ -82,14 +82,14 @@ OPTIONS
       comma-separated OAuth scopes; valid values are Basic, Api, Web, Full, Chatter, CustomApplications, RefreshToken, 
       OpenID, Profile, Email, Address, Phone, OfflineAccess, CustomPermissions, Wave, Eclair
 
-  -u, --callbackurl=callbackurl
-      callback url
-
   -u, --targetusername=targetusername
       username or alias for the target org; overrides default target org
 
   --apiversion=apiversion
       override the api version used for api requests made by this command
+
+  --callbackurl=callbackurl
+      callback url
 
   --json
       format output as json
@@ -102,7 +102,7 @@ DESCRIPTION
 
   Example:
        sfdx pony:connectedapp:create -u myOrg -l "My CI" -s Api,Web,RefreshToken -c /path/to/cert.crt -e john@acme.com 
-  -u http://localhost:1717/OauthRedirect
+  --callbackurl http://localhost:1717/OauthRedirect
 ```
 
 ## `sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`

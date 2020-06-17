@@ -178,8 +178,15 @@ export default class DataImportCommand extends PonyCommand {
             const describe = await describeSObject(sObjectName, targetusername, {ux: this.ux});
             this.ux.startSpinner(chalk.blueBright.bold(`Deleting ${describe.labelPlural}`));
             const deleteSoql = toDeleteSoql(soqlDeleteDir, sObjectName);
-            await api.delete(sObjectName, deleteSoql);
-            this.ux.stopSpinner();
+            let status = 'done';
+            try {
+                await api.delete(sObjectName, deleteSoql);
+            } catch (e) {
+                status = 'failed';
+                throw e;
+            } finally {
+                this.ux.stopSpinner(status);
+            }
         }
     }
 }

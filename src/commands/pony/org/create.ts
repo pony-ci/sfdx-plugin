@@ -68,10 +68,14 @@ Execution Flow:
         let env = Environment.parse(this.flags.ponyenv);
         const project = await PonyProject.load();
         const {orgCreate = {}} = project.ponyConfig;
-        let org = this.org;
         let orgCreateResult: AnyJson = {};
-        if (org) {
-            this.ux.log(`Using existing org ${org.getOrgId()}, username: ${org.getUsername()}`);
+        let useExisting = false;
+        if (this.org) {
+            useExisting = await this.ux.confirm(`Use existing org ${this.org.getOrgId()}, username: ${this.org.getUsername()}? [y/n]`);
+        }
+        let org;
+        if (useExisting) {
+            org = this.org;
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {

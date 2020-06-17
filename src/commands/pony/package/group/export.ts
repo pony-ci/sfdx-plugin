@@ -1,6 +1,9 @@
 import {flags, FlagsConfig} from '@salesforce/command';
-import {Package, sfdx} from '../../../..';
+import fs from 'fs-extra';
+import * as path from 'path';
+import {Package, PackageGroups, sfdx} from '../../../..';
 import PonyCommand from '../../../../lib/PonyCommand';
+import PonyProject from '../../../../lib/PonyProject';
 
 const standardSubscriberPackageNames = [
     'Contacts Today',
@@ -57,6 +60,8 @@ Exported package group is an ordered list of packages that can be installed with
     };
 
     public async run(): Promise<void> {
+        const {group} = this.flags;
+        const project = await PonyProject.load();
         this.ux.startSpinner('Retrieving installed packages.');
         const [installedPackages]: InstalledPackage[][] = await Promise.all([
             sfdx.force.package.installed.list({
@@ -66,7 +71,14 @@ Exported package group is an ordered list of packages that can be installed with
         ]);
         this.ux.stopSpinner();
         const packages = await this.filterAndMapPackages(installedPackages);
-        this.logPackages(packages);
+        const dir = path.join(project.projectDir, 'data/groups/');
+        const file = path.join(dir, 'packages.json');
+        fs.ensureDirSync(dir);
+        const pkgs: PackageGroups = fs.existsSync(file) ? fs.readJSONSync(file) : {};
+        fs.writeJsonSync(file, {
+            ...pkgs,
+            [group]: packages
+        }, {spaces: 2});
     }
 
     private filterAndMapPackages(installedPackages: InstalledPackage[]): Package[] {
@@ -80,30 +92,12 @@ Exported package group is an ordered list of packages that can be installed with
                 filtered.push(pkg);
             }
         }
+        this.ux.warn(`Standard packages were removed automatically, 
+please check the group and remove any other standard packages manually.`);
         return filtered;
     }
 
     private packageToString({SubscriberPackageName, SubscriberPackageVersionNumber}: Package): string {
         return `${SubscriberPackageName} (${SubscriberPackageVersionNumber})`;
     }
-
-    private logPackages(packages: Package[]): void {
-        this.ux.warn(`
-Some standard groups were removed automatically, please check the group and remove any other standard packages manually. 
-Add following configuration to your pony-config.yml and run 'sfdx pony:package:group:install' to install the package group:`);
-        this.ux.log(`
-packages:
-    default:
-${packages.map(toPackageYamlString).join('')}`);
-    }
 }
-
-const toPackageYamlString = (pkg): string => {
-    let result = '';
-    Object.entries(pkg).forEach(([key, value], idx) => {
-        result += '        ';
-        result += idx === 0 ? '-   ' : '    ';
-        result += `${key}: ${value}\n`;
-    });
-    return result;
-};

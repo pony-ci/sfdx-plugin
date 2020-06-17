@@ -33,7 +33,7 @@ Use 'sfdx force:data:soql:query:create' command to create a query for export.
         const exportOrder = sObjects.export?.order || reversedOrder;
         const importOrder = sObjects?.import?.order || [];
         const sObjectNames = exportOrder === reversedOrder
-            ? importOrder.reverse() : exportOrder;
+            ? reverseArray(importOrder) : exportOrder;
         for (const sObjectName of sObjectNames) {
             const queryFile = toQueryFile(soqlExportDir, sObjectName);
             if (!fs.existsSync(queryFile)) {
@@ -52,4 +52,12 @@ Use 'sfdx force:data:soql:query:create' command to create a query for export.
             }
         }
     }
+}
+
+function reverseArray<T>(arr: T[]): T[] {
+    const result: T[] = [];
+    for (let i = arr.length - 1; i >= 0; --i) {
+        result.push(arr[i]);
+    }
+    return result;
 }

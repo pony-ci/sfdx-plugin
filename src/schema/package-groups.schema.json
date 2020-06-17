@@ -27,7 +27,7 @@
           "type": "string"
         },
         "SubscriberPackageNamespace": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "SubscriberPackageVersionId": {
           "type": "string",

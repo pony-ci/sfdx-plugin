@@ -11,7 +11,7 @@ export interface PackageGroups {
 export interface Package {
   SubscriberPackageId?: string;
   SubscriberPackageName: string;
-  SubscriberPackageNamespace?: string;
+  SubscriberPackageNamespace?: string | null;
   /**
    * ID (starts with 04t) or alias of the package version to install
    */
