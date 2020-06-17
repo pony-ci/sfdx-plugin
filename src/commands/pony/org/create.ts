@@ -1,12 +1,13 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
 import {Org} from '@salesforce/core';
-import {AnyJson, Dictionary, isJsonMap, isString} from '@salesforce/ts-types';
+import {AnyJson, Dictionary, isJsonMap, isString, Optional} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {OrgCreateConfig, sfdx} from '../../..';
 import {Environment} from '../../../lib/jobs';
 import PonyCommand from '../../../lib/PonyCommand';
 import PonyProject from '../../../lib/PonyProject';
+import {hasProp} from '../../../type-guards/general';
 
 const PONY_PRE_ORG_CREATE = 'pony:preOrgCreate';
 const PONY_POST_ORG_CREATE = 'pony:postOrgCreate';
@@ -69,15 +70,8 @@ Execution Flow:
         const project = await PonyProject.load();
         const {orgCreate = {}} = project.ponyConfig;
         let orgCreateResult: AnyJson = {};
-        let useExisting = false;
-        if (this.flags.targetusername) {
-            useExisting = true;
-        } else if (this.org) {
-            useExisting = await this.ux.confirm(`Use existing org ${this.org.getOrgId()}, username: ${this.org.getUsername()}? [y/n]`);
-        }
-        let org;
-        if (useExisting) {
-            org = this.org;
+        let org = await this.tryGetExistingOrg();
+        if (org) {
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
@@ -104,6 +98,43 @@ Execution Flow:
             await project.executeJobByName(PONY_POST_ORG_CREATE, env);
         }
         return orgCreateResult;
+    }
+
+    private async tryGetExistingOrg(): Promise<Optional<Org>> {
+        const {targetusername, setalias} = this.flags;
+        if (targetusername) {
+            // if -u use the org
+            return this.org;
+        } else if (setalias) {
+            // if -a try to find the org and prompt to use it
+            const setAliasOrg = await this.resolveAlias(setalias);
+            if (setAliasOrg) {
+                const useExisting = await this.ux.confirm(`Use existing org from alias ${setalias} ${setAliasOrg.getOrgId()}, username: ${setAliasOrg.getUsername()}? [y/n]`);
+                if (useExisting) {
+                    return setAliasOrg;
+                }
+            }
+        }
+        if (this.org) {
+            // if default org, prompt to use it
+            const useExisting = await this.ux.confirm(`Use existing default org ${this.org.getOrgId()}, username: ${this.org.getUsername()}? [y/n]`);
+            if (useExisting) {
+                return this.org;
+            }
+        }
+    }
+
+    private async resolveAlias(aliasOrUsername: string): Promise<Optional<Org>> {
+        try {
+            return await Org.create({
+                aliasOrUsername
+            });
+        } catch (e) {
+            if (e.name === 'AuthInfoCreationError' || e.name === 'NamedOrgNotFound') {
+                return undefined;
+            }
+            throw e;
+        }
     }
 
     private getOptions(orgCreate: OrgCreateConfig): Dictionary<string | boolean> {
