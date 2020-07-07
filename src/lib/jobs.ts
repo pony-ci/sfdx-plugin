@@ -104,7 +104,7 @@ export async function executeJobByName(
     }
     const ux = await getUX();
     const logger = await getLogger();
-    ux.log(chalk.blueBright.bold(`=== [job] ${name}`));
+    ux.log(chalk.cyanBright.bold(`=== [job] ${name}`));
     logger.info('run job', jobs[name], env);
     let currEnv = env;
     for (const step of jobs[name].steps || []) {
@@ -141,10 +141,10 @@ export async function executeStep(
             throw Error(`Invalid env value: ${stepValue}`);
         }
         const keyPair = stepValue.split('=');
-        ux.log(`${chalk.blueBright('[env]')} ${stepValue}`);
+        ux.log(`${chalk.cyanBright('[env]')} ${stepValue}`);
         newEnv.setEnv(keyPair[0], keyPair[1]);
     } else if (stepKey === 'echo') {
-        ux.log(`${chalk.blueBright(`[echo]`)} ${Object.values(step)[0]}`);
+        ux.log(`${chalk.cyanBright(`[echo]`)} ${Object.values(step)[0]}`);
         ux.log(stepValue);
     } else if (stepKey === 'job') {
         return executeJobByName(jobs, stepValue, newEnv);
@@ -158,7 +158,7 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     const ux = await getUX();
     const logger = await getLogger();
     const command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
-    ux.log(`${chalk.blueBright(`[run] ${command}`)}`);
+    ux.log(`${chalk.cyanBright(`[run] ${command}`)}`);
     const supportsEnvArg = (c) => [
         'pony:org:create',
         'pony:source:content:replace',
@@ -180,7 +180,7 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
         }
     });
     return new Promise((resolve, reject) => {
-        const error = (code) => `Command exited with code ${code} [${command}]`;
+        const error = (code) => `Command failed: ${command}`;
         cmd.on('close', (code) => code ? reject(error(code)) : resolve(newEnvironment));
     });
 }

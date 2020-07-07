@@ -13,11 +13,6 @@ for (const p of ['force', 'pony']) {
                     commandsDir: path.join(__dirname, '../../dist/commands'),
                     namespace: 'pony'
                 });
-            } else if (p === 'force' && !(p in _sfdx)) {
-                registerNamespace({
-                    commandsDir: path.join(__dirname, '../../node_modules/salesforce-alm/dist/commands/'),
-                    namespace: 'force'
-                });
             }
             return _sfdx[p];
         }
