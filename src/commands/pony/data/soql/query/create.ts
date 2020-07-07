@@ -1,11 +1,11 @@
 import {flags} from '@salesforce/command';
 import {FlagsConfig} from '@salesforce/command/lib/sfdxFlags';
-import {AnyJson, isArray} from '@salesforce/ts-types';
+import {AnyJson, Dictionary, isArray} from '@salesforce/ts-types';
 import fs from 'fs-extra';
 import {DescribeSObjectResult, Field} from 'jsforce/describe-result';
 import {EOL} from 'os';
 import path from 'path';
-import {sfdx} from '../../../../..';
+import {describeSObject} from '../../../../../lib/data/sObject';
 import PonyCommand from '../../../../../lib/PonyCommand';
 import PonyProject from '../../../../../lib/PonyProject';
 import {defaultSoqlExportDir} from '../../export';
@@ -19,8 +19,8 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
     protected static flagsConfig: FlagsConfig = {
         sobjecttype: flags.string({
             char: 's',
-            description: 'the API name of the object to create query',
-            required: true
+            description: 'the API name of the object to create query, (default: all sobjects defined in config)',
+            required: false
         }),
         noprompt: flags.boolean({
             char: 'p',
@@ -46,19 +46,27 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
     public async run(): Promise<AnyJson> {
         const project = await PonyProject.load();
         const data = project.dataConfig;
-        const query = await this.buildQuery();
         const soqlExportDir = data?.sObjects?.export?.soqlExportDir || defaultSoqlExportDir;
-        await this.writeQuery(query, soqlExportDir);
-        return {query};
+        const exportOrder = data.sObjects?.export?.order;
+        const sObjectTypes = this.flags.sobjecttype
+            ? [this.flags.sobjecttype]
+            : isArray(exportOrder) ? exportOrder : ([...data.sObjects?.import?.order || []]).reverse();
+        const queries: Dictionary<string> = {};
+        for (const sObjectType of sObjectTypes) {
+            const query = await this.buildQuery(sObjectType);
+            await this.writeQuery(sObjectType, query, soqlExportDir);
+            queries[sObjectType] = query;
+        }
+        return queries;
     }
 
-    private async buildQuery(): Promise<string> {
-        const {sobjecttype, excludeparentfields, includenoncreateable} = this.flags;
-        const describeMap = await this.describeSObjectsByType();
-        const described = describeMap[sobjecttype];
+    private async buildQuery(sObjectType: string): Promise<string> {
+        const {excludeparentfields, includenoncreateable} = this.flags;
+        const describeMap = await this.describeSObjectsByType(sObjectType);
+        const described = describeMap[sObjectType];
         const soqlFieldNames = this.filterCreateable(described.fields).map(it => it.name);
         if (!excludeparentfields) {
-            soqlFieldNames.push(...getParentFieldNames(describeMap, sobjecttype, includenoncreateable));
+            soqlFieldNames.push(...getParentFieldNames(describeMap, sObjectType, includenoncreateable));
         }
         const nameFieldNames = getNameFields(described).map(it => it.name);
         soqlFieldNames
@@ -68,13 +76,13 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         const nameField = getNameFields(described).find(() => true);
         const orderByClause = nameField ? `${EOL}ORDER BY ${nameField.name}` : '';
         const fieldsClause = [...new Set(soqlFieldNames)].map(it => `    ${it}`).join(`,${EOL}`);
-        return `SELECT${EOL}${fieldsClause}${EOL}FROM ${sobjecttype}${orderByClause}${EOL}`;
+        return `SELECT${EOL}${fieldsClause}${EOL}FROM ${sObjectType}${orderByClause}${EOL}`;
     }
 
-    private async writeQuery(query: string, soqlExportDir: string): Promise<void> {
-        const {sobjecttype, noprompt} = this.flags;
+    private async writeQuery(sObjectType: string, query: string, soqlExportDir: string): Promise<void> {
+        const {noprompt} = this.flags;
         fs.ensureDirSync(soqlExportDir);
-        const file = path.join(soqlExportDir, `${sobjecttype}.soql`);
+        const file = path.join(soqlExportDir, `${sObjectType}.soql`);
         let writeFile = true;
         if (!noprompt && fs.existsSync(file)) {
             writeFile = await this.ux.confirm(`File already exists, overwrite ${file}?`);
@@ -85,11 +93,10 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         }
     }
 
-    private async describeSObjectsByType(): Promise<DescribeSObjectResultByType> {
-        this.ux.startSpinner('Describing SObject');
-        const {sobjecttype, excludeparentfields, targetusername} = this.flags;
+    private async describeSObjectsByType(sObjectType: string): Promise<DescribeSObjectResultByType> {
+        const {excludeparentfields, targetusername} = this.flags;
         const describeMap: DescribeSObjectResultByType = {};
-        const described = describeMap[sobjecttype] = await this.describeSObject(sobjecttype, targetusername);
+        const described = describeMap[sObjectType] = await describeSObject(sObjectType, targetusername, {ux: this.ux});
         if (!excludeparentfields) {
             const alreadyInProgress = new Set<string>();
             const describePromises: Promise<DescribeSObjectResult>[] = [];
@@ -97,7 +104,7 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
                 if (referenceField.referenceTo) {
                     for (const referenceTo of referenceField.referenceTo) {
                         if (!alreadyInProgress.has(referenceTo)) {
-                            describePromises.push(this.describeSObject(referenceTo, targetusername));
+                            describePromises.push(describeSObject(referenceTo, targetusername, {ux: this.ux}));
                             alreadyInProgress.add(referenceTo);
                         }
                     }
@@ -111,14 +118,6 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         return describeMap;
     }
 
-    private async describeSObject(sObjectType: string, targetUsername: string): Promise<DescribeSObjectResult> {
-        return sfdx.force.schema.sobject.describe({
-            quiet: true,
-            sobjecttype: sObjectType,
-            targetusername: targetUsername
-        });
-    }
-
     private filterCreateable(fields: Field[]): Field[] {
         return this.flags.includenoncreateable ? fields : fields.filter(it => it.createable);
     }
@@ -129,8 +128,8 @@ const getNameFields = (result: DescribeSObjectResult) => result.fields.filter(it
 const getReferenceFields = (result: DescribeSObjectResult) => result.fields.filter(it =>
     it.type === 'reference' && isArray(it.referenceTo) && it.referenceTo.length && it.referenceTo[0]);
 
-const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sobjectType: string, nonCreateable: boolean) => {
-    return getReferenceFields(describeMap[sobjectType])
+const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sObjectType: string, nonCreateable: boolean) => {
+    return getReferenceFields(describeMap[sObjectType])
         .filter(it => it.relationshipName && (it.createable || nonCreateable))
         .reduce((arr: string[], it) => {
             if (it.referenceTo) {
