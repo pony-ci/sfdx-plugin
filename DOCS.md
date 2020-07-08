@@ -17,7 +17,7 @@ Directories `data/` and `scripts/` contains files essential for creation of full
 │   └── project-scratch-def.json
 ├── data
 │   ├── groups
-│   │   └── package.json
+│   │   └── packages.json
 │   └── sObjects
 │       ├── Account.json
 │       └── Contact.json
