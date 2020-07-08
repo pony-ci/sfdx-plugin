@@ -39,6 +39,10 @@ Directories `data/` and `scripts/` contains files essential for creation of full
 
 ## Jobs configuration
 Job is a collection of steps.
+You can define your own job which can be executed from another job or using `sfdx pony:run`.
+Standard job extensions are prefixed with `pony`, e.g. `pony:preOrgCreate` and `pony:postSourcePush`,
+these two jobs are executed before and after the `sfdx pony:org:create` command. 
+
 There are five types of steps: 'echo', 'env', 'job', 'run' and 'sfdx'.
 
 | type | example                           | description                   |
@@ -50,7 +54,6 @@ There are five types of steps: 'echo', 'env', 'job', 'run' and 'sfdx'.
 | sfdx | `sfdx: force:org:list`            | shortcut for `run: sfdx`      |
 
 In the example you can see defined three jobs and one replacement.
-Standard job extensions are prefixed with `pony`, e.g. `pony:postOrgCreate` and `pony:preSourcePush`.
 To create a scratch org execute `sfdx pony:org:create` command. 
 Before a scratch org is created the command will look for `pony:preOrgCreate` job.
 In the example there is a `pony:postOrgCreate` job which is executed after org creation.
