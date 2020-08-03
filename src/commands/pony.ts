@@ -4,9 +4,9 @@ import PonyCommand from '../lib/PonyCommand';
 
 const DESCRIPTION = `Automate your application lifecycle.
 
-* Docs: https://pony-ci.github.io/docs
-* Repository: https://github.com/pony-ci/sfdx-plugin
-* Issues: https://github.com/pony-ci/sfdx-plugin/issues
+* Docs: https://pony-ci.github.io/pony-ci
+* Plugin Repository: https://github.com/pony-ci/sfdx-plugin
+* Plugin Issues: https://github.com/pony-ci/sfdx-plugin/issues
 `;
 
 export default class PonyBaseCommand extends PonyCommand {
