@@ -37,7 +37,7 @@ If not specified, the profile is assigned to target username.
         const profileId = await this.getProfileId();
         await this.assignProfile(assignerUsername, profileId);
         if (!assigner) {
-            await this.deactivateAssigner(assignerUsername);
+            await this.deactivateAndLogoutAssigner(assignerUsername);
         }
     }
 
@@ -64,14 +64,19 @@ If not specified, the profile is assigned to target username.
         });
     }
 
-    private async deactivateAssigner(assignerUsername: string): Promise<void> {
+    private async deactivateAndLogoutAssigner(assignerUsername: string): Promise<void> {
         const {targetusername} = this.flags;
-        this.ux.log(`Deactivating assigner: ${assignerUsername}`);
+        this.ux.log(`Deactivating assigner.`);
         await sfdx.force.data.record.update({
             targetusername,
             sobjecttype: 'User',
             where: `Username='${assignerUsername}'`,
             values: `IsActive=false'`
+        });
+        this.ux.log(`Logging out assigner.`);
+        await sfdx.force.auth.logout({
+            noprompt: true,
+            targetusername
         });
     }
 

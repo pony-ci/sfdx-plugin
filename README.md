@@ -26,7 +26,7 @@ USAGE
 * [`sfdx pony:connectedapp:deploy -l <string> -e <string> [-s <string>] [--callbackurl <string>] [-c <string>] [-d <string>] [-p] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyconnectedappdeploy--l-string--e-string--s-string---callbackurl-string--c-string--d-string--p--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:export [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataexport--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:data:import [--noprompt] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydataimport---noprompt--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-* [`sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydatasoqlquerycreate--s-string--p---excludeparentfields---includenoncreateable--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx pony:data:soql:query:create [-s <string>] [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponydatasoqlquerycreate--s-string--p---excludeparentfields---includenoncreateable--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:group:assign -g <string> [-t AllCustomerPortal|ChannelProgramGroup|CollaborationGroup|Manager|ManagerAndSubordinatesInternal|Organization|PRMOrganization|Queue|Regular|Role|RoleAndSubordinates|RoleAndSubordinatesInternal|Territory|TerritoryAndSubordinates] [--userorgroup <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponygroupassign--g-string--t-allcustomerportalchannelprogramgroupcollaborationgroupmanagermanagerandsubordinatesinternalorganizationprmorganizationqueueregularroleroleandsubordinatesroleandsubordinatesinternalterritoryterritoryandsubordinates---userorgroup-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:org:create [name=value...] [-s] [-a <string>] [-d <integer>] [-w <number>] [-v <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyorgcreate-namevalue--s--a-string--d-integer--w-number--v-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:package:group:export [-n <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponypackagegroupexport--n-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
@@ -35,7 +35,7 @@ USAGE
 * [`sfdx pony:source:content:replace -r <string> [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponysourcecontentreplace--r-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:source:push [-f] [-g] [-w <number>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponysourcepush--f--g--w-number--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:source:sort [-f <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponysourcesort--f-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
-* [`sfdx pony:user:create -n <string> [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyusercreate--n-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx pony:user:create [name=value...] [-a <string>] [-p <string>] [-f <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyusercreate-namevalue--a-string--p-string--f-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:user:profile:assign -p <string> [-a <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyuserprofileassign--p-string--a-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx pony:user:update -v <string> [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-ponyuserupdate--v-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
@@ -155,20 +155,21 @@ OPTIONS
                                                                                     without prompt.
 ```
 
-## `sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx pony:data:soql:query:create [-s <string>] [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 create file with soql query for exporting records
 
 ```
 USAGE
-  $ sfdx pony:data:soql:query:create -s <string> [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] 
+  $ sfdx pony:data:soql:query:create [-s <string>] [-p] [--excludeparentfields] [--includenoncreateable] [-u <string>] 
   [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
   -p, --noprompt                                                                    no prompt to confirm overwrite
 
-  -s, --sobjecttype=sobjecttype                                                     (required) the API name of the
-                                                                                    object to create query
+  -s, --sobjecttype=sobjecttype                                                     the API name of the object to create
+                                                                                    query, (default: all sobjects
+                                                                                    defined in config)
 
   -u, --targetusername=targetusername                                               username or alias for the target
                                                                                     org; overrides default target org
@@ -465,18 +466,19 @@ EXAMPLES
   $ sfdx pony:source:sort -f src/main/default/profiles/*
 ```
 
-## `sfdx pony:user:create -n <string> [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx pony:user:create [name=value...] [-a <string>] [-p <string>] [-f <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 create a user by name defined in config
 
 ```
 USAGE
-  $ sfdx pony:user:create -n <string> [-u <string>] [--apiversion <string>] [--json] [--loglevel 
-  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx pony:user:create [name=value...] [-a <string>] [-p <string>] [-f <string>] [-u <string>] [--apiversion 
+  <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
-  -n, --name=name                                                                   (required) comma-separated list of
-                                                                                    user definition names
+  -a, --setalias=setalias                                                           alias for the created org
+  -f, --definitionfile=definitionfile                                               file path to a user definition
+  -p, --prefix=prefix                                                               username prefix
 
   -u, --targetusername=targetusername                                               username or alias for the target
                                                                                     org; overrides default target org
