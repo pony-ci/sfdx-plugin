@@ -1,6 +1,6 @@
 *-debug.log
 *-error.log
 .nyc_output/
-
+dist/
 node_modules/
 .idea/
