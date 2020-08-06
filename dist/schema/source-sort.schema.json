@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/source-sort.schema.json",
+    "title": "Source Sort",
+    "type": "object",
+    "additionalProperties": false,
+    "definitions": {
+        "sourceSort": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "enum": [
+                        "all",
+                        "source",
+                        "none"
+                    ],
+                    "default": "source"
+                },
+                {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "additionalItems": false,
+                    "description": "List of files and/or metadata types to sort."
+                }
+            ],
+            "description": "Define which files and/or metadata types to sort on 'pony:source:sort' command."
+        }
+    }
+}

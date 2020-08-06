@@ -1,0 +1,83 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/jobs.schema.json",
+    "title": "Jobs",
+    "type": "object",
+    "additionalProperties": {
+        "$ref": "#/definitions/job"
+    },
+    "definitions": {
+        "job": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "steps": {
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": {
+                        "$ref": "#/definitions/step"
+                    }
+                }
+            }
+        },
+        "step": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": false,
+                    "properties": {
+                        "echo": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["echo"]
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": false,
+                    "properties": {
+                        "env": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["env"]
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": false,
+                    "properties": {
+                        "job": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["job"]
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": false,
+                    "properties": {
+                        "run": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["run"]
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": false,
+                    "properties": {
+                        "sfdx": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["sfdx"]
+                }
+            ]
+        }
+    }
+}

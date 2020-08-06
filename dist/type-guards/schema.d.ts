@@ -1,0 +1,11 @@
+import { AnyJson, Optional } from '@salesforce/ts-types/lib/types';
+import { Config, DataConfig, InnerTextReplacement, OrgWideEmailAddressReplacement, PackageGroups } from '..';
+export declare const validateConfig: (value: Optional<AnyJson>) => string | void;
+export declare const validateDataConfig: (value: Optional<AnyJson>) => string | void;
+export declare const validateJobs: (value: Optional<AnyJson>) => string | void;
+export declare const validatePackageGroups: (value: Optional<AnyJson>) => string | void;
+export declare const isConfig: (value: unknown) => value is Config;
+export declare const isPackageGroups: (value: unknown) => value is PackageGroups;
+export declare const isDataConfig: (value: unknown) => value is DataConfig;
+export declare const isInnerTextReplacement: (value: unknown) => value is InnerTextReplacement;
+export declare const isOrgWideEmailAddressReplacement: (value: unknown) => value is OrgWideEmailAddressReplacement;

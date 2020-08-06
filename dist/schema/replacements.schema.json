@@ -1,0 +1,79 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/replacements.schema.json",
+    "title": "Replacements",
+    "type": "object",
+    "additionalProperties": {
+        "$ref": "#/definitions/replacement"
+    },
+    "definitions": {
+        "replacement": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+                "innerText": {
+                    "$ref": "#/definitions/innerText"
+                },
+                "orgWideEmailAddress": {
+                    "$ref": "#/definitions/orgWideEmailAddress"
+                }
+            }
+        },
+        "innerText": {
+            "type": "object",
+            "additionalProperties": false,
+            "title": "Inner Text Replacement",
+            "properties": {
+                "files": {
+                    "$ref": "#/definitions/files"
+                },
+                "replacement": {
+                    "$ref": "#/definitions/replacementValue"
+                },
+                "search": {
+                    "$ref": "#/definitions/search"
+                }
+            },
+            "required": [
+                "files",
+                "replacement",
+                "search"
+            ]
+        },
+        "orgWideEmailAddress": {
+            "type": "object",
+            "additionalProperties": false,
+            "title": "Org Wide Email Address Replacement",
+            "properties": {
+                "files": {
+                    "$ref": "#/definitions/files"
+                },
+                "replacement": {
+                    "$ref": "#/definitions/replacementValue"
+                }
+            },
+            "required": [
+                "files",
+                "replacement"
+            ]
+        },
+        "files": {
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+                "type": "string"
+            }
+        },
+        "search": {
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+                "type": "string"
+            }
+        },
+        "replacementValue": {
+            "type": "string"
+        }
+    }
+}
