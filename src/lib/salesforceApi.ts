@@ -48,6 +48,7 @@ export class SalesforceApi {
     }
 
     public async query(query: string): Promise<Record[]> {
+        // tslint:disable-next-line:await-promise
         let result = await this.conn.query(query);
         const records = (result.records || []) as Record[];
         while (!result.done && result.nextRecordsUrl) {
@@ -57,7 +58,7 @@ export class SalesforceApi {
         return records;
     }
 
-    public async delete(sObjectName: string, query: string): Promise<void> {
+    public async destroy(sObjectName: string, query: string): Promise<void> {
         const records = await this.query(query);
         const ids = records.map(it => it.Id) as string[];
         if (ids.length) {

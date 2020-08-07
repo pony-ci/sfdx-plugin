@@ -26,6 +26,7 @@
     "trailing-comma": false,
     "no-increment-decrement": false,
     "no-trailing-whitespace": false,
+    "prefer-type-cast": false,
     "typedef": [
       true,
       "call-signature",
@@ -34,6 +35,20 @@
       "member-variable-declaration",
       "array-destructuring"
     ],
+    "align": [
+      true,
+      "elements",
+      "members",
+      "parameters",
+      "statements"
+    ],
+    "function-name": [true, {
+      "method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+      "private-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+      "protected-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+      "static-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+      "function-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$"
+    }],
     // remove rules below
     "completed-docs": false
   }
