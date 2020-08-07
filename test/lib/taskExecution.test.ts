@@ -13,7 +13,7 @@ before(() => {
 });
 
 function createEnv(variables: Dictionary<string>): Environment {
-    const env = Environment.default();
+    const env = Environment.createDefault();
     for (const [key, value] of Object.entries(variables)) {
         env.setEnv(key, value);
     }

@@ -63,9 +63,9 @@ export default class PonyProject {
         return this.sfdxProjectJson;
     }
 
-    public async findComponents(type: MetadataType): Promise<string[]> {
+    public async findComponents(metadataType: MetadataType): Promise<string[]> {
         const files: string[] = [];
-        for (const file of await this.findAllComponents(type)) {
+        for (const file of await this.findAllComponents(metadataType)) {
             if (await this.isSourceFile(file)) {
                 files.push(file);
             }
@@ -73,8 +73,8 @@ export default class PonyProject {
         return files;
     }
 
-    public async findAllComponents(type: MetadataType): Promise<string[]> {
-        return findComponents(type, this.projectDir);
+    public async findAllComponents(metadataType: MetadataType): Promise<string[]> {
+        return findComponents(metadataType, this.projectDir);
     }
 
     public async isSourceFile(file: string): Promise<boolean> {

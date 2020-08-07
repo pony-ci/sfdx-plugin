@@ -27,7 +27,9 @@ export class FilesBackup {
     }
 
     public backupFiles(files: string[]): void {
-        files.forEach(it => this.backupFile(it));
+        files.forEach(it => {
+            this.backupFile(it);
+        });
     }
 
     public backupFile(file: string): void {
@@ -38,7 +40,7 @@ export class FilesBackup {
     }
 
     public async restoreBackupFiles(username?: string): Promise<void> {
-        const ux = await getUX();
+        const ux = getUX();
         const dir = this.backupDir;
         if (fs.existsSync(dir)) {
             const targetFiles: string[] = [];

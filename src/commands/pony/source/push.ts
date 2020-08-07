@@ -45,7 +45,7 @@ Execution Flow:
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.default()),
+            default: Environment.stringify(Environment.createDefault()),
             hidden: true
         })
     };

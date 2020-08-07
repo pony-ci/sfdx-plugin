@@ -43,7 +43,7 @@ export class Environment {
         return Environment.create(variables, hrtime);
     }
 
-    public static default(): Environment {
+    public static createDefault(): Environment {
         return Environment.create({}, process.hrtime());
     }
 
@@ -102,8 +102,8 @@ export async function executeJobByName(
     if (!jobs[name]) {
         throw Error(`Job not found: ${name}`);
     }
-    const ux = await getUX();
-    const logger = await getLogger();
+    const ux = getUX();
+    const logger = getLogger();
     ux.log(chalk.cyanBright.bold(`=== [job] ${name}`));
     logger.info('run job', jobs[name], env);
     let currEnv = env;
@@ -155,8 +155,8 @@ export async function executeStep(
 }
 
 async function executeCommand(stepKey: string, stepValue: string, environment: Environment): Promise<Environment> {
-    const ux = await getUX();
-    const logger = await getLogger();
+    const ux = getUX();
+    const logger = getLogger();
     const command = stepKey === 'run' ? stepValue : [stepKey, stepValue].join(' ');
     ux.log(`${chalk.cyanBright(`[run] ${command}`)}`);
     const supportsEnvArg = (c) => [
