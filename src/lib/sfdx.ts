@@ -43,7 +43,7 @@ export interface ListOrgsOptions {
 }
 
 export async function logoutAll(): Promise<void> {
-    const ux = await getUX();
+    const ux = getUX();
     ux.log(`Logging out from all orgs`);
     return sfdx.force.auth.logout({
         all: true,
@@ -52,7 +52,7 @@ export async function logoutAll(): Promise<void> {
 }
 
 export async function listOrgs(options: ListOrgsOptions = {}): Promise<unknown> {
-    const ux = await getUX();
+    const ux = getUX();
     ux.log('Listing orgs');
     return sfdx.force.org.list({
         ...options,

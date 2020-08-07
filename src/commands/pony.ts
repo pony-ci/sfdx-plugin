@@ -21,7 +21,7 @@ export default class PonyBaseCommand extends PonyCommand {
     public static readonly flagsConfig: FlagsConfig = {};
 
     public async run(): Promise<void> {
-        const ux = await getUX();
+        const ux = getUX();
         ux.log(DESCRIPTION);
     }
 }

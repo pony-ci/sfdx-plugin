@@ -9,7 +9,7 @@ export async function updateSourcePathInfos(
     username: string,
     files: string[]
 ): Promise<void> {
-    const ux = await getUX();
+    const ux = getUX();
     const infosFile = path.join(projectDir, `.sfdx/orgs/${username}/sourcePathInfos.json`);
     if (!existsSync(infosFile)) {
         throw Error(`File not found: ${infosFile}`);

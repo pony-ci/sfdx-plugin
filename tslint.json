@@ -22,6 +22,10 @@
     "no-implicit-dependencies": false,
     "no-relative-imports": false,
     "no-unsafe-any": false,
+    "strict-boolean-expressions": false,
+    "trailing-comma": false,
+    "no-increment-decrement": false,
+    "no-trailing-whitespace": false,
     "typedef": [
       true,
       "call-signature",

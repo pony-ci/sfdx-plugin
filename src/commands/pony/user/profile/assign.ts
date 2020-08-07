@@ -89,7 +89,7 @@ If not specified, the profile is assigned to target username.
         this.log(`Creating a user ${assignerUsername} who will assign the profile.`);
         await sfdx.force.user.create({
             targetusername,
-        }, [
+        },                           [
             `Username=${assignerUsername}`,
             `profileName=System Administrator`
         ]);
