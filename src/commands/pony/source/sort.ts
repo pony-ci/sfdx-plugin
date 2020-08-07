@@ -59,10 +59,10 @@ ${supportedMetadataToSort.map(it => `   * ${it}`).join(EOL)}
                 await this.sortComponentOrDir(file);
             }
         } else if (!sourceSort || isString(sourceSort)) {
-            for (const type of supportedMetadataToSort) {
+            for (const metadataType of supportedMetadataToSort) {
                 const filesToSort = sourceSort === 'all'
-                    ? await project.findAllComponents(type)
-                    : await project.findComponents(type);
+                    ? await project.findAllComponents(metadataType)
+                    : await project.findComponents(metadataType);
                 for (const file of filesToSort) {
                     await this.sortComponent(file);
                 }
@@ -82,8 +82,8 @@ ${supportedMetadataToSort.map(it => `   * ${it}`).join(EOL)}
     }
 
     private async sortComponent(file: string): Promise<void> {
-        const type = describeComponentFile(file);
-        if (!supportedMetadataToSort.includes(type || '')) {
+        const metadataType = describeComponentFile(file);
+        if (!supportedMetadataToSort.includes(metadataType || '')) {
             throw Error(`Unsupported metadata: ${file}`);
         }
         this.ux.log(`sort: ${file}`);
