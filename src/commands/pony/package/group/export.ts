@@ -70,7 +70,7 @@ Exported package group is an ordered list of packages that can be installed with
             })
         ]);
         this.ux.stopSpinner();
-        const packages = await this.filterAndMapPackages(installedPackages);
+        const packages = this.filterAndMapPackages(installedPackages);
         const dir = path.join(project.projectDir, 'data/groups/');
         const file = path.join(dir, 'packages.json');
         fs.ensureDirSync(dir);
