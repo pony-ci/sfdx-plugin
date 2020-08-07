@@ -19,7 +19,7 @@ $ npm install -g @pony-ci/sfdx-plugin
 $ sfdx COMMAND
 running command...
 $ sfdx (-v|--version|version)
-@pony-ci/sfdx-plugin/1.0.0 linux-x64 node-v8.10.0
+@pony-ci/sfdx-plugin/1.0.1 linux-x64 node-v8.10.0
 $ sfdx --help [COMMAND]
 USAGE
   $ sfdx COMMAND
