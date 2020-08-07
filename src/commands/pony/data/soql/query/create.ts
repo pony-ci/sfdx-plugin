@@ -12,6 +12,26 @@ import {defaultSoqlExportDir} from '../../export';
 
 type DescribeSObjectResultByType = { [key: string]: DescribeSObjectResult };
 
+const getNameFields = (result: DescribeSObjectResult) => result.fields.filter(it => it.nameField);
+
+const getReferenceFields = (result: DescribeSObjectResult) => result.fields.filter(it =>
+    it.type === 'reference' && isArray(it.referenceTo) && it.referenceTo.length && it.referenceTo[0]);
+
+const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sObjectType: string, nonCreateable: boolean) => {
+    return getReferenceFields(describeMap[sObjectType])
+        .filter(it => it.relationshipName && (it.createable || nonCreateable))
+        .reduce((arr: string[], it) => {
+            if (it.referenceTo) {
+                for (const referenceTo of it.referenceTo) {
+                    getNameFields(describeMap[it.referenceTo[0]])
+                        .map(field => `${it.relationshipName}.${field.name}`)
+                        .forEach(name => arr.push(name));
+                }
+            }
+            return arr;
+        }, []);
+};
+
 export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
     public static description: string = `create file with soql query for exporting records`;
@@ -122,23 +142,3 @@ export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
         return this.flags.includenoncreateable ? fields : fields.filter(it => it.createable);
     }
 }
-
-const getNameFields = (result: DescribeSObjectResult) => result.fields.filter(it => it.nameField);
-
-const getReferenceFields = (result: DescribeSObjectResult) => result.fields.filter(it =>
-    it.type === 'reference' && isArray(it.referenceTo) && it.referenceTo.length && it.referenceTo[0]);
-
-const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sObjectType: string, nonCreateable: boolean) => {
-    return getReferenceFields(describeMap[sObjectType])
-        .filter(it => it.relationshipName && (it.createable || nonCreateable))
-        .reduce((arr: string[], it) => {
-            if (it.referenceTo) {
-                for (const referenceTo of it.referenceTo) {
-                    getNameFields(describeMap[it.referenceTo[0]])
-                        .map(field => `${it.relationshipName}.${field.name}`)
-                        .forEach(name => arr.push(name));
-                }
-            }
-            return arr;
-        }, []);
-};

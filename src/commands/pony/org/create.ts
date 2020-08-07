@@ -75,7 +75,7 @@ Execution Flow:
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
-            env = await project.hasJob(PONY_PRE_ORG_CREATE)
+            env = project.hasJob(PONY_PRE_ORG_CREATE)
                 ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
                 : env;
             this.ux.startSpinner('Creating scratch org');
@@ -94,7 +94,7 @@ Execution Flow:
                 env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             }
         }
-        if (await project.hasJob(PONY_POST_ORG_CREATE)) {
+        if (project.hasJob(PONY_POST_ORG_CREATE)) {
             await project.executeJobByName(PONY_POST_ORG_CREATE, env);
         }
         return orgCreateResult;
