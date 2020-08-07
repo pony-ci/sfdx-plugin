@@ -1,13 +1,19 @@
+import {Logger} from '@salesforce/core';
 import {Dictionary} from '@salesforce/ts-types';
 import {expect, should, use} from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import {Environment, prepareCommandArgs} from '../../src/lib/jobs';
+import {registerLogger} from '../../src';
+import {Environment} from '../../src/lib/jobs';
 
 should();
 use(chaiAsPromised);
 
+before(() => {
+    registerLogger(new Logger('testLogger'));
+});
+
 function createEnv(variables: Dictionary<string>): Environment {
-    const env = Environment.create();
+    const env = Environment.default();
     for (const [key, value] of Object.entries(variables)) {
         env.setEnv(key, value);
     }
@@ -17,47 +23,47 @@ function createEnv(variables: Dictionary<string>): Environment {
 // tslint:disable:no-invalid-template-strings
 describe('prepareCommandArgs', () => {
     it('sfdx object properties', () => {
-        expect(prepareCommandArgs('$env.some', createEnv({some: 'abc'}))).to.eq('abc');
-        expect(prepareCommandArgs('  $env.some', createEnv({some: 'abc'}))).to.eq('  abc');
-        expect(prepareCommandArgs('$env.some  ', createEnv({some: 'abc'}))).to.eq('abc  ');
-        expect(prepareCommandArgs(' $env.some ', createEnv({some: 'abc'}))).to.eq(' abc ');
-        expect(prepareCommandArgs('  $env.some  ', createEnv({some: 'abc'}))).to.eq('  abc  ');
-        expect(prepareCommandArgs('aaaa $env.some aaaa', createEnv({some: 'abc'}))).to.eq('aaaa abc aaaa');
-        expect(prepareCommandArgs('some $env.some some', createEnv({some: 'abc'}))).to.eq('some abc some');
+        expect(createEnv({some: 'abc'}).fillString('$env.some')).to.eq('abc');
+        expect(createEnv({some: 'abc'}).fillString('  $env.some')).to.eq('  abc');
+        expect(createEnv({some: 'abc'}).fillString('$env.some  ')).to.eq('abc  ');
+        expect(createEnv({some: 'abc'}).fillString(' $env.some ')).to.eq(' abc ');
+        expect(createEnv({some: 'abc'}).fillString('  $env.some  ')).to.eq('  abc  ');
+        expect(createEnv({some: 'abc'}).fillString('aaaa $env.some aaaa')).to.eq('aaaa abc aaaa');
+        expect(createEnv({some: 'abc'}).fillString('some $env.some some')).to.eq('some abc some');
 
-        expect(prepareCommandArgs('${env.some}', createEnv({some: 'abc'}))).to.eq('abc');
-        expect(prepareCommandArgs('  ${env.some}', createEnv({some: 'abc'}))).to.eq('  abc');
-        expect(prepareCommandArgs('${env.some}  ', createEnv({some: 'abc'}))).to.eq('abc  ');
-        expect(prepareCommandArgs(' ${env.some} ', createEnv({some: 'abc'}))).to.eq(' abc ');
-        expect(prepareCommandArgs('  ${env.some}  ', createEnv({some: 'abc'}))).to.eq('  abc  ');
-        expect(prepareCommandArgs('aaaa ${env.some} aaaa', createEnv({some: 'abc'}))).to.eq('aaaa abc aaaa');
-        expect(prepareCommandArgs('some ${env.some} some', createEnv({some: 'abc'}))).to.eq('some abc some');
+        expect(createEnv({some: 'abc'}).fillString('${env.some}')).to.eq('abc');
+        expect(createEnv({some: 'abc'}).fillString('  ${env.some}')).to.eq('  abc');
+        expect(createEnv({some: 'abc'}).fillString('${env.some}  ')).to.eq('abc  ');
+        expect(createEnv({some: 'abc'}).fillString(' ${env.some} ')).to.eq(' abc ');
+        expect(createEnv({some: 'abc'}).fillString('  ${env.some}  ')).to.eq('  abc  ');
+        expect(createEnv({some: 'abc'}).fillString('aaaa ${env.some} aaaa')).to.eq('aaaa abc aaaa');
+        expect(createEnv({some: 'abc'}).fillString('some ${env.some} some')).to.eq('some abc some');
 
-        expect(prepareCommandArgs('some $env.some $env.other some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('some $env.some $env.other some'))
             .to.eq('some abc xyz some');
-        expect(prepareCommandArgs('some "$env.some" $env.other some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('some "$env.some" $env.other some'))
             .to.eq('some "abc" xyz some');
-        expect(prepareCommandArgs('some "$env.some" "$env.other" some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('some "$env.some" "$env.other" some'))
             .to.eq('some "abc" "xyz" some');
-        expect(prepareCommandArgs('some "$env.some $env.other" some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('some "$env.some $env.other" some'))
             .to.eq('some "abc xyz" some');
-        expect(prepareCommandArgs('"some $env.some $env.other" some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('"some $env.some $env.other" some'))
             .to.eq('"some abc xyz" some');
-        expect(prepareCommandArgs('"some $env.some ${env.other}aaa" some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('"some $env.some ${env.other}aaa" some'))
             .to.eq('"some abc xyzaaa" some');
-        expect(prepareCommandArgs('some "${env.some}" $env.other some', createEnv({some: 'abc', other: 'xyz'})))
+        expect(createEnv({some: 'abc', other: 'xyz'}).fillString('some "${env.some}" $env.other some'))
             .to.eq('some "abc" xyz some');
 
-        expect(prepareCommandArgs('$env.someaaa', createEnv({some: 'abc'}))).to.eq('');
+        expect(createEnv({some: 'abc'}).fillString('$env.someaaa')).to.eq('');
 
-        expect(prepareCommandArgs('sfdx force:org:create -u $env.username -v $env.devhub_username',
-            createEnv({username: 'abc', devhub_username: 'dh'})))
+        expect(createEnv({username: 'abc', devhub_username: 'dh'})
+            .fillString('sfdx force:org:create -u $env.username -v $env.devhub_username'))
             .to.eq('sfdx force:org:create -u abc -v dh');
-        expect(prepareCommandArgs('sfdx force:org:create -u $env.username -v $env.devhub_username',
-            createEnv({username: 'abc', devhub_username: undefined})))
+        expect(createEnv({username: 'abc', devhub_username: undefined})
+            .fillString('sfdx force:org:create -u $env.username -v $env.devhub_username'))
             .to.eq('sfdx force:org:create -u abc -v ');
-        expect(prepareCommandArgs('sfdx force:org:create -u "$env.username" -v "$env.devhub_username"',
-            createEnv({username: 'abc'})))
+        expect(createEnv({username: 'abc'})
+            .fillString('sfdx force:org:create -u "$env.username" -v "$env.devhub_username"'))
             .to.eq('sfdx force:org:create -u "abc" -v ""');
     });
 });

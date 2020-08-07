@@ -1,7 +1,7 @@
 import {IConfig} from '@oclif/config';
 import {SfdxCommand, UX} from '@salesforce/command';
 import {Logger} from '@salesforce/core';
-import {isArray, isPlainObject} from '@salesforce/ts-types';
+import {isArray, isPlainObject, isString} from '@salesforce/ts-types';
 import {EOL} from 'os';
 import {hasProp} from '../type-guards/general';
 import {registerLogger, registerUX} from './pubsub';
@@ -33,7 +33,8 @@ function preprocessError(errors: unknown): unknown {
     if (errors instanceof String || errors instanceof Error) {
         return errors;
     }
-    if (isPlainObject(errors) && hasProp(errors, 'commandName') && hasProp(errors, 'message')) {
+    if (isPlainObject(errors) && hasProp(errors, 'commandName')
+        && hasProp(errors, 'message') && isString(errors.message)) {
         return (errors.commandName ? `[${errors.commandName}] ` : '') + errors.message;
     }
     if (isArray(errors)) {

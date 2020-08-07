@@ -185,12 +185,12 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     });
 }
 
+const secondsParser = (secs: number) => [
+    Math.floor(secs / 3600), Math.floor(secs % 3600 / 60), Math.floor(secs % 3600 % 60)
+];
+
 function secondsFormatter(secs: number): string {
     const [h, m, s]: number[] = secondsParser(secs);
     const seconds = (h + m + s) === 0 ? '<1s' : s > 0 ? `${s}s` : '';
     return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m ` : ''}${seconds}`;
 }
-
-const secondsParser = (secs: number) => [
-    Math.floor(secs / 3600), Math.floor(secs % 3600 / 60), Math.floor(secs % 3600 % 60)
-];
