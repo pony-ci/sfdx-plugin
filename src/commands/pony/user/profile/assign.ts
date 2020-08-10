@@ -76,7 +76,7 @@ If not specified, the profile is assigned to target username.
         this.ux.log(`Logging out assigner.`);
         await sfdx.force.auth.logout({
             noprompt: true,
-            targetusername
+            targetusername: assignerUsername
         });
     }
 
