@@ -1,23 +1,14 @@
 import {Dictionary, isAnyJson, isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
 import chalk from 'chalk';
 import {spawn} from 'child_process';
+import fs from 'fs-extra';
 import {Jobs} from '..';
 import {Step} from '../types/jobs.schema';
 import {getLogger, getUX} from './pubsub';
-
-export interface IPCMessage {
-    pony: {
-        env: {
-            variables: Variables;
-        };
-    };
-}
+import {tmp} from './tmp';
 
 type Variables = Dictionary<EnvValue>;
 type HrTime = [number, number];
-
-export const isIPCMessage = (value: unknown): value is IPCMessage =>
-    isAnyJson(value) && isJsonMap(value) && 'pony' in value && isJsonMap(value.pony);
 
 export type EnvValue = Optional<string>;
 
@@ -28,14 +19,24 @@ function isEnvValue(value: unknown): value is EnvValue {
 export class Environment {
     public readonly hrtime: [number, number];
     private readonly variables: Variables;
+    private readonly file?: string;
 
-    private constructor(variables: Variables, hrtime: HrTime) {
+    private constructor(variables: Variables, hrtime: HrTime, file?: string) {
         this.variables = variables;
         this.hrtime = hrtime;
+        this.file = file;
     }
 
-    public static create(variables: Variables, hrtime: HrTime): Environment {
-        return new Environment(variables, hrtime);
+    public static create(variables: Variables, hrtime: HrTime, file?: string): Environment {
+        return new Environment(variables, hrtime, file);
+    }
+
+    public static load(file?: string): Environment {
+        if (!file) {
+            return Environment.createDefault();
+        }
+        const {variables, hrtime} = fs.readJSONSync(file);
+        return Environment.create(variables, hrtime, file);
     }
 
     public static parse(json: string): Environment {
@@ -51,18 +52,25 @@ export class Environment {
         return JSON.stringify({variables: env.variables, hrtime: env.hrtime});
     }
 
+    public save(file: string): void {
+        fs.writeFileSync(file, Environment.stringify(this));
+    }
+
     public getEnv(name: string): Optional<EnvValue> {
         return this.variables[name];
     }
 
     public setEnv(name: string, value: Optional<EnvValue>): void {
         this.variables[name] = value;
-        getLogger().info(`set env [${name}]="${value}"`);
-        this.sendMessage({
-            env: {
-                variables: this.variables
-            }
-        });
+        const logger = getLogger();
+        if (this.file) {
+            logger.info(`set env [${name}]="${value}"`);
+            const values = fs.readJSONSync(this.file);
+            values.variables = this.variables;
+            fs.writeJSONSync(this.file, values);
+        } else {
+            logger.error(`cannot set env [${name}]="${value}"`);
+        }
     }
 
     public clone(): Environment {
@@ -85,14 +93,6 @@ export class Environment {
             }
         }
         return result;
-    }
-
-    private sendMessage(message: IPCMessage['pony']): void {
-        if (process.send) {
-            process.send({
-                pony: message
-            });
-        }
     }
 }
 
@@ -164,24 +164,24 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
         'pony:source:content:replace',
         'pony:source:push'
     ].some(it => c.includes(it));
+    const {name: envFile} = tmp.fileSync({postfix: '.json'});
+    environment.save(envFile);
     const commandWithEnv = supportsEnvArg(command)
-        ? `${command} --ponyenv '${Environment.stringify(environment)}'` : command;
+        ? `${command} --ponyenv '${envFile}'` : command;
     logger.info('spawn', commandWithEnv);
     const cmd = spawn(commandWithEnv, [], {
         shell: true,
-        stdio: ['inherit', 'inherit', 'inherit', 'ipc']
-    });
-    let newEnvironment = environment;
-    cmd.on('message', async (message) => {
-        if (isIPCMessage(message)) {
-            logger.info('ipc message', JSON.stringify(message, null, 4));
-            const {env} = message.pony;
-            newEnvironment = Environment.create(env.variables, newEnvironment.hrtime);
-        }
+        stdio: ['inherit', 'inherit', 'inherit']
     });
     return new Promise((resolve, reject) => {
-        const error = (code) => `Command failed: ${command}`;
-        cmd.on('close', (code) => code ? reject(error(code)) : resolve(newEnvironment));
+        cmd.on('close', (code) => {
+            const newEnvironment = Environment.load(envFile);
+            if (code) {
+                reject(`Command failed: ${command}`);
+            } else {
+                resolve(newEnvironment);
+            }
+        });
     });
 }
 

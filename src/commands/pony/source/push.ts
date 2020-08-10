@@ -45,7 +45,6 @@ Execution Flow:
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.createDefault()),
             hidden: true
         })
     };
@@ -55,7 +54,8 @@ Execution Flow:
         const username = this.org?.getUsername();
         const backup = FilesBackup.create(project.projectDir);
         backup.clean();
-        let env = Environment.parse(this.flags.ponyenv);
+        const {ponyenv} = this.flags;
+        let env = Environment.load(ponyenv);
         if (project.hasJob(PONY_PRE_SOURCE_PUSH)) {
             env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
         }
