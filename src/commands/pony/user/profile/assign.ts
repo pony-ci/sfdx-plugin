@@ -73,11 +73,11 @@ If not specified, the profile is assigned to target username.
             where: `Username='${assignerUsername}'`,
             values: `IsActive=false'`
         });
-        this.ux.log(`Logging out assigner.`);
-        await sfdx.force.auth.logout({
-            noprompt: true,
-            targetusername: assignerUsername
-        });
+        // this.ux.log(`Logging out assigner.`);
+        // await sfdx.force.auth.logout({
+        //     noprompt: true,
+        //     targetusername: assignerUsername
+        // });
     }
 
     private async getAssignerUsername(project: PonyProject): Promise<string> {
