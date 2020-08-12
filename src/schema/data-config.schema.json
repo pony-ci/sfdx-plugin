@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/data-config.schema.json",
+  "title": "Data Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "sObjects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recordsDir": {
+          "type": "string",
+          "default": "data/sObjects"
+        },
+        "import": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "chunkSize": {
+              "type": "number",
+              "default": 200,
+              "minimum": 1,
+              "maximum": 200
+            },
+            "deleteBeforeImport": {
+              "oneOf": [
+                {
+                  "enum": [
+                    false,
+                    "reversedOrder"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "additionalItems": false,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/sObjectName"
+                  }
+                }
+              ],
+              "default": "reversed"
+            },
+            "soqlDeleteDir": {
+              "type": "string",
+              "default": "scripts/soql/delete"
+            },
+            "order":             {
+              "type": "array",
+              "additionalItems": false,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/definitions/sObjectName"
+              }
+            },
+            "relationships": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "additionalItems": false,
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/definitions/relationshipField"
+                }
+              }
+            }
+          },
+          "required": [
+            "order"
+          ]
+        },
+        "export": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "soqlExportDir": {
+              "type": "string",
+              "default": "scripts/soql/export"
+            },
+            "order": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "additionalItems": false,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/sObjectName"
+                  }
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "reversedOrder"
+                  ]
+                }
+              ],
+              "default": "reversedOrder"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "sObjectName": {
+      "type": "string"
+    },
+    "relationshipField": {
+      "type": "string"
+    }
+  }
+}

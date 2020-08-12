@@ -2,13 +2,17 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2017",
-    "lib": ["es2017"],
+    "lib": [
+      "es2017"
+    ],
     "sourceMap": true,
     "declaration": true,
     "moduleResolution": "node",
     "alwaysStrict": true,
     "noUnusedLocals": false,
-    "outDir": "./lib",
+    "strictNullChecks":  true,
+    "strictPropertyInitialization":  true,
+    "outDir": "./dist",
     "rootDir": "./src",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -16,7 +20,10 @@
     "resolveJsonModule": true
   },
   "include": [
-    "./src/**/*"
+    "src/"
+  ],
+  "exclude": [
+    "test/"
   ]
 }
 

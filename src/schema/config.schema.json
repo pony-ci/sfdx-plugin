@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/config.schema.json",
+  "title": "Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "data": {
+      "$ref": "data-config.schema.json"
+    },
+    "jobs": {
+      "$ref": "jobs.schema.json"
+    },
+    "orgCreate": {
+      "$ref": "org-create.schema.json"
+    },
+    "replacements": {
+      "$ref": "replacements.schema.json"
+    },
+    "sourceSort": {
+      "$ref": "source-sort.schema.json#/definitions/sourceSort"
+    },
+    "sourceValidate": {
+      "$ref": "source-validate.schema.json"
+    },
+    "users": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/user"
+      }
+    }
+  },
+  "definitions": {
+    "user": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  }
+}

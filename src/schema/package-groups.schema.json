@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pony-ci/sfdx-plugin/blob/master/src/schema/package-group.schema.json",
+  "title": "Package Groups",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "additionalItems": false,
+    "items": {
+      "$ref": "#/definitions/package"
+    }
+  },
+  "definitions": {
+    "package": {
+      "type": "object",
+      "title": "Package",
+      "additionalProperties": false,
+      "required": [
+        "SubscriberPackageName",
+        "SubscriberPackageVersionId"
+      ],
+      "properties": {
+        "SubscriberPackageId": {
+          "type": "string"
+        },
+        "SubscriberPackageName": {
+          "type": "string"
+        },
+        "SubscriberPackageNamespace": {
+          "type": ["string", "null"]
+        },
+        "SubscriberPackageVersionId": {
+          "type": "string",
+          "description": "ID (starts with 04t) or alias of the package version to install"
+        },
+        "SubscriberPackageVersionName": {
+          "type": "string"
+        },
+        "SubscriberPackageVersionNumber": {
+          "type": "string"
+        },
+        "apexCompile": {
+          "type": "string",
+          "enum": [
+            "all",
+            "package"
+          ],
+          "default": "all",
+          "description": "compile all Apex in the org and package, or only Apex in the package"
+        },
+        "publishWait": {
+          "type": "number",
+          "description": "number of minutes to wait for subscriber package version ID to become available in the target org"
+        },
+        "installationKey": {
+          "type": "string",
+          "description": "installation key for key-protected package"
+        },
+        "securityType": {
+          "type": "string",
+          "enum": [
+            "AllUsers",
+            "AdminsOnly"
+          ],
+          "description": "security access type for the installed package"
+        },
+        "upgradeType": {
+          "type": "string",
+          "enum": [
+            "DeprecateOnly",
+            "Mixed",
+            "Delete"
+          ],
+          "default": "Mixed",
+          "description": "the upgrade type for the package installation"
+        },
+        "wait": {
+          "type": "number",
+          "description": "number of minutes to wait for installation status",
+          "default": 200
+        }
+      }
+    }
+  }
+}

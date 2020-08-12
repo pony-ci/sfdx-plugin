@@ -1,0 +1,67 @@
+{
+  "metadataObjects": [
+    {
+      "directoryName": "fields",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "field",
+      "xmlName": "CustomField"
+    },
+    {
+      "directoryName": "businessProcesses",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "businessProcess",
+      "xmlName": "BusinessProcess"
+    },
+    {
+      "directoryName": "compactLayouts",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "compactLayout",
+      "xmlName": "CompactLayout"
+    },
+    {
+      "directoryName": "sharingReasons",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "sharingReason",
+      "xmlName": "SharingReason"
+    },
+    {
+      "directoryName": "recordTypes",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "recordType",
+      "xmlName": "RecordType"
+    },
+    {
+      "directoryName": "webLinks",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "webLink",
+      "xmlName": "WebLink"
+    },
+    {
+      "directoryName": "validationRules",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "validationRule",
+      "xmlName": "ValidationRule"
+    },
+    {
+      "directoryName": "listViews",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "listView",
+      "xmlName": "ListView"
+    },
+    {
+      "directoryName": "fieldSets",
+      "inFolder": false,
+      "metaFile": false,
+      "suffix": "fieldSet",
+      "xmlName": "FieldSet"
+    }
+  ]
+}
