@@ -1,6 +1,6 @@
 {
   "name": "@pony-ci/sfdx-plugin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Pony sfdx plugin to automate application lifecycle.",
   "author": "Ondřej Kratochvíl",
   "bugs": "https://github.com/pony-ci/sfdx-plugin/issues",
@@ -70,6 +70,29 @@
   "oclif": {
     "commands": "./dist/commands",
     "bin": "sfdx",
+    "topics": {
+      "pony:data": {
+        "desription": "manipulate records in your org"
+      },
+      "pony:data:soql:query": {
+        "desription": "create q"
+      },
+      "pony:org": {
+        "desription": "manage your orgs"
+      },
+      "pony:package": {
+        "desription": "export and install packages"
+      },
+      "pony:package:group": {
+        "desription": "export and install package groups"
+      },
+      "pony:source": {
+        "desription": "sync your project with your orgs"
+      },
+      "pony:user": {
+        "desription": "perform user-related admin tasks"
+      }
+    },
     "devPlugins": [
       "@oclif/plugin-help"
     ]

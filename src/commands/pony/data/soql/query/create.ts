@@ -34,7 +34,7 @@ const getParentFieldNames = (describeMap: DescribeSObjectResultByType, sObjectTy
 
 export default class DataExportSoqlQueryCreateCommand extends PonyCommand {
 
-    public static description: string = `create file with soql query for exporting records`;
+    public static description: string = `create a file with soql query for exporting records`;
 
     protected static flagsConfig: FlagsConfig = {
         sobjecttype: flags.string({
