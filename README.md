@@ -1,11 +1,15 @@
 # sfdx-plugin
 
+[![CircleCI](https://circleci.com/gh/pony-ci/sfdx-plugin.svg?style=svg)](https://circleci.com/gh/pony-ci/sfdx-plugin)
+[![npm](https://badge.fury.io/js/%40pony-ci%2Fsfdx-plugin.svg)](https://badge.fury.io/js/%40pony-ci%2Fsfdx-plugin)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/pony-ci/sfdx-plugin/blob/master/LICENSE)
+
 Pony sfdx plugin to automate your application lifecycle.
 
 Installation
 `sfdx plugins:install @pony-ci/sfdx-plugin`
 
-* Docs: https://pony-ci.github.io/docs
+* Docs: https://pony-ci.github.io/pony-ci-docs/
 * Issues: https://github.com/pony-ci/sfdx-plugin/issues
 
 # Usage
@@ -15,7 +19,7 @@ $ npm install -g @pony-ci/sfdx-plugin
 $ sfdx COMMAND
 running command...
 $ sfdx (-v|--version|version)
-@pony-ci/sfdx-plugin/1.0.0 linux-x64 node-v8.10.0
+@pony-ci/sfdx-plugin/1.0.1 linux-x64 node-v8.10.0
 $ sfdx --help [COMMAND]
 USAGE
   $ sfdx COMMAND

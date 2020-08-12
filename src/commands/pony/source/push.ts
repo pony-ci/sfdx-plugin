@@ -45,7 +45,6 @@ Execution Flow:
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.default()),
             hidden: true
         })
     };
@@ -55,8 +54,9 @@ Execution Flow:
         const username = this.org?.getUsername();
         const backup = FilesBackup.create(project.projectDir);
         backup.clean();
-        let env = Environment.parse(this.flags.ponyenv);
-        if (await project.hasJob(PONY_PRE_SOURCE_PUSH)) {
+        const {ponyenv} = this.flags;
+        let env = Environment.load(ponyenv);
+        if (project.hasJob(PONY_PRE_SOURCE_PUSH)) {
             env = await project.executeJobByName(PONY_PRE_SOURCE_PUSH, env);
         }
         this.ux.log('Pushing source...');
@@ -75,7 +75,7 @@ Execution Flow:
             this.ux.log(`Pushing source... ${pushSuccess ? 'done' : 'failed'}`);
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }
-        if (await project.hasJob(PONY_POST_SOURCE_PUSH)) {
+        if (project.hasJob(PONY_POST_SOURCE_PUSH)) {
             await project.executeJobByName(PONY_POST_SOURCE_PUSH, env);
         }
     }

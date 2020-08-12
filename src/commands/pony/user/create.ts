@@ -47,7 +47,6 @@ export default class UserCreateCommand extends PonyCommand {
         const targetusername = this.org?.getUsername();
         const targetdevhub = await this.org?.getDevHubOrg();
         const targetdevhubusername = targetdevhub?.getUsername();
-        console.log(args);
         await sfdx.force.user.create({
             targetusername,
             targetdevhubusername,

@@ -73,11 +73,11 @@ If not specified, the profile is assigned to target username.
             where: `Username='${assignerUsername}'`,
             values: `IsActive=false'`
         });
-        this.ux.log(`Logging out assigner.`);
-        await sfdx.force.auth.logout({
-            noprompt: true,
-            targetusername
-        });
+        // this.ux.log(`Logging out assigner.`);
+        // await sfdx.force.auth.logout({
+        //     noprompt: true,
+        //     targetusername: assignerUsername
+        // });
     }
 
     private async getAssignerUsername(project: PonyProject): Promise<string> {
@@ -89,7 +89,7 @@ If not specified, the profile is assigned to target username.
         this.log(`Creating a user ${assignerUsername} who will assign the profile.`);
         await sfdx.force.user.create({
             targetusername,
-        }, [
+        },                           [
             `Username=${assignerUsername}`,
             `profileName=System Administrator`
         ]);

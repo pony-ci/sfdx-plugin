@@ -1,6 +1,6 @@
 {
   "name": "@pony-ci/sfdx-plugin",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Pony sfdx plugin to automate application lifecycle.",
   "author": "Ondřej Kratochvíl",
   "bugs": "https://github.com/pony-ci/sfdx-plugin/issues",
@@ -77,7 +77,7 @@
   "scripts": {
     "postpack": "rimraf oclif.manifest.json",
     "prepack": "npm run build && oclif-dev manifest && oclif-dev readme",
-    "posttest": "tslint -p test -t stylish",
+    "posttest": "tslint -p tsconfig.json -c tslint.json -t stylish",
     "build": "rimraf dist & npm run schema2ts ; tsc -b",
     "docs": "rimraf docs/reference/config; mkdir -p docs/reference/config; jsonschema2md -o docs/reference/config -d src/schema -x -",
     "schema2ts": "(rimraf src/types && cd src/schema && json2ts -i . -o ../types && cd ../types && renamer --find .d.ts --replace .ts *)",

@@ -1,3 +1,4 @@
+import {isAnyJson, isJsonMap} from '@salesforce/ts-types';
 import crypto from 'crypto';
 import {existsSync, readFileSync, readJSONSync, writeJSONSync} from 'fs-extra';
 import path from 'path';
@@ -9,12 +10,12 @@ export async function updateSourcePathInfos(
     username: string,
     files: string[]
 ): Promise<void> {
-    const ux = await getUX();
+    const ux = getUX();
     const infosFile = path.join(projectDir, `.sfdx/orgs/${username}/sourcePathInfos.json`);
     if (!existsSync(infosFile)) {
         throw Error(`File not found: ${infosFile}`);
     }
-    const infos = readJSONSync(infosFile);
+    const infos = Object.entries(readJSONSync(infosFile));
     const updated = new Set();
     const updates: string[] = [];
     files
@@ -26,7 +27,9 @@ export async function updateSourcePathInfos(
                 .forEach(([infoPath, infoData]) => {
                     try {
                         const data = readFileSync(file).toString();
-                        infoData.contentHash = hash(data);
+                        if (isAnyJson(infoData) && isJsonMap(infoData)) {
+                            infoData.contentHash = hash(data);
+                        }
                         updates.push(file);
                     } catch (e) {
                         ux.warn(e);

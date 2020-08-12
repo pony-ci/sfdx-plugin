@@ -1,4 +1,4 @@
-import {isJsonMap, JsonMap} from '@salesforce/ts-types';
+import {isAnyJson, isJsonMap, JsonMap} from '@salesforce/ts-types';
 import {Optional} from '@salesforce/ts-types/lib/types';
 import find from 'find';
 import fs from 'fs-extra';
@@ -22,8 +22,8 @@ const DEFAULT_BUILDER_OPTIONS: OptionsV2 = {
 
 export type Component = JsonMap;
 
-export const isComponent = (value: Optional<any>): value is Component =>
-    isJsonMap(value) && Object.keys(value).length === 1 && isJsonMap(value[Object.keys(value)[0]]);
+export const isComponent = (value: Optional<unknown>): value is Component =>
+    isAnyJson(value) && isJsonMap(value) && Object.keys(value).length === 1 && isJsonMap(value[Object.keys(value)[0]]);
 
 export async function readComponent(file: string): Promise<Component> {
     const parser: xml2js.Parser = new xml2js.Parser({});
@@ -53,10 +53,10 @@ export async function writeComponent(
     await fs.writeFile(file, `${builder.buildObject(component)}${EOL}`);
 }
 
-export function findComponents(type: MetadataType, dir: string = '.'): string[] {
-    const pattern = metadataTypeToFilePattern(type);
+export function findComponents(metadataType: MetadataType, dir: string = '.'): string[] {
+    const pattern = metadataTypeToFilePattern(metadataType);
     if (!pattern) {
-        throw Error(`${type} is not described. Possibly not supported.`);
+        throw Error(`${metadataType} is not described. Possibly not supported.`);
     }
     return find.fileSync(pattern, dir);
 }
@@ -71,17 +71,17 @@ export function describeComponentFile(file: string): Optional<MetadataType> {
 
 const metadataTypeToFilePatternCache: {[key: string]: RegExp} = {};
 
-function metadataTypeToFilePattern(type: MetadataType): Optional<RegExp> {
-    if (!metadataTypeToFilePatternCache[type]) {
-        const metadataObject = describeMetadata(type);
+function metadataTypeToFilePattern(metadataType: MetadataType): Optional<RegExp> {
+    if (!metadataTypeToFilePatternCache[metadataType]) {
+        const metadataObject = describeMetadata(metadataType);
         if (!metadataObject) {
             return undefined;
         }
         const directoryName: string = metadataObject.directoryName;
         const suffix: string = metadataObject.suffix ? `\.${metadataObject.suffix}(-meta\.xml)?` : '';
-        metadataTypeToFilePatternCache[type] = new RegExp(`.*?[/\\\\\]${directoryName}[/\\\\\].*?${suffix}`);
+        metadataTypeToFilePatternCache[metadataType] = new RegExp(`.*?[/\\\\\]${directoryName}[/\\\\\].*?${suffix}`);
     }
-    return metadataTypeToFilePatternCache[type];
+    return metadataTypeToFilePatternCache[metadataType];
 }
 
 // export function findCustomObjectChildComponents(childXmlName: string, dir: string = '.'): string[] {

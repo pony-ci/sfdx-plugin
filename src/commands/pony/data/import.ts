@@ -180,7 +180,7 @@ export default class DataImportCommand extends PonyCommand {
             const deleteSoql = toDeleteSoql(soqlDeleteDir, sObjectName);
             let status = 'done';
             try {
-                await api.delete(sObjectName, deleteSoql);
+                await api.destroy(sObjectName, deleteSoql);
             } catch (e) {
                 status = 'failed';
                 throw e;

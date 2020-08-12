@@ -48,8 +48,6 @@ Execution Flow:
         }),
         ponyenv: flags.string({
             description: 'environment',
-            default: Environment.stringify(Environment.default()),
-            required: true,
             hidden: true
         }),
         wait: flags.number({
@@ -66,7 +64,8 @@ Execution Flow:
     protected static requiresProject: boolean = true;
 
     public async run(): Promise<AnyJson> {
-        let env = Environment.parse(this.flags.ponyenv);
+        const {ponyenv} = this.flags;
+        let env = Environment.load(ponyenv);
         const project = await PonyProject.load();
         const {orgCreate = {}} = project.ponyConfig;
         let orgCreateResult: AnyJson = {};
@@ -75,7 +74,7 @@ Execution Flow:
             env.setEnv('username', org.getUsername());
             env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
         } else {
-            env = await project.hasJob(PONY_PRE_ORG_CREATE)
+            env = project.hasJob(PONY_PRE_ORG_CREATE)
                 ? await project.executeJobByName(PONY_PRE_ORG_CREATE, env)
                 : env;
             this.ux.startSpinner('Creating scratch org');
@@ -94,7 +93,7 @@ Execution Flow:
                 env.setEnv('devhubusername', (await org.getDevHubOrg())?.getUsername());
             }
         }
-        if (await project.hasJob(PONY_POST_ORG_CREATE)) {
+        if (project.hasJob(PONY_POST_ORG_CREATE)) {
             await project.executeJobByName(PONY_POST_ORG_CREATE, env);
         }
         return orgCreateResult;
@@ -103,6 +102,9 @@ Execution Flow:
     private async tryGetExistingOrg(): Promise<Optional<Org>> {
         const {targetusername, setalias} = this.flags;
         if (targetusername) {
+            if (!this.org) {
+                throw Error(`No org found: ${targetusername}`);
+            }
             // if -u use the org
             return this.org;
         } else if (setalias) {

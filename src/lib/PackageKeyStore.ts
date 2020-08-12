@@ -6,7 +6,7 @@ import {getAppHomeDir} from './app';
 
 interface KeyEntry {
     name: string;
-    type: 'subscriberPackageVersionId' | 'subscriberPackageName' | 'subscriberPackageNamespace';
+    entryType: 'subscriberPackageVersionId' | 'subscriberPackageName' | 'subscriberPackageNamespace';
     key: string;
 }
 
@@ -34,18 +34,18 @@ export class PackageKeyStore {
 
     public getInstallationKey(pkg: Package): Optional<string> {
         let entry = this.entries.find(it =>
-            it.type === 'subscriberPackageVersionId'
+            it.entryType === 'subscriberPackageVersionId'
             && it.name === pkg.SubscriberPackageId
         );
         if (!entry) {
             entry = this.entries.find(it =>
-                it.type === 'subscriberPackageName'
+                it.entryType === 'subscriberPackageName'
                 && it.name === pkg.SubscriberPackageName
             );
         }
         if (!entry) {
             entry = this.entries.find(it =>
-                it.type === 'subscriberPackageNamespace'
+                it.entryType === 'subscriberPackageNamespace'
                 && it.name === pkg.SubscriberPackageNamespace
             );
         }
