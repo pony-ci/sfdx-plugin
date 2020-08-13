@@ -73,6 +73,7 @@ Execution Flow:
             throw Error('Push failed.');
         } finally {
             this.ux.log(`Pushing source... ${pushSuccess ? 'done' : 'failed'}`);
+            // todo should use this instead `sfdx force:source:tracking:reset`?
             await backup.restoreBackupFiles(pushSuccess ? username : undefined);
         }
         if (project.hasJob(PONY_POST_SOURCE_PUSH)) {
