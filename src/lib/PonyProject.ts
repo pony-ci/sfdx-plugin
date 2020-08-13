@@ -1,23 +1,15 @@
 import {SfdxProject, SfdxProjectJson} from '@salesforce/core';
-import {isArray, isJsonMap, isString, Optional} from '@salesforce/ts-types';
+import {isArray, Optional} from '@salesforce/ts-types';
 import {existsSync} from 'fs';
 import fs, {readFileSync, readJSONSync} from 'fs-extra';
 import path from 'path';
 import slash from 'slash';
 import yaml from 'yaml';
-import {
-    Config,
-    DataConfig,
-    isConfig,
-    isPackageGroups,
-    Package,
-    PackageGroups,
-    validateConfig,
-    validatePackageGroups
-} from '..';
+import {Config, DataConfig, isConfig, isPackageGroups, Package, PackageGroups} from '..';
 import {Environment, executeJobByName} from './jobs';
 import {findComponents} from './metadata/components';
 import {MetadataType} from './metadata/describeMetadata';
+import {validateConfig, validatePackageGroups} from './schema';
 
 export default class PonyProject {
 
