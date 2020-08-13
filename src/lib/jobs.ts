@@ -167,7 +167,7 @@ async function executeCommand(stepKey: string, stepValue: string, environment: E
     const {name: envFile} = tmp.fileSync({postfix: '.json'});
     environment.save(envFile);
     const commandWithEnv = supportsEnvArg(command)
-        ? `${command} --ponyenv '${envFile}'` : command;
+        ? `${command} --ponyenv "${envFile}"` : command;
     logger.info('spawn', commandWithEnv);
     const cmd = spawn(commandWithEnv, [], {
         shell: true,
