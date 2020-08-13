@@ -81,11 +81,8 @@ export default class PonyProject {
         const sfdxProjectJson = await this.getSfdxProjectJson();
         const {packageDirectories} = sfdxProjectJson.getContents();
         const slashed = ((p) => p.startsWith('./') ? p.substr(2) : p)(slash(file));
-        return isArray(packageDirectories) && packageDirectories.some(it =>
-            isJsonMap(it) &&
-            isString(it.path) &&
-            slashed.includes(`${slash(it.path)}/`)
-        );
+        return isArray(packageDirectories) &&
+            packageDirectories.some(it => it.path && slashed.includes(`${slash(it.path)}/`));
     }
 
     public hasJob(name: string): boolean {
