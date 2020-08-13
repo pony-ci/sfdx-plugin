@@ -40,11 +40,11 @@ export default class SourceContentReplaceCommand extends PonyCommand {
         const {replacements = {}} = project.ponyConfig;
         const rpl = replacements[replacement];
         if (rpl) {
-            if (isInnerTextReplacement(rpl) && rpl.innerText) {
+            if (rpl.innerText && isInnerTextReplacement(rpl.innerText)) {
                 const backup = FilesBackup.create(project.projectDir);
                 backup.backupFiles(rpl.innerText.files);
                 await this.replaceInnerText(rpl.innerText, env);
-            } else if (isOrgWideEmailAddressReplacement(rpl) && rpl.orgWideEmailAddress) {
+            } else if (rpl.orgWideEmailAddress && isOrgWideEmailAddressReplacement(rpl.orgWideEmailAddress)) {
                 const backup = FilesBackup.create(project.projectDir);
                 backup.backupFiles(rpl.orgWideEmailAddress.files);
                 await this.replaceOrgWideEmailAddress(rpl.orgWideEmailAddress, env);

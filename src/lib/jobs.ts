@@ -68,8 +68,6 @@ export class Environment {
             const values = fs.readJSONSync(this.file);
             values.variables = this.variables;
             fs.writeJSONSync(this.file, values);
-        } else {
-            logger.error(`cannot set env [${name}]="${value}"`);
         }
     }
 

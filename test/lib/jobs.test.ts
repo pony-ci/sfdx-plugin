@@ -21,7 +21,7 @@ function createEnv(variables: Dictionary<string>): Environment {
 }
 
 // tslint:disable:no-invalid-template-strings
-describe('prepareCommandArgs', () => {
+describe('fillString', () => {
     it('sfdx object properties', () => {
         expect(createEnv({some: 'abc'}).fillString('$env.some')).to.eq('abc');
         expect(createEnv({some: 'abc'}).fillString('  $env.some')).to.eq('  abc');
