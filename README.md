@@ -6,11 +6,15 @@
 
 Pony sfdx plugin to automate your application lifecycle.
 
-Installation
+### Installation
 `sfdx plugins:install @pony-ci/sfdx-plugin`
 
 * Docs: https://pony-ci.github.io/pony-ci-docs/
 * Issues: https://github.com/pony-ci/sfdx-plugin/issues
+
+### Requirements
+* node >=12.0.0
+
 
 # Usage
 <!-- usage -->
